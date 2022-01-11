@@ -382,7 +382,7 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
                         const productInserted = await createNewProduct( product, variations )
                         if (productInserted) {
                             const productId = productInserted._id
-                            const productUpdated = await updateProductById(productId, { sku: productId })
+                            const productUpdated = await updateProductById(productId, { sku: productHub2b.skus.source })
                             if (productUpdated) {
                                 productEventEmitter.emit('update', productUpdated )
                                 products.push(productUpdated)
