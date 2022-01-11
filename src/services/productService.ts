@@ -420,7 +420,7 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
 
     const CATALOG_URL = HUB2B_URL_V2 +
       "/catalog/product/" + HUB2B_MARKETPLACE + "/" + idTenant +
-      "?onlyWithDestinationSKU=true&onlyActiveProducts=true&getAdditionalInfo=false&access_token=" + HUB2B_CREDENTIALS.access_token
+      "?idProductStatus=2&onlyActiveProducts=true&getAdditionalInfo=false&access_token=" + HUB2B_CREDENTIALS.access_token
 
     const response = await requestHub2B( CATALOG_URL, 'GET' )
     if ( !response ) return null
