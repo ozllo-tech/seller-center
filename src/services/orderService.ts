@@ -14,7 +14,7 @@ import { findProductByVariation } from "./productService"
 import { getToken } from "../utils/cryptUtil"
 import orderEventEmitter from "../events/orders"
 
-export const INTEGRATION_INTERVAL = 1000 * 83 //seconds
+export const INTEGRATION_INTERVAL = 1000 * 60 * 60 // 1 hour
 
 export const integrateHub2bOrders = async (start?: string, end?: string) => {
 
