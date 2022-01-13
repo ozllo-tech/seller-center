@@ -36,7 +36,7 @@ export const generateAccessTokenV2Hub2b = async (idTenant = null) => {
     let hub2bUsername = HUB2B_USERNAME
     let hub2bPassword = HUB2B_PASSWORD
 
-    let scope = "inventory orders catalog agency"
+    let scope = "inventory orders catalog"
 
     if (idTenant) {
 
