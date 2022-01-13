@@ -6,7 +6,7 @@ import { log } from "../utils/loggerUtil"
 import { getFunctionName, nowInSeconds } from "../utils/util"
 import { deleteCredential, retrieveCredentials, saveCredential, findAuthByTenant } from "../repositories/hub2AuthRepository"
 import { HUB2B_Credentials } from "../models/hub2b"
-import { HUB2B_CLIENT_ID, HUB2B_CLIENT_SECRET, HUB2B_PASSWORD, HUB2B_TENANT, HUB2B_URL_V2, HUB2B_USERNAME } from "../utils/consts"
+import { HUB2B_CLIENT_ID, HUB2B_CLIENT_SECRET, HUB2B_PASSWORD, HUB2B_SCOPE_AGENCY, HUB2B_SCOPE_DEFAULT, HUB2B_TENANT, HUB2B_URL_V2, HUB2B_USERNAME } from "../utils/consts"
 import { requestHub2B } from "./hub2bService"
 import { findTenantCredential  } from "../repositories/hub2TenantCredentialRepository"
 
@@ -36,11 +36,11 @@ export const generateAccessTokenV2Hub2b = async (idTenant = null) => {
     let hub2bUsername = HUB2B_USERNAME
     let hub2bPassword = HUB2B_PASSWORD
 
-    let scope = "inventory orders catalog agency"
+    let scope = HUB2B_SCOPE_AGENCY
 
     if (idTenant) {
 
-        scope = "inventory orders catalog"
+        scope = HUB2B_SCOPE_DEFAULT
 
         const credentials = await findTenantCredential(idTenant)
 
