@@ -23,7 +23,7 @@ const transporter = nodemailer.createTransport( {
 
 /**
  * Save a new user and creates account
- * 
+ *
  * @param email
  * @param password
  */
@@ -99,7 +99,7 @@ export const sendOrderEmailToSeller = async ( shop_id: string ): Promise<any> =>
     const user = await findUserByShopId( shop_id )
 
     if ( !user ) {
-        log( `Could not send order email. User not found.`, 'EVENT', getFunctionName(), 'ERROR' )
+        log(`Could not send order email for shop_id ${shop_id}. User not found.`, 'EVENT', getFunctionName(), 'ERROR' )
         return
     }
 
@@ -108,8 +108,8 @@ export const sendOrderEmailToSeller = async ( shop_id: string ): Promise<any> =>
     const result = await sendEmail( user.email, 'OZLLO360 | Boas notícias: você vendeu!', content )
 
     result
-        ? log( `Order  email sent to ${ user.email }`, 'EVENT', getFunctionName() )
-        : log( `Could not order email to ${ user.email }`, 'EVENT', getFunctionName(), 'ERROR' )
+        ? log( `Order email sent to ${ user.email }`, 'EVENT', getFunctionName() )
+        : log( `Could not send order email to ${ user.email }`, 'EVENT', getFunctionName(), 'ERROR' )
 
     return result
 }

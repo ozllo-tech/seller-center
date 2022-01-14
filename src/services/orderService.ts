@@ -151,8 +151,8 @@ export const savNewOrder = async (shop_id: string, order: HUB2B_Order) => {
     if(newOrder) sendOrderEmailToSeller(shop_id)
 
     newOrder
-        ? log(`Order with sku`, 'EVENT', getFunctionName())
-        : log(`Could not retrieve category list.`, 'EVENT', getFunctionName(), 'ERROR')
+        ? log(`Order ${order.reference.id} saved.`, 'EVENT', getFunctionName())
+        : log(`Could not save order ${order.reference.id}.`, 'EVENT', getFunctionName(), 'ERROR')
 }
 
 export const sendInvoice = async (order: any, data: any) : Promise<HUB2B_Invoice | null> => {
