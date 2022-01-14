@@ -4,14 +4,20 @@
 
 import events from 'events'
 import { postInvoiceHub2b, updateStatusHub2b } from '../services/hub2bService'
-import { sendTracking, updateStatus } from '../services/orderService'
+import { sendOrderEmailToSeller } from '../services/mailService'
+import { sendTracking } from '../services/orderService'
+import { log } from '../utils/loggerUtil'
 
 const orderEventEmitter = new events.EventEmitter()
 
-orderEventEmitter.on('updated', (orderId,status) => console.log(`Atualizando status do pedido ${orderId} para ${status}`))
+orderEventEmitter.on('updated', (orderId,status) => log(`Atualizando status do pedido ${orderId} para ${status}`,'EVENT', 'onOrderUpdatedEvent', 'INFO'))
 
-// Notify Seller by email.
-orderEventEmitter.on( 'approved', ( orderId ) => console.log( `Order ${orderId} is now approved.` ) )
+orderEventEmitter.on( 'approved', ( order ) => {
+
+    sendOrderEmailToSeller(order.shop_id)
+
+    log(`Order ${order.order.reference.id} is now approved.`, 'EVENT', 'onOrderApprovedEvent', 'INFO' )
+})
 
 orderEventEmitter.on( 'invoiced', ( orderId, invoice ) => postInvoiceHub2b(orderId, invoice ) )
 

@@ -9,7 +9,6 @@ import { HUB2B_TENANT, PROJECT_HOST } from "../utils/consts"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName, nowIsoDateHub2b } from "../utils/util"
 import { listAllOrdersHub2b, listOrdersHub2bByTime, postInvoiceHub2b, postTrackingHub2b, getTrackingHub2b, setupIntegrationHub2b, getInvoiceHub2b, getOrderHub2b } from "./hub2bService"
-import { sendOrderEmailToSeller } from "./mailService"
 import { findProductByVariation } from "./productService"
 import { getToken } from "../utils/cryptUtil"
 import orderEventEmitter from "../events/orders"
@@ -148,8 +147,6 @@ export const savNewOrder = async (shop_id: string, order: HUB2B_Order) => {
 
     const newOrder = await newOrderHub2b({ order, shop_id })
 
-    if(newOrder) sendOrderEmailToSeller(shop_id)
-
     newOrder
         ? log(`Order ${order.reference.id} saved.`, 'EVENT', getFunctionName())
         : log(`Could not save order ${order.reference.id}.`, 'EVENT', getFunctionName(), 'ERROR')
@@ -235,7 +232,11 @@ export const setupWebhookIntegration = async(): Promise<HUB2B_Order_Webhook | nu
         ]
     }
 
-    return await setupIntegrationHub2b(integration)
+    const setup = await setupIntegrationHub2b(integration, 'POST')
+
+    if (!setup) return await setupIntegrationHub2b(integration, 'PUT')
+
+    return setup
 }
 
 export const updateStatus = async (order_id: string, status: string, webhook = false) => {
@@ -255,7 +256,7 @@ export const updateStatus = async (order_id: string, status: string, webhook = f
 
     if (update?.value) orderEventEmitter.emit('updated', order_id, status)
 
-    if (update?.value && "Approved" == status) orderEventEmitter.emit('approved', order_id)
+    if (update?.value && "Approved" == status) orderEventEmitter.emit('approved', update.value)
 
     // TODO: check if order comes from an agency subaccount. If not, it can only be from the main account. So, do nothing.
 
