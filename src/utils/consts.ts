@@ -78,10 +78,16 @@ export const HUB2B_USERNAME = process.env.HUB2B_USERNAME || ''
 
 export const HUB2B_PASSWORD = process.env.HUB2B_PASSWORD || ''
 
-export const HUB2B_MARKETPLACE = process.env.HUB2B_MARKETPLACE || 'enjoei'
+export const HUB2B_MARKETPLACE = process.env.HUB2B_MARKETPLACE || ''
 
-export const HUB2B_SALES_CHANEL = process.env.HUB2B_SALES_CHANEL || 115
+export const HUB2B_SALES_CHANEL = process.env.HUB2B_SALES_CHANEL || ''
 
-export const HUB2B_SCOPE_AGENCY = process.env.HUB2B_SCOPE_AGENCY || 'agency inventory orders catalog'
+export const HUB2B_AGENCY_MAIN_USERNAME = process.env.HUB2B_AGENCY_MAIN_USERNAME || ''
 
-export const HUB2B_SCOPE_DEFAULT = process.env.HUB2B_SCOPE_DEFAULT || 'inventory orders catalog'
+export const HUB2B_AGENCY_MAIN_PASSWORD = process.env.HUB2B_AGENCY_MAIN_PASSWORD || ''
+
+export const HUB2B_AGENCY_MAIN_SCOPE = process.env.HUB2B_AGENCY_MAIN_SCOPE || 'agency inventory orders catalog'
+
+export const HUB2B_AGENCY_SUB_SCOPE = process.env.HUB2B_AGENCY_SUB_SCOPE || 'inventory orders catalog'
+
+export const HUB2B_DEFAULT_SCOPE = process.env.HUB2B_DEFAULT_SCOPE || 'inventory orders catalog'
