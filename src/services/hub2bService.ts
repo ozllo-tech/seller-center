@@ -76,13 +76,13 @@ export const requestHub2B = async (URL: string, type?: Method, body?: any, heade
     }
 }
 
-export const setupIntegrationHub2b = async (integration: HUB2B_Integration) => {
+export const setupIntegrationHub2b = async (integration: HUB2B_Integration, method: Method) => {
 
     await renewAccessTokenHub2b()
 
     const SETUP_URL = HUB2B_URL_V2 + "/Setup/integration" + "?access_token=" + HUB2B_CREDENTIALS.access_token
 
-    const response = await requestHub2B(SETUP_URL, 'PUT', integration)
+    const response = await requestHub2B(SETUP_URL, method, integration)
 
     if (!response) return null
 

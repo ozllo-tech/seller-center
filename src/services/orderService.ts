@@ -232,7 +232,11 @@ export const setupWebhookIntegration = async(): Promise<HUB2B_Order_Webhook | nu
         ]
     }
 
-    return await setupIntegrationHub2b(integration)
+    const setup = await setupIntegrationHub2b(integration, 'POST')
+
+    if (!setup) return await setupIntegrationHub2b(integration, 'PUT')
+
+    return setup
 }
 
 export const updateStatus = async (order_id: string, status: string, webhook = false) => {
