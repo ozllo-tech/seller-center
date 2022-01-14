@@ -9,7 +9,6 @@ import { HUB2B_TENANT, PROJECT_HOST } from "../utils/consts"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName, nowIsoDateHub2b } from "../utils/util"
 import { listAllOrdersHub2b, listOrdersHub2bByTime, postInvoiceHub2b, postTrackingHub2b, getTrackingHub2b, setupIntegrationHub2b, getInvoiceHub2b, getOrderHub2b } from "./hub2bService"
-import { sendOrderEmailToSeller } from "./mailService"
 import { findProductByVariation } from "./productService"
 import { getToken } from "../utils/cryptUtil"
 import orderEventEmitter from "../events/orders"
@@ -148,8 +147,6 @@ export const savNewOrder = async (shop_id: string, order: HUB2B_Order) => {
 
     const newOrder = await newOrderHub2b({ order, shop_id })
 
-    if(newOrder) sendOrderEmailToSeller(shop_id)
-
     newOrder
         ? log(`Order with sku`, 'EVENT', getFunctionName())
         : log(`Could not retrieve category list.`, 'EVENT', getFunctionName(), 'ERROR')
@@ -255,7 +252,7 @@ export const updateStatus = async (order_id: string, status: string, webhook = f
 
     if (update?.value) orderEventEmitter.emit('updated', order_id, status)
 
-    if (update?.value && "Approved" == status) orderEventEmitter.emit('approved', order_id)
+    if (update?.value && "Approved" == status) orderEventEmitter.emit('approved', update.value)
 
     // TODO: check if order comes from an agency subaccount. If not, it can only be from the main account. So, do nothing.
 
