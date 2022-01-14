@@ -7,8 +7,7 @@ const router = Router()
 
 router.post('/order', async (req: Request, res: Response, next: NextFunction) => {
 
-    // TODO: checar também se o pedido notificado é novo (Pending) e inserir no banco de dados.
-    const result = await updateStatus(req.body.IdOrder, req.body.OrderStatus)
+    const result = await updateStatus(req.body.IdOrder, req.body.OrderStatus, true)
 
     if (!result)
         return res

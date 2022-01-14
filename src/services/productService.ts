@@ -9,7 +9,7 @@ import { createNewProduct, createVariation, deleteVariation, findProductByShopId
 import productEventEmitter from "../events/product"
 import { HUB2B_CREDENTIALS, renewAccessTokenHub2b } from "./hub2bAuhService"
 import { requestHub2B } from "./hub2bService"
-import { HUB2B_URL_V2, HUB2B_MARKETPLACE } from "../utils/consts"
+import { HUB2B_URL_V2, HUB2B_MARKETPLACE, HUB2B_SALES_CHANEL } from "../utils/consts"
 import { HUB2B_Catalog_Product } from "../models/hub2b"
 import { ObjectID } from "mongodb"
 import { CATEGORIES, SUBCATEGORIES } from "../models/category"
@@ -382,9 +382,9 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
                         const productInserted = await createNewProduct( product, variations )
                         if (productInserted) {
                             const productId = productInserted._id
-                            const productUpdated = await updateProductById(productId, { sku: productId })
+                            const productUpdated = await updateProductById(productId, { sku: productHub2b.skus.source })
                             if (productUpdated) {
-                                productEventEmitter.emit('update', productUpdated )
+                                productEventEmitter.emit('update', productUpdated, HUB2B_TENANT )
                                 products.push(productUpdated)
                             }
                         }
@@ -406,6 +406,8 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
         }
     }
 
+    if (products.length > 0) await mapSku(products, idTenant)
+
     return products
 }
 
@@ -420,7 +422,7 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
 
     const CATALOG_URL = HUB2B_URL_V2 +
       "/catalog/product/" + HUB2B_MARKETPLACE + "/" + idTenant +
-      "?onlyWithDestinationSKU=true&onlyActiveProducts=true&getAdditionalInfo=false&access_token=" + HUB2B_CREDENTIALS.access_token
+      "?idProductStatus=2&onlyActiveProducts=true&getAdditionalInfo=false&access_token=" + HUB2B_CREDENTIALS.access_token
 
     const response = await requestHub2B( CATALOG_URL, 'GET' )
     if ( !response ) return null
@@ -432,4 +434,26 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
         : log( "GET Products in hub2b error", "EVENT", getFunctionName(), "WARN" )
 
     return productsHub2b
+}
+
+export const mapSku = async (products: Product[], idTenant: any) => {
+
+    await renewAccessTokenHub2b(false, idTenant)
+
+    const CATALOG_URL = HUB2B_URL_V2 +
+        "/catalog/product/mapsku/" + HUB2B_SALES_CHANEL + "?access_token=" + HUB2B_CREDENTIALS.access_token
+
+    let data = new Array()
+
+    products.forEach( item => data.push({ sourceSKU: item.sku, destinationSKU: item._id }))
+
+    const response = await requestHub2B(CATALOG_URL, 'POST', JSON.stringify(data), { "Content-type": "application/json" } )
+    if ( !response ) return null
+
+    response
+        ? log( " mapSku success", "EVENT", getFunctionName() )
+        : log( " mapSku error", "EVENT", getFunctionName(), "WARN" )
+
+    return response.data
+
 }
