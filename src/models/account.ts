@@ -49,8 +49,8 @@ export interface PessoaJuridica {
     cnpj: string,
     name: string,
     razaoSocial: string,
-    inscricaoEstadual: string,
-    inscricaoMunicipal: string,
+    inscricaoEstadual?: string,
+    inscricaoMunicipal?: string,
 }
 
 export type PersonalInfo = PessoaFisica | PessoaJuridica
