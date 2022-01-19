@@ -3,7 +3,7 @@
 //
 
 import { Role, User } from "../models/user"
-import { createNewUser, deleteUserByID, enableUser, findOneUser, findUserById, updatePassword } from "../repositories/userRepository"
+import { createNewUser, deleteUserByID, enableUser, findAllUsers, findOneUser, findUserById, updatePassword } from "../repositories/userRepository"
 import { hashPassword } from "../utils/cryptUtil"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName } from "../utils/util"
@@ -67,6 +67,34 @@ export const findUser = async (email?: string, username?: string): Promise<User 
         result = await findUserByUsername(username)
 
     return result
+}
+
+/**
+ * Find All Users
+ * 
+ */
+export const findUsers = async (): Promise<User[] | null> => {
+
+
+    let result = await findAllUsers()
+
+    return result
+}
+
+
+/**
+ * Check if user has admin role
+ * 
+ *  @param email - user email
+ */
+export const isUserAdmin = async (email: string): Promise<boolean | null> => {
+
+    let user = await findUserByEmail(email)
+
+    if(!!user)
+        return user.role === 'admin'
+
+    return user
 }
 
 /**
