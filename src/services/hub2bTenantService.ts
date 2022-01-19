@@ -14,7 +14,7 @@ import { requestHub2B } from "./hub2bService"
 
 /**
  * Save a new Tenant
- * 
+ *
  * @param body
  */
 export const createTenant = async ( body: any ): Promise<HUB2B_Tenants | null> => {
@@ -61,15 +61,16 @@ export const createTenant = async ( body: any ): Promise<HUB2B_Tenants | null> =
 
 /**
  * Get Tenant
- * 
- * @returns 
+ *
+ * @returns
  */
  export const getTenantInHub2b = async (idTenant: any): Promise<HUB2B_Tenants | null> => {
-    await renewAccessTokenHub2b()
 
-    const SETUP_URL = HUB2B_URL_V2 + 
+    await renewAccessTokenHub2b(false, null, true)
+
+    const SETUP_URL = HUB2B_URL_V2 +
       "/Setup/Tenants/" + idTenant + "?access_token=" + HUB2B_CREDENTIALS.access_token
-    
+
     const response = await requestHub2B( SETUP_URL, 'GET' )
     if ( !response ) return null
 
@@ -84,16 +85,17 @@ export const createTenant = async ( body: any ): Promise<HUB2B_Tenants | null> =
 
 /**
  * Create a new Tenant in the hub2b
- * 
- * @param body 
- * @returns 
+ *
+ * @param body
+ * @returns
  */
 export const setupTenantsHub2b = async (body: any) => {
-    await renewAccessTokenHub2b()
 
-    const SETUP_URL = HUB2B_URL_V2 + 
+    await renewAccessTokenHub2b(false, null, true)
+
+    const SETUP_URL = HUB2B_URL_V2 +
       "/Setup/Tenants?SendPasswordEmail=true&access_token=" + HUB2B_CREDENTIALS.access_token
-    
+
     const response = await requestHub2B( SETUP_URL, 'POST', body )
     if ( !response ) return null
 
@@ -108,16 +110,17 @@ export const setupTenantsHub2b = async (body: any) => {
 
 /**
  * Get Tenant Credentials
- * 
- * @param body 
- * @returns 
+ *
+ * @param body
+ * @returns
  */
  export const getTenantCredentialsInHub2b = async (idTenant: any) => {
-    await renewAccessTokenHub2b()
 
-    const SETUP_URL = HUB2B_URL_V2 + 
+    await renewAccessTokenHub2b(false, null, true)
+
+    const SETUP_URL = HUB2B_URL_V2 +
       "/Setup/Tenants/" + idTenant + "/Credentials?access_token=" + HUB2B_CREDENTIALS.access_token
-    
+
     const response = await requestHub2B( SETUP_URL, 'POST' )
     if ( !response ) return null
 
@@ -132,7 +135,7 @@ export const setupTenantsHub2b = async (body: any) => {
 
 /**
  * Update Tenant
- * 
+ *
  * @param body
  */
  export const updateHub2bTenant = async ( body: any ): Promise<HUB2B_Tenants | null> => {
@@ -169,16 +172,17 @@ export const setupTenantsHub2b = async (body: any) => {
 
 /**
  * Update Tenant in the hub2b
- * 
- * @param body 
- * @returns 
+ *
+ * @param body
+ * @returns
  */
  export const updateTenantsInHub2b = async (body: any) => {
-    await renewAccessTokenHub2b()
 
-    const SETUP_URL = HUB2B_URL_V2 + 
+    await renewAccessTokenHub2b(false, null, true)
+
+    const SETUP_URL = HUB2B_URL_V2 +
       "/Setup/Tenants/" + body.idTenant + "?access_token=" + HUB2B_CREDENTIALS.access_token
-    
+
     const response = await requestHub2B( SETUP_URL, 'PUT', body )
     if ( !response ) return null
 
@@ -193,7 +197,7 @@ export const setupTenantsHub2b = async (body: any) => {
 
 /**
  * Get Tenant
- * 
+ *
  * @param idTenant
  */
  export const getHub2bTenant = async ( idTenant: any ): Promise<HUB2B_Tenants | null> => {

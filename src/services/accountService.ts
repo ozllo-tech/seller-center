@@ -17,10 +17,10 @@ export const createPersonalInfo = async ( body: any ): Promise<PersonalInfo | nu
 
     let personalInfo
 
-    const { userId, firstName, lastName, cpf, birthday, name, cnpj, razaoSocial, inscricaoEstadual, inscricaoMunicipal } = body
+    const { userId, firstName, lastName, cpf, birthday, name, cnpj, razaoSocial } = body
 
     if ( body.isPJ )
-        personalInfo = { userId, name, cnpj, razaoSocial, inscricaoEstadual, inscricaoMunicipal }
+        personalInfo = { userId, name, cnpj, razaoSocial }
 
     else if ( body.isPF ) {
         let _birthday: any

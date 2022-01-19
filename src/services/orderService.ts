@@ -8,13 +8,12 @@ import { findLastIntegrationOrder, findOrderByShopId, newIntegrationHub2b, newOr
 import { HUB2B_TENANT, PROJECT_HOST } from "../utils/consts"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName, nowIsoDateHub2b } from "../utils/util"
-import { listAllOrdersHub2b, listOrdersHub2bByTime, postInvoiceHub2b, postTrackingHub2b, getTrackingHub2b, setupIntegrationHub2b, getInvoiceHub2b } from "./hub2bService"
-import { sendOrderEmailToSeller } from "./mailService"
+import { listAllOrdersHub2b, listOrdersHub2bByTime, postInvoiceHub2b, postTrackingHub2b, getTrackingHub2b, setupIntegrationHub2b, getInvoiceHub2b, getOrderHub2b } from "./hub2bService"
 import { findProductByVariation } from "./productService"
 import { getToken } from "../utils/cryptUtil"
 import orderEventEmitter from "../events/orders"
 
-export const INTEGRATION_INTERVAL = 1000 * 83 //seconds
+export const INTEGRATION_INTERVAL = 1000 * 60 * 60 // 1 hour
 
 export const integrateHub2bOrders = async (start?: string, end?: string) => {
 
@@ -148,11 +147,9 @@ export const savNewOrder = async (shop_id: string, order: HUB2B_Order) => {
 
     const newOrder = await newOrderHub2b({ order, shop_id })
 
-    if(newOrder) sendOrderEmailToSeller(shop_id)
-
     newOrder
-        ? log(`Order with sku`, 'EVENT', getFunctionName())
-        : log(`Could not retrieve category list.`, 'EVENT', getFunctionName(), 'ERROR')
+        ? log(`Order ${order.reference.id} saved.`, 'EVENT', getFunctionName())
+        : log(`Could not save order ${order.reference.id}.`, 'EVENT', getFunctionName(), 'ERROR')
 }
 
 export const sendInvoice = async (order: any, data: any) : Promise<HUB2B_Invoice | null> => {
@@ -235,20 +232,33 @@ export const setupWebhookIntegration = async(): Promise<HUB2B_Order_Webhook | nu
         ]
     }
 
-    return await setupIntegrationHub2b(integration)
+    const setup = await setupIntegrationHub2b(integration, 'POST')
+
+    if (!setup) return await setupIntegrationHub2b(integration, 'PUT')
+
+    return setup
 }
 
-export const updateStatus = async (order_id: string, status: string) => {
+export const updateStatus = async (order_id: string, status: string, webhook = false) => {
 
     const fields = { "order.status.status": status, "order.status.updatedDate": nowIsoDateHub2b() }
 
     const update = await findOneOrderAndModify("order.reference.id", order_id, fields) // update.value = Order
 
+    if ( webhook && 'Pending' == status && !update?.value) {
+
+        // Check if this is a new order and save it.
+
+        const orderHub2b: HUB2B_Order = await getOrderHub2b(order_id)
+
+        if (orderHub2b) saveOrders([orderHub2b])
+    }
+
     if (update?.value) orderEventEmitter.emit('updated', order_id, status)
 
-    if (update?.value && "Approved" == status) orderEventEmitter.emit('approved', order_id)
+    if (update?.value && "Approved" == status) orderEventEmitter.emit('approved', update.value)
 
-    // TODO: check if order is from an agency subaccount. If not, it can be only from the main account. So, do nothing.
+    // TODO: check if order comes from an agency subaccount. If not, it can only be from the main account. So, do nothing.
 
     if (update?.value && "Invoiced" == status) {
 

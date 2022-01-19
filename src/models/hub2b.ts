@@ -260,6 +260,10 @@ export interface HUB2B_Catalog_Product {
       updateUserName: string,
       idProductLoad: number,
       idProductAction: number
+    },
+    skus: {
+        source: string,
+        destination: any
     }
 }
 export interface HUB2B_Tenants {

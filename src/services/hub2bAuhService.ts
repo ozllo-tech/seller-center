@@ -6,7 +6,7 @@ import { log } from "../utils/loggerUtil"
 import { getFunctionName, nowInSeconds } from "../utils/util"
 import { deleteCredential, retrieveCredentials, saveCredential, findAuthByTenant } from "../repositories/hub2AuthRepository"
 import { HUB2B_Credentials } from "../models/hub2b"
-import { HUB2B_CLIENT_ID, HUB2B_CLIENT_SECRET, HUB2B_PASSWORD, HUB2B_TENANT, HUB2B_URL_V2, HUB2B_USERNAME } from "../utils/consts"
+import { HUB2B_CLIENT_ID, HUB2B_CLIENT_SECRET, HUB2B_PASSWORD, HUB2B_AGENCY_SUB_SCOPE, HUB2B_DEFAULT_SCOPE, HUB2B_TENANT, HUB2B_URL_V2, HUB2B_USERNAME, HUB2B_AGENCY_MAIN_SCOPE, HUB2B_AGENCY_MAIN_USERNAME, HUB2B_AGENCY_MAIN_PASSWORD } from "../utils/consts"
 import { requestHub2B } from "./hub2bService"
 import { findTenantCredential  } from "../repositories/hub2TenantCredentialRepository"
 
@@ -32,22 +32,27 @@ export const isAccessTokenValidHub2b = ( credentials: HUB2B_Credentials ) => {
     return true
 }
 
-export const generateAccessTokenV2Hub2b = async (idTenant = null) => {
+export const generateAccessTokenV2Hub2b = async (idTenant = null , agency = false) => {
+
     let hub2bUsername = HUB2B_USERNAME
     let hub2bPassword = HUB2B_PASSWORD
 
-    let scope = "inventory orders catalog agency"
+    let scope = HUB2B_DEFAULT_SCOPE
 
     if (idTenant) {
-
-        scope = "inventory orders catalog"
-
+        scope = HUB2B_AGENCY_SUB_SCOPE
         const credentials = await findTenantCredential(idTenant)
-
         if (!credentials) return null
 
         hub2bUsername = credentials.apiV2.userName
         hub2bPassword = credentials.apiV2.password
+    }
+
+    if (agency) {
+        scope = HUB2B_AGENCY_MAIN_SCOPE
+
+        hub2bUsername = HUB2B_AGENCY_MAIN_USERNAME
+        hub2bPassword = HUB2B_AGENCY_MAIN_PASSWORD
     }
 
     const URL_OAUTH = HUB2B_URL_V2 + "/oauth2/login"
@@ -66,7 +71,7 @@ export const generateAccessTokenV2Hub2b = async (idTenant = null) => {
     if ( !response ) return null
 
     HUB2B_CREDENTIALS = response.data
-    HUB2B_CREDENTIALS.tenant_id = idTenant || HUB2B_TENANT
+    HUB2B_CREDENTIALS.tenant_id = agency ? '9999' : idTenant || HUB2B_TENANT
 
     HUB2B_CREDENTIALS.access_token
         ? log( "Access Token obtido com sucesso", "EVENT", getFunctionName() )
@@ -128,7 +133,7 @@ export const deleteAllInvalid = async () => {
     } )
 }
 
-export const renewAccessTokenHub2b = async ( force = false, idTenant = null ) => {
+export const renewAccessTokenHub2b = async ( force = false, idTenant = null, agency = false ) => {
 
     if (idTenant) {
 
@@ -139,7 +144,17 @@ export const renewAccessTokenHub2b = async ( force = false, idTenant = null ) =>
         HUB2B_CREDENTIALS = auth
     }
 
-    HUB2B_CREDENTIALS.tenant_id = idTenant || HUB2B_TENANT
+    if (agency) {
+
+        const auth = await findAuthByTenant('9999')
+
+        if (!auth) return await generateAccessTokenV2Hub2b(null, true)
+
+        HUB2B_CREDENTIALS = auth
+
+    }
+
+    HUB2B_CREDENTIALS.tenant_id = agency ? '9999' : idTenant || HUB2B_TENANT
 
     if ( !force && isAccessTokenValidHub2b( HUB2B_CREDENTIALS ) ) return
 
@@ -159,7 +174,7 @@ export const renewAccessTokenHub2b = async ( force = false, idTenant = null ) =>
     if (!response) return await generateAccessTokenV2Hub2b()
 
     HUB2B_CREDENTIALS = response.data
-    HUB2B_CREDENTIALS.tenant_id = idTenant || HUB2B_TENANT
+    HUB2B_CREDENTIALS.tenant_id = agency ? '9999' : idTenant || HUB2B_TENANT
 
     HUB2B_CREDENTIALS.access_token
         ? log( "Token atualizado com sucesso", "EVENT", getFunctionName() )

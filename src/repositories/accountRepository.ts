@@ -13,7 +13,7 @@ import { getFunctionName } from "../utils/util"
 
 /**
  * Save personal info
- * 
+ *
  * @param personalInfo - the user personal information
  */
 export const createOrUpdatePersonalInfo = async ( personalInfo: PersonalInfo ): Promise<PersonalInfo | null> => {
@@ -58,7 +58,7 @@ export const createOrUpdatePersonalInfo = async ( personalInfo: PersonalInfo ): 
 
 /**
  * Find personal info by user id
- * 
+ *
  * @param userId
  */
 export const findPersonalInfoByUserID = async ( userId: string ): Promise<PersonalInfo | null> => {
@@ -70,7 +70,7 @@ export const findPersonalInfoByUserID = async ( userId: string ): Promise<Person
         }
 
         const projectionPJ = {
-            cnpj: 1, name: 1, razaoSocial: 1, inscricaoEstadual: 1, inscricaoMunicipal: 1
+            cnpj: 1, name: 1, razaoSocial: 1
         }
 
         const projection = {
@@ -99,8 +99,8 @@ export const findPersonalInfoByUserID = async ( userId: string ): Promise<Person
 
 
 /**
- * Save address 
- * 
+ * Save address
+ *
  * @param address - the user address
  */
 export const createOrUpdateAddress = async ( address: Address ): Promise<Address | null> => {
@@ -138,7 +138,7 @@ export const createOrUpdateAddress = async ( address: Address ): Promise<Address
 
 /**
  * Find address by user id
- * 
+ *
  * @param userId
  */
 export const findAddressByUserID = async ( userId: string ): Promise<Address | null> => {
@@ -168,7 +168,7 @@ export const findAddressByUserID = async ( userId: string ): Promise<Address | n
 
 /**
  * Save bank information
- * 
+ *
  * @param bankInfo - the user bank information
  */
 export const createOrUpdateBankInfo = async ( bankInfo: BankInfo ): Promise<BankInfo | null> => {
@@ -206,7 +206,7 @@ export const createOrUpdateBankInfo = async ( bankInfo: BankInfo ): Promise<Bank
 
 /**
  * Find bank information by user id
- * 
+ *
  * @param userId
  */
 export const findBankInfoByUserID = async ( userId: string ): Promise<BankInfo | null> => {
@@ -235,7 +235,7 @@ export const findBankInfoByUserID = async ( userId: string ): Promise<BankInfo |
 
 /**
  * Save shop information
- * 
+ *
  * @param shopInfo - the user shop information
  */
 export const createOrUpdateShopInfo = async ( shopInfo: ShopInfo ): Promise<ShopInfo | null> => {
@@ -273,7 +273,7 @@ export const createOrUpdateShopInfo = async ( shopInfo: ShopInfo ): Promise<Shop
 
 /**
  * Find shop information by user id
- * 
+ *
  * @param userId
  */
 export const findShopInfoByUserID = async ( userId: string ): Promise<ShopInfo | null> => {
@@ -297,7 +297,7 @@ export const findShopInfoByUserID = async ( userId: string ): Promise<ShopInfo |
 
 /**
  * Find shop information by id
- * 
+ *
  * @param userId
  */
 export const findShopInfoByID = async ( _id: string ): Promise<ShopInfo | null> => {
@@ -325,7 +325,7 @@ export const findShopInfoByID = async ( _id: string ): Promise<ShopInfo | null> 
 
 /**
  * Save contact information
- * 
+ *
  * @param shopInfo - the user shop information
  */
 export const createOrUpdateContact = async ( contact: Contact ): Promise<Contact | null> => {
@@ -363,7 +363,7 @@ export const createOrUpdateContact = async ( contact: Contact ): Promise<Contact
 
 /**
  * Find contact information by user id
- * 
+ *
  * @param userId
  */
 export const findContactByUserID = async ( userId: string ): Promise<Contact | null> => {
