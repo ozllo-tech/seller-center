@@ -44,6 +44,7 @@ app.use( '/account', routers.account )
 app.use( '/product', userCanAccessShop, routers.product )
 app.use( '/category', routers.category )
 app.use( '/bank', routers.bank )
+app.use( '/admin', routers.admin )
 app.use( '/order', userCanAccessShop, routers.order )
 app.use( '/tenant', routers.tenant )
 
