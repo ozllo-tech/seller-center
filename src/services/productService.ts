@@ -164,6 +164,8 @@ export const updateProduct = async (_id: any, patch: any): Promise<Product | nul
  */
 export const updateProductImages = async (_id: any, patch: any): Promise<Product | null> => {
 
+    patch.images = patch.images.filter(Boolean)
+
     const { images } = patch
 
     const product = await updateProductById(_id, { images })
