@@ -4,7 +4,7 @@
 
 import { Router, Request, Response, NextFunction } from 'express'
 import { deleteVariation } from '../repositories/productRepository'
-import { createNewVariation, createProduct, findProductsByShop, updateProduct, updateProductImgaes, updateProductPrice, updateProductVariation, updateProductVariationStock, importProduct } from '../services/productService'
+import { createNewVariation, createProduct, findProductsByShop, updateProduct, updateProductImages, updateProductPrice, updateProductVariation, updateProductVariationStock, importProduct } from '../services/productService'
 import { uploadProductPicture } from '../services/uploadService'
 import { badRequest, createHttpStatus, internalServerError, noContent, ok } from '../utils/httpStatus'
 import { log } from '../utils/loggerUtil'
@@ -125,7 +125,7 @@ router.patch('/:product_id/images', isProductFromShop, async (req: Request, res:
             .status(badRequest.status)
             .send(createHttpStatus(badRequest, errors))
 
-    const product = await updateProductImgaes(product_id, body)
+    const product = await updateProductImages(product_id, body)
 
     if (!product)
         return res

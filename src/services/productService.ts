@@ -164,7 +164,7 @@ export const updateProduct = async (_id: any, patch: any): Promise<Product | nul
  *
  * @param _id - product id
  */
-export const updateProductImgaes = async (_id: any, patch: any): Promise<Product | null> => {
+export const updateProductImages = async (_id: any, patch: any): Promise<Product | null> => {
 
     const { images } = patch
 
