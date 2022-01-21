@@ -151,10 +151,8 @@ export const updateProduct = async (_id: any, patch: any): Promise<Product | nul
     const product = await updateProductById(_id, patch)
 
     product
-        ? log(`Update product ${_id}`, 'EVENT', getFunctionName())
-        : log(`Could not update product`, 'EVENT', getFunctionName())
-
-    productEventEmitter.emit('update', product)
+    ? log(`Update product ${_id}`, 'EVENT', getFunctionName())
+    : log(`Could not update product`, 'EVENT', getFunctionName())
 
     return product
 }
@@ -174,8 +172,6 @@ export const updateProductImages = async (_id: any, patch: any): Promise<Product
         ? log(`Update product ${_id}`, 'EVENT', getFunctionName())
         : log(`Could not update product`, 'EVENT', getFunctionName())
 
-    productEventEmitter.emit('update', product)
-
     return product
 }
 
@@ -193,8 +189,6 @@ export const updateProductPrice = async (_id: any, patch: any): Promise<Product 
     product
         ? log(`Update product ${_id}`, 'EVENT', getFunctionName())
         : log(`Could not update product`, 'EVENT', getFunctionName())
-
-    productEventEmitter.emit('update_price', product)
 
     return product
 }
@@ -231,10 +225,6 @@ export const updateProductVariation = async (_id: any, patch: any): Promise<Prod
     product
         ? log( `Update product variation ${ _id }`, 'EVENT', getFunctionName() )
         : log( `Could not update product`, 'EVENT', getFunctionName() )
-
-    const idTenant = patch.idTenant | Number(HUB2B_TENANT)
-
-    productEventEmitter.emit( 'update', product, idTenant )
 
     return product
 }

@@ -3,11 +3,13 @@
 //
 
 import { MongoError, ObjectID, TransactionOptions } from "mongodb"
+import productEventEmitter from "../events/product"
 import { Product, Variation } from "../models/product"
+import { HUB2B_TENANT } from "../utils/consts"
 import { productCollection, variationCollection, VARIATION_COLLECTION } from "../utils/db/collections"
 import { getMongoSession } from "../utils/db/mongoConnector"
 import { log } from "../utils/loggerUtil"
-import { getFunctionName } from "../utils/util"
+import { equalArray, getFunctionName, isSubset } from "../utils/util"
 
 const transactionOptions: TransactionOptions = {
     readPreference: 'primary',
@@ -18,7 +20,7 @@ const transactionOptions: TransactionOptions = {
 
 /**
  * Create new Product
- * 
+ *
  * @param product - the product to be saved
  */
 export const createNewProduct = async ( product: Product, variations: Variation[] ): Promise<Product | null> => {
@@ -62,7 +64,7 @@ export const createNewProduct = async ( product: Product, variations: Variation[
 
 /**
  * Save many products
- * 
+ *
  * @param products
  */
  export const createManyProducts = async ( products: Product[] ): Promise<boolean> => {
@@ -81,8 +83,8 @@ export const createNewProduct = async ( product: Product, variations: Variation[
 
 /**
  * Update a product
- * 
- * @param product 
+ *
+ * @param product
  */
 export const updateProductById = async ( _id: any, patch: any ): Promise<Product | null> => {
 
@@ -98,7 +100,14 @@ export const updateProductById = async ( _id: any, patch: any ): Promise<Product
 
         if ( !result.value ) return null
 
-        return await findProductById( result.value._id )
+        const product = await findProductById(result.value._id)
+
+        if (!isSubset(result.value, patch) || patch.images && !equalArray(result.value.images, patch.images)) {
+            const idTenant = patch.idTenant | Number(HUB2B_TENANT) // TODO: remove idTenant?
+            productEventEmitter.emit('update', product, idTenant)
+        }
+
+        return product
 
     } catch ( error ) {
 
@@ -111,8 +120,8 @@ export const updateProductById = async ( _id: any, patch: any ): Promise<Product
 
 /**
  * Update a variation
- * 
- * @param patch - 
+ *
+ * @param patch -
  */
 export const updateVariationById = async ( _id: any, patch: any ): Promise<Product | null> => {
 
@@ -128,7 +137,13 @@ export const updateVariationById = async ( _id: any, patch: any ): Promise<Produ
 
         if ( !result.value ) return null
 
-        return await findProductById( result.value.product_id )
+        const product = await findProductById(result.value.product_id)
+
+        const idTenant = patch.idTenant | Number(HUB2B_TENANT) // TODO: remover idTenant?
+
+        if (!isSubset(result.value, patch)) productEventEmitter.emit('update', product, idTenant)
+
+        return product
 
     } catch ( error ) {
 
@@ -141,7 +156,7 @@ export const updateVariationById = async ( _id: any, patch: any ): Promise<Produ
 
 /**
  * Find product by id
- * 
+ *
  * @param productId
  */
 export const findProductById = async ( productId: string ): Promise<Product | null> => {
@@ -180,7 +195,7 @@ export const findProductById = async ( productId: string ): Promise<Product | nu
 
 /**
  * Find shop products
- * 
+ *
  * @param shopId
  */
 export const findProductsByShopId = async ( shop_id: string ): Promise<Product[] | null> => {
@@ -220,9 +235,9 @@ export const findProductsByShopId = async ( shop_id: string ): Promise<Product[]
 
 /**
  * Find product by shop and name
- * 
- * @param shopId 
- * @param name 
+ *
+ * @param shopId
+ * @param name
  * @returns Product
  */
  export const findProductByShopIdAndName = async ( shopId: string, name: string ): Promise<Product | null> => {
@@ -261,7 +276,7 @@ export const findProductsByShopId = async ( shop_id: string ): Promise<Product[]
 
 /**
  * Find variations by product id
- * 
+ *
  * @param product_id
  */
 export const findVariationsByProductId = async ( product_id: string ): Promise<Variation[] | null> => {
@@ -287,7 +302,7 @@ export const findVariationsByProductId = async ( product_id: string ): Promise<V
 
 /**
  * Find variation by id
- * 
+ *
  * @param variation_id
  */
 export const findVariationById = async ( variation_id: string ): Promise<Variation | null> => {
@@ -311,7 +326,7 @@ export const findVariationById = async ( variation_id: string ): Promise<Variati
 
 /**
  * Creates a variation
- * 
+ *
  * @param variation
  */
 export const createVariation = async ( variation: Variation ): Promise<Variation | null> => {
@@ -338,7 +353,7 @@ export const createVariation = async ( variation: Variation ): Promise<Variation
 
 /**
  * Creates a variation
- * 
+ *
  * @param variation
  */
 export const deleteVariation = async ( variation_id: string ): Promise<boolean> => {
