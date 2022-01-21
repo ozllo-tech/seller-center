@@ -5,7 +5,7 @@ import { log } from './loggerUtil'
 
 /**
  * Call it inside an async function and it will sleep
- * 
+ *
  * @param ms - milliseconds
  */
 export const sleep = ( ms: number = 1 ) => {
@@ -16,7 +16,7 @@ export const sleep = ( ms: number = 1 ) => {
 
 /**
  * Returns the callee name
- * 
+ *
  * @param depth - depth
  */
 export const getFunctionName = ( depth: number = 1 ) => {
@@ -29,8 +29,8 @@ export const getFunctionName = ( depth: number = 1 ) => {
 }
 
 /**
- * 
- * @param timestamp 
+ *
+ * @param timestamp
  * @returns the time in format of dd-mm-yyyy
  */
 export const formatDate = ( timestamp: number ) => {
@@ -42,8 +42,8 @@ export const formatDate = ( timestamp: number ) => {
 }
 
 /**
- * 
- * @param timestamp 
+ *
+ * @param timestamp
  * @returns the time in format of yyyy-mm-ddTHH:mm:ss
  */
 export const formatDateEnglish = ( timestamp: number ) => {
@@ -59,8 +59,8 @@ export const formatDateEnglish = ( timestamp: number ) => {
 
 /**
  * Verifies whether a password is secure or not
- * 
- * @param password 
+ *
+ * @param password
  * @returns `true` or `false`
  */
 export const isPasswordSecure = ( password: string ): boolean => {
@@ -72,7 +72,7 @@ export const isPasswordSecure = ( password: string ): boolean => {
 
 /**
  * Verifies whether the email is valid or not
- * 
+ *
  * @param email
  * @returns `true` or `false`
  */
@@ -85,7 +85,7 @@ export const isEmailValid = ( email: string ) => {
 
 /**
  * Verifies whether the string has image format
- * 
+ *
  * @param image_name
  * @returns `true` or `false`
  */
@@ -125,9 +125,9 @@ export const isCNPJValid = ( _cnpj: string ) => {
 }
 
 /**
- * 
- * @param offset 
- * @returns 
+ *
+ * @param offset
+ * @returns
  */
 export const nowForPostgre = ( offset: number = 0 ) => {
     return new Date( Date.now() - offset ).toLocaleString()
@@ -157,7 +157,7 @@ export const logAxiosError = ( error: AxiosError ) => {
     ------ AXIOS ERROR -------
 
         -- URL --
-    ${ error.config?.url } 
+    ${ error.config?.url }
 
     -- REQUEST DATA --
      ${ error.config?.data }
@@ -176,7 +176,7 @@ export const logResponse = ( response: AxiosResponse ) => {
     ------ AXIOS RESPONSE -------
 
         -- URL --
-    ${ response.config.url } 
+    ${ response.config.url }
 
     -- REQUEST DATA --
      ${ response.request }
@@ -262,4 +262,17 @@ export const parsePotentiallyGroupedFloat = ( stringValue: string ) => {
     } catch ( error ) {
         return false
     }
+}
+
+export const isSubset = (superObj: any, subObj: any): boolean => {
+    return Object.keys(subObj).every(ele => {
+        if (typeof subObj[ele] == 'object') {
+            return isSubset(superObj[ele], subObj[ele]);
+        }
+        return subObj[ele] === superObj[ele]
+    })
+}
+
+export const equalArray = (array1: any, array2: any) => {
+    return JSON.stringify(array1) == JSON.stringify(array2)
 }

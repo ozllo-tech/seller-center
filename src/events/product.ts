@@ -24,11 +24,11 @@ productEventEmitter.on( 'update', ( product: Product, idTenant: any ) => {
 
 } )
 
-productEventEmitter.on( 'delete', ( product: Product, idTenant: any ) => {
+productEventEmitter.on( 'delete', ( productId: any, idTenant: any ) => {
 
-    log( `Deletando produto ${ product._id } na hub2b.`, 'EVENT', 'ProductEventEmitter' )
+    log( `Deletando produto ${ productId } na hub2b.`, 'EVENT', 'ProductEventEmitter' )
 
-    deleteProdutoHub2b( product._id, idTenant )
+    deleteProdutoHub2b( productId, idTenant )
 
 } )
 
