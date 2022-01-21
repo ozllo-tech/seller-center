@@ -360,9 +360,13 @@ export const deleteVariation = async ( variation_id: string ): Promise<boolean> 
 
     try {
 
-        const result = await variationCollection.deleteOne( { _id: variation_id } )
+        const query = await variationCollection.deleteOne( { _id: variation_id } )
 
-        return result.deletedCount ? result.deletedCount >= 1 : false
+        const result = query.deletedCount ? query.deletedCount >= 1 : false
+
+        if ( result ) productEventEmitter.emit( 'delete', variation_id )
+
+        return result
 
     } catch ( error ) {
 
