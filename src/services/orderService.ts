@@ -202,6 +202,17 @@ export const retrieveTracking = async (order_id: string): Promise<HUB2B_Tracking
     return orderTracking
 }
 
+export const retrieveInvoice = async (order_id: string): Promise<HUB2B_Order | null> => {
+
+    const invoice = await getInvoiceHub2b(order_id)
+
+    invoice
+        ? log(`Invoice from order ${order_id} retrieved`, 'EVENT', getFunctionName(), 'INFO')
+        : log(`Could not retrieve order ${order_id} invoice`, 'EVENT', getFunctionName(), 'ERROR')
+
+    return invoice
+}
+
 export const setupWebhookIntegration = async(): Promise<HUB2B_Order_Webhook | null> => {
     const integration : HUB2B_Integration = {
         system: "ERPOrdersNotification",

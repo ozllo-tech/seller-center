@@ -3,7 +3,7 @@
 //
 
 import { Router, Request, Response, NextFunction } from 'express'
-import { findOrdersByShop, sendInvoice, sendTracking, retrieveTracking } from '../services/orderService'
+import { findOrdersByShop, sendInvoice, retrieveInvoice, sendTracking, retrieveTracking } from '../services/orderService'
 import { createHttpStatus, internalServerError, ok } from '../utils/httpStatus'
 import { isOrderInvoiceable } from "../utils/middlewares"
 const router = Router()
@@ -28,6 +28,20 @@ router.get('/all', async (req: Request, res: Response, next: NextFunction) => {
 router.post('/:id/invoice', isOrderInvoiceable, async (req: Request, res: Response, next: NextFunction) => {
 
     const invoice = await sendInvoice(req?.order, req.body)
+
+    if (!invoice)
+        return res
+            .status(internalServerError.status)
+            .send(createHttpStatus(internalServerError))
+
+    return res
+        .status(ok.status)
+        .send(invoice)
+})
+
+router.get('/:id/invoice', async (req: Request, res: Response, next: NextFunction) => {
+
+    const invoice = await retrieveInvoice(req.params.id)
 
     if (!invoice)
         return res
