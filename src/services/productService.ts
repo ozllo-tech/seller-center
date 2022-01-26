@@ -189,8 +189,10 @@ export const updateProductPrice = async (_id: any, patch: any): Promise<Product 
     const product = await updateProductById(_id, { price, price_discounted })
 
     product
-        ? log(`Update product ${_id}`, 'EVENT', getFunctionName())
-        : log(`Could not update product`, 'EVENT', getFunctionName())
+        ? log(`Update product ${_id} price`, 'EVENT', getFunctionName())
+        : log(`Could not update product ${_id} price`, 'EVENT', getFunctionName())
+
+    productEventEmitter.emit('update_price', product)
 
     return product
 }
