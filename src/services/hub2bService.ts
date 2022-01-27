@@ -282,8 +282,8 @@ export const updateStockHub2b = async (variation_id: any, stock: number) => {
     const update_stock = response.data
 
     update_stock
-        ? log("Get List Orders success", "EVENT", getFunctionName())
-        : log("Get List Orders error", "EVENT", getFunctionName(), "WARN")
+        ? log(`SKU ${variation_id} stock update success`, "EVENT", getFunctionName())
+        : log(`SKU ${variation_id} stock update fail`, "EVENT", getFunctionName(), "WARN")
 
     return update_stock
 }

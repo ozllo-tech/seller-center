@@ -37,7 +37,7 @@ productEventEmitter.on( 'update_stock', ( product: Product ) => {
     log( `Updating stock produto ${ product._id } na hub2b.`, 'EVENT', 'ProductEventEmitter' )
 
     product.variations && Array.isArray( product.variations ) && product.variations.forEach( variation => {
-        updateStockHub2b( variation._id, variation.stock )
+        updateStockHub2b( variation._id, Number(variation.stock ))
     } )
 
 } )

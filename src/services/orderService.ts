@@ -9,7 +9,7 @@ import { HUB2B_TENANT, PROJECT_HOST } from "../utils/consts"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName, nowIsoDateHub2b } from "../utils/util"
 import { listAllOrdersHub2b, listOrdersHub2bByTime, postInvoiceHub2b, postTrackingHub2b, getTrackingHub2b, setupIntegrationHub2b, getInvoiceHub2b, getOrderHub2b } from "./hub2bService"
-import { findProductByVariation } from "./productService"
+import { findProductByVariation, updateStockByQuantitySold } from "./productService"
 import { getToken } from "../utils/cryptUtil"
 import orderEventEmitter from "../events/orders"
 
@@ -276,6 +276,9 @@ export const updateStatus = async (order_id: string, status: string, webhook = f
         const invoice = await getInvoiceHub2b(order_id)
 
         if (invoice) orderEventEmitter.emit('invoiced', order_id, invoice)
+
+        // Foreach variation in order, decrease stock by quantity sold.
+        update.value.order.products.forEach( variation => updateStockByQuantitySold(variation.sku, variation.quantity))
     }
 
     if (update?.value && "Shipped" == status) {

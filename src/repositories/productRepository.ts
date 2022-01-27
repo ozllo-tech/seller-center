@@ -141,6 +141,8 @@ export const updateVariationById = async ( _id: any, patch: any ): Promise<Produ
 
         const idTenant = patch.idTenant | Number(HUB2B_TENANT) // TODO: remover idTenant?
 
+        // TODO: Maybe emit diferentt event for stock and price, so we call exclusive Hub2b methods (performance).
+
         if (!isSubset(result.value, patch)) productEventEmitter.emit('update', product, idTenant)
 
         return product

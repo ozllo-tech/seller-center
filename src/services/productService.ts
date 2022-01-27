@@ -204,14 +204,13 @@ export const updateProductPrice = async (_id: any, patch: any): Promise<Product 
  */
 export const updateProductVariationStock = async (_id: any, patch: any): Promise<Product | null> => {
 
-    const stock = patch
-
-    const product = await updateVariationById(_id, { stock })
+    const product = await updateVariationById(_id, patch)
 
     product
-        ? log(`Update stock variation ${_id}`, 'EVENT', getFunctionName())
-        : log(`Could not update product`, 'EVENT', getFunctionName())
+        ? log(`Stock from variation ${_id} has been updated.`, 'EVENT', getFunctionName())
+        : log(`Could not update stock from variation ${_id}.`, 'EVENT', getFunctionName(), 'WARN')
 
+    // TODO: emit event only if stock has actually changed.
     productEventEmitter.emit('update_stock', product)
 
     return product
@@ -450,4 +449,11 @@ export const mapSku = async (products: Product[], idTenant: any) => {
 
     return response.data
 
+}
+
+export const updateStockByQuantitySold = async (variationId: any, quantity: any) => {
+
+    const variation = await findVariationById(variationId)
+
+    await updateProductVariationStock(variationId, { stock: Number(variation?.stock) - Number(quantity) })
 }
