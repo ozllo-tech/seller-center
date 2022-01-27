@@ -278,7 +278,7 @@ export const updateStatus = async (order_id: string, status: string, webhook = f
         if (invoice) orderEventEmitter.emit('invoiced', order_id, invoice)
 
         // Foreach variation in order, decrease stock by quantity sold.
-        update.value.order.products.forEach( variation => updateStockByQuantitySold(variation.sku, variation.quantity))
+        update.value.order.products.forEach(variation => updateStockByQuantitySold(variation.sku, variation.quantity))
     }
 
     if (update?.value && "Shipped" == status) {
