@@ -441,11 +441,12 @@ export const mapSku = async (products: Product[], idTenant: any) => {
     products.forEach( item => data.push({ sourceSKU: item.sku, destinationSKU: item._id }))
 
     const response = await requestHub2B(CATALOG_URL, 'POST', JSON.stringify(data), { "Content-type": "application/json" } )
+
     if ( !response ) return null
 
     response
-        ? log( " mapSku success", "EVENT", getFunctionName() )
-        : log( " mapSku error", "EVENT", getFunctionName(), "WARN" )
+        ? log(`SKUs from Tenant ${idTenant} has been mapped.`, "EVENT", getFunctionName() )
+        : log(`Could not map SKUs from Tenant ${idTenant}.`, "EVENT", getFunctionName(), "WARN" )
 
     return response.data
 
