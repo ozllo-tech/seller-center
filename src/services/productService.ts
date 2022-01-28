@@ -353,7 +353,7 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
                             subcategory => subcategory.value === productHub2b.categorization.destination.name )[0].code : 0,
                     nationality: 0,
                     name: productHub2b.name,
-                    description: productHub2b.description.description,
+                    description: productHub2b.description.sourceDescription,
                     brand: productHub2b.brand,
                     more_info: '',
                     ean: productHub2b.ean,
