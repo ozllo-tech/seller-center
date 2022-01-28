@@ -8,7 +8,7 @@ import { getFunctionName } from "../utils/util"
 import { createNewProduct, createVariation, deleteVariation, findProductByShopIdAndName, findProductById, findProductsByShopId, findVariationById, updateProductById, updateVariationById, createManyProducts } from "../repositories/productRepository"
 import productEventEmitter from "../events/product"
 import { HUB2B_CREDENTIALS, renewAccessTokenHub2b } from "./hub2bAuhService"
-import { requestHub2B } from "./hub2bService"
+import { requestHub2B, updateHub2bSkuStatus } from "./hub2bService"
 import { HUB2B_URL_V2, HUB2B_MARKETPLACE, HUB2B_SALES_CHANEL } from "../utils/consts"
 import { HUB2B_Catalog_Product } from "../models/hub2b"
 import { ObjectID } from "mongodb"
@@ -310,6 +310,7 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
 
         for await (let productHub2b of productsInHub2b) {
             const variations: Variation[] = []
+            // TODO: search by skus.source or skus.source.destination
             const productExists = await findProductByShopIdAndName(shop_id, productHub2b.name)
             if (!productExists) {
                 const images: string[] = []
@@ -386,6 +387,20 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
                     }
                 }
             }
+
+            // if product exists, update description.
+
+            if (productExists?.description !== productHub2b.description.sourceDescription) {
+                const productUpdated = await updateProductById(productExists?._id, {
+                    description: productHub2b.description.sourceDescription
+                })
+
+                if (productUpdated) {
+                    productEventEmitter.emit('update', productUpdated, HUB2B_TENANT )
+                    products.push(productUpdated)
+                }
+            }
+
         }
 
         if (productsWithoutVariation.length > 0) {
@@ -443,6 +458,10 @@ export const mapSku = async (products: Product[], idTenant: any) => {
     const response = await requestHub2B(CATALOG_URL, 'POST', JSON.stringify(data), { "Content-type": "application/json" } )
 
     if ( !response ) return null
+
+    response.data.forEach( (item: any) => {
+        if ('ERROR_EXISTING_MAP' == item.code) updateHub2bSkuStatus(item.sourceSKU, 3, Number(HUB2B_SALES_CHANEL), idTenant)
+    })
 
     response
         ? log(`SKUs from Tenant ${idTenant} has been mapped.`, "EVENT", getFunctionName() )

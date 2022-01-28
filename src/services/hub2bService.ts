@@ -6,6 +6,7 @@ import axios, { Method } from "axios"
 import { HUB2B_Invoice, HUB2B_Product, HUB2B_Status, HUB2B_Tracking, HUB2B_Order, HUB2B_Integration } from "../models/hub2b"
 import { Product } from "../models/product"
 import { SALES_CHANNEL_HUB2B } from "../models/salesChannelHub2b"
+import { findTenantCredential } from "../repositories/hub2TenantCredentialRepository"
 import { HUB2B_ACCESS_KEY_V1, HUB2B_URL_V2, PROJECT_HOST, HUB2B_TENANT, HUB2B_URL_V1 } from "../utils/consts"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName, logAxiosError, logResponse, nowIsoDate } from "../utils/util"
@@ -224,6 +225,47 @@ export const deleteProdutoHub2b = async ( product_id: string, idTenant: any ) =>
     log("Produto deletado com sucesso no HUB2B", "EVENT", getFunctionName())
 
     response && logResponse(response)
+}
+
+export const updateHub2bSkuStatus = async (id: string, status: number, channel: number, idTenant = null) => {
+
+    let HUB2B_TENANT_HEADERS_V1
+
+    if (idTenant) {
+
+        const credential = await findTenantCredential(idTenant)
+
+        HUB2B_TENANT_HEADERS_V1 = {
+            ...HUB2B_DEFAULT_HEADERS,
+            "auth": credential?.apiV1.authToken
+        }
+    }
+
+    const URL = HUB2B_URL_V1 + "/setproductstatus/" + idTenant || HUB2B_TENANT
+
+    const body = [
+        {
+            'itemId': id,
+            'salesChannel': channel,
+            'status': status
+        }
+    ]
+
+    const response = await requestHub2B(URL, 'POST', body, HUB2B_TENANT_HEADERS_V1 || HUB2B_HEADERS_V1)
+
+    if (!response) return null
+
+    if (response.data.error) {
+
+        log("Não foi possível atualizar status do SKU na HUB2B", "EVENT", getFunctionName(), "WARN")
+
+        return null
+    }
+
+    log("Status do SKU atualizado com sucesso na HUB2B", "EVENT", getFunctionName())
+
+    response && logResponse(response)
+
 }
 
 export const getSKU = async ( sku: string, idTenant: any ) => {
