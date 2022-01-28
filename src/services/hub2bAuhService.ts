@@ -104,7 +104,7 @@ export const findValidCredential = async (): Promise<HUB2B_Credentials> => {
 
     if ( !credentials || credentials.length === 0 ) return HUB2B_CREDENTIALS
 
-    const credential = credentials.find( credential => isAccessTokenValidHub2b( credential ) )
+    const credential = credentials.find( credential => isAccessTokenValidHub2b( credential ) && credential.tenant_id === HUB2B_TENANT )
 
     if ( !credential ) return HUB2B_CREDENTIALS
 
@@ -141,6 +141,8 @@ export const renewAccessTokenHub2b = async ( force = false, idTenant = null, age
 
         if (!auth) return await generateAccessTokenV2Hub2b(idTenant)
 
+        if (!isAccessTokenValidHub2b(auth)) return await generateAccessTokenV2Hub2b(idTenant)
+
         HUB2B_CREDENTIALS = auth
     }
 
@@ -149,6 +151,8 @@ export const renewAccessTokenHub2b = async ( force = false, idTenant = null, age
         const auth = await findAuthByTenant('9999')
 
         if (!auth) return await generateAccessTokenV2Hub2b(null, true)
+
+        if (!isAccessTokenValidHub2b(auth)) return await generateAccessTokenV2Hub2b(null, true)
 
         HUB2B_CREDENTIALS = auth
 
@@ -191,10 +195,9 @@ export const recoverLateCredential = async () => {
 
     const credential = await findValidCredential()
 
-    if ( isAccessTokenValidHub2b( credential ) )
-        HUB2B_CREDENTIALS = credential
+    if (!isAccessTokenValidHub2b(credential)) return await renewAccessTokenHub2b(true)
 
-    await renewAccessTokenHub2b( true )
+    HUB2B_CREDENTIALS = credential
 }
 
 setInterval( async () => await renewAccessTokenHub2b( true ), 3600 * 60 * 1000 )
