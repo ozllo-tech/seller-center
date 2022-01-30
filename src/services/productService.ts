@@ -210,9 +210,6 @@ export const updateProductVariationStock = async (_id: any, patch: any): Promise
         ? log(`Stock from variation ${_id} has been updated.`, 'EVENT', getFunctionName())
         : log(`Could not update stock from variation ${_id}.`, 'EVENT', getFunctionName(), 'WARN')
 
-    // TODO: emit event only if stock has actually changed.
-    productEventEmitter.emit('update_stock', product)
-
     return product
 }
 
@@ -405,17 +402,22 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
 
                 if (productExists.price !== productHub2b.destinationPrices.priceBase || productExists.price_discounted !== productHub2b.destinationPrices.priceSale) {
 
-                    const productUpdated = await updateProductById(productExists._id, {
+                    await updateProductById(productExists._id, {
                         price: productHub2b.destinationPrices.priceBase,
                         price_discounted: productHub2b.destinationPrices.priceSale
                     })
-
-                    if (productUpdated) products.push(productUpdated)
                 }
 
                 // Update stock.
-            }
 
+                if (Array.isArray(productExists.variations)) {
+                    productExists.variations.forEach(async (variation) => {
+                        if (variation.stock !== productHub2b.stocks.virtualStock) { // stocks.sourceStock ?
+                            await updateVariationById(variation._id, { stock: productHub2b.stocks.virtualStock }) // stocks.sourceStock ?
+                        }
+                    })
+                }
+            }
         }
 
         if (productsWithoutVariation.length > 0) {
@@ -429,6 +431,9 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
         }
     }
 
+    // TODO: filter products[]
+    // check if productsInHub2b[i].skus.destination is already filled
+    // or if productsInHub2b[i].status.id != 3 before call mapsku.
     if (products.length > 0) await mapSku(products, idTenant)
 
     return products
@@ -445,7 +450,7 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
 
     const CATALOG_URL = HUB2B_URL_V2 +
       "/catalog/product/" + HUB2B_MARKETPLACE + "/" + idTenant +
-      "?idProductStatus=2&onlyActiveProducts=true&getAdditionalInfo=false&access_token=" + HUB2B_CREDENTIALS.access_token
+      "?onlyActiveProducts=true&access_token=" + HUB2B_CREDENTIALS.access_token
 
     const response = await requestHub2B( CATALOG_URL, 'GET' )
     if ( !response ) return null

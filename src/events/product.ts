@@ -3,7 +3,7 @@
 //
 
 import events from 'events'
-import { Product } from '../models/product'
+import { Product, Variation } from '../models/product'
 import { criarProdutoHub2b, deleteProdutoHub2b, parseProdutoToProdutoHub2, updatePriceHub2b, updateProdutoHub2b, updateStockHub2b } from '../services/hub2bService'
 import { log } from '../utils/loggerUtil'
 
@@ -32,15 +32,13 @@ productEventEmitter.on( 'delete', ( productId: any, idTenant: any ) => {
 
 } )
 
-productEventEmitter.on( 'update_stock', ( product: Product ) => {
+productEventEmitter.on( 'update_stock', ( variation: Variation ) => {
 
-    log( `Updating stock produto ${ product._id } na hub2b.`, 'EVENT', 'ProductEventEmitter' )
+    log( `Updating stock from SKU ${ variation._id } in HUB2B.`, 'EVENT', 'ProductEventEmitter' )
 
-    product.variations && Array.isArray( product.variations ) && product.variations.forEach( variation => {
-        updateStockHub2b( variation._id, Number(variation.stock ))
-    } )
+    updateStockHub2b( variation._id, Number(variation.stock ))
 
-} )
+})
 
 productEventEmitter.on( 'update_price', ( product: Product ) => {
 
