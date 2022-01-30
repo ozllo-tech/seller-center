@@ -345,13 +345,11 @@ export const updatePriceHub2b = async (variation_id: any, price: number, price_d
 
     if (!response) return null
 
-    const orders = response.data
+    response.data
+        ? log(`SKU ${variation_id} price has been updated`, "EVENT", getFunctionName())
+        : log(`Could not update price from SKU ${variation_id}`, "EVENT", getFunctionName(), "WARN")
 
-    orders
-        ? log("Get List Orders success", "EVENT", getFunctionName())
-        : log("Get List Orders error", "EVENT", getFunctionName(), "WARN")
-
-    return orders
+    return response.data
 }
 
 // TODO -> Implementar

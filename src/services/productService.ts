@@ -388,17 +388,32 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
                 }
             }
 
-            // if product exists, update description.
+            if (productExists) {
 
-            if (productExists?.description !== productHub2b.description.sourceDescription) {
-                const productUpdated = await updateProductById(productExists?._id, {
-                    description: productHub2b.description.sourceDescription
-                })
+                // Update description.
 
-                if (productUpdated) {
-                    productEventEmitter.emit('update', productUpdated, HUB2B_TENANT )
-                    products.push(productUpdated)
+                if (productExists.description !== productHub2b.description.sourceDescription) {
+
+                    const productUpdated = await updateProductById(productExists._id, {
+                        description: productHub2b.description.sourceDescription
+                    })
+
+                    if (productUpdated) products.push(productUpdated)
                 }
+
+                // Update base price and sales price.
+
+                if (productExists.price !== productHub2b.destinationPrices.priceBase || productExists.price_discounted !== productHub2b.destinationPrices.priceSale) {
+
+                    const productUpdated = await updateProductById(productExists._id, {
+                        price: productHub2b.destinationPrices.priceBase,
+                        price_discounted: productHub2b.destinationPrices.priceSale
+                    })
+
+                    if (productUpdated) products.push(productUpdated)
+                }
+
+                // Update stock.
             }
 
         }
@@ -459,6 +474,7 @@ export const mapSku = async (products: Product[], idTenant: any) => {
 
     if ( !response ) return null
 
+    // TODO: testar chamar todos os skus de uma vez
     response.data.forEach( (item: any) => {
         if ('ERROR_EXISTING_MAP' == item.code) updateHub2bSkuStatus(item.sourceSKU, 3, Number(HUB2B_SALES_CHANEL), idTenant)
     })
