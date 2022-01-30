@@ -2,7 +2,7 @@
 //      Order Service
 //
 
-import { HUB2B_Order, HUB2B_Invoice, HUB2B_Tracking, HUB2B_Integration, HUB2B_Order_Webhook, HUB2B_Status } from "../models/hub2b"
+import { HUB2B_Order, HUB2B_Invoice, HUB2B_Tracking, HUB2B_Integration, HUB2B_Order_Webhook, HUB2B_Status, HUB2B_Product_Order } from "../models/hub2b"
 import { Order, OrderIntegration } from "../models/order"
 import { findLastIntegrationOrder, findOrderByShopId, newIntegrationHub2b, newOrderHub2b, findOneOrderAndModify } from "../repositories/orderRepository"
 import { HUB2B_TENANT, PROJECT_HOST } from "../utils/consts"
@@ -163,7 +163,25 @@ export const sendInvoice = async (order: any, data: any) : Promise<HUB2B_Invoice
         totalAmount: order.payment.totalAmount,
     }
 
+    // TODO: maybe check if product has available stock before send invoice.
+
     const res = await postInvoiceHub2b(order.reference.id, invoice)
+
+    if (res) {
+
+        const status: HUB2B_Status = {
+            status: 'Invoiced',
+            updatedDate: nowIsoDateHub2b(),
+            active: true,
+            message: ''
+        }
+
+        await findOneOrderAndModify("order.reference.id", order.reference.id, { "order.status": status })
+
+        // Foreach SKU in order, decrease stock by quantity sold.
+        order.products.forEach((product:HUB2B_Product_Order) => updateStockByQuantitySold(product.sku, product.quantity))
+
+    }
 
     res
         ? log(`Invoice sent`, 'EVENT', getFunctionName())
@@ -277,8 +295,8 @@ export const updateStatus = async (order_id: string, status: string, webhook = f
 
         if (invoice) orderEventEmitter.emit('invoiced', order_id, invoice)
 
-        // Foreach variation in order, decrease stock by quantity sold.
-        update.value.order.products.forEach(variation => updateStockByQuantitySold(variation.sku, variation.quantity))
+        // Foreach SKU in order, decrease stock by quantity sold.
+        update.value.order.products.forEach(product => updateStockByQuantitySold(product.sku, product.quantity))
     }
 
     if (update?.value && "Shipped" == status) {
