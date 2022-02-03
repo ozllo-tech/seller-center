@@ -1,5 +1,6 @@
 import { recoverLateCredential } from "./services/hub2bAuhService"
 import { integrateHub2bOrders, INTEGRATION_INTERVAL } from "./services/orderService"
+import { updateIntegrationStock } from "./services/productService"
 import { nowIsoDateHub2b } from "./utils/util"
 
 /**
@@ -76,4 +77,6 @@ export const init = async () => {
     setInterval(async () => {
         await integrateHub2bOrders()
     }, INTEGRATION_INTERVAL)
+
+    updateIntegrationStock()
 }

@@ -5,15 +5,16 @@
 import { Product, Variation } from "../models/product"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName } from "../utils/util"
-import { createNewProduct, createVariation, deleteVariation, findProductByShopIdAndName, findProductById, findProductsByShopId, findVariationById, updateProductById, updateVariationById, createManyProducts } from "../repositories/productRepository"
+import { createNewProduct, createVariation, deleteVariation, findProductByShopIdAndName, findProductById, findProductsByShopId, findVariationById, updateProductById, updateVariationById, createManyProducts, findVariationsByProductId } from "../repositories/productRepository"
 import productEventEmitter from "../events/product"
 import { HUB2B_CREDENTIALS, renewAccessTokenHub2b } from "./hub2bAuhService"
-import { requestHub2B, updateHub2bSkuStatus } from "./hub2bService"
+import { getStockHub2b, requestHub2B, updateHub2bSkuStatus } from "./hub2bService"
 import { HUB2B_URL_V2, HUB2B_MARKETPLACE, HUB2B_SALES_CHANEL } from "../utils/consts"
 import { HUB2B_Catalog_Product } from "../models/hub2b"
 import { ObjectID } from "mongodb"
 import { CATEGORIES, SUBCATEGORIES } from "../models/category"
 import { HUB2B_TENANT } from "../utils/consts"
+import { retrieveTenants } from "../repositories/hub2TenantRepository"
 
 /**
  * Save a new product
@@ -446,11 +447,18 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
  */
  export const getProductsInHub2b = async (idTenant: any): Promise<HUB2B_Catalog_Product[] | null> => {
 
-    await renewAccessTokenHub2b(false, idTenant)
+    const access = await renewAccessTokenHub2b(false, idTenant)
+
+    if ('object' === typeof(access)) { // TODO: solve gambiarra.
+        log(`Could not get access token from tenant ${idTenant}`, 'EVENT', getFunctionName(), 'ERROR')
+        return null
+    }
+
+    // TODO: Filter by more than one status in order to get stock and price updates (2,3 status).
 
     const CATALOG_URL = HUB2B_URL_V2 +
       "/catalog/product/" + HUB2B_MARKETPLACE + "/" + idTenant +
-      "?onlyActiveProducts=true&access_token=" + HUB2B_CREDENTIALS.access_token
+      "?idProductStatus=2&onlyWithDestinationSKU=false&access_token=" + HUB2B_CREDENTIALS.access_token
 
     const response = await requestHub2B( CATALOG_URL, 'GET' )
     if ( !response ) return null
@@ -498,3 +506,37 @@ export const updateStockByQuantitySold = async (variationId: any, quantity: any)
 
     await updateProductVariationStock(variationId, { stock: Number(variation?.stock) - Number(quantity) })
 }
+
+export const updateIntegrationStock = async() => {
+
+    // 1 - For each tenant account GET all variations in repository.
+    const accounts = await retrieveTenants()
+
+    if (!accounts) return null
+
+    accounts.forEach(async (account:any) => {
+
+        await renewAccessTokenHub2b( false, account.idTenant)
+
+        // 2 - Call GET v2/inventory/{sku}/stocks for each variation/sku.
+        const products = await getProductsInHub2b(account.idTenant)
+
+        if (!products) return null
+
+        products.forEach(async (product: any) => {
+
+            const stock = await getStockHub2b(product.skus.source)
+
+            const variation = await findVariationsByProductId(product.skus.destination)
+
+            if (!variation || !stock) return null
+
+            variation.forEach(async (variation: any) => {
+                // 3 - If stock in HUB2B is different from varriations in seller center, call updateProductVariationStock.
+                if (variation.stock != stock.available) await updateProductVariationStock(variation._id, { stock: stock.available })
+            })
+        })
+    })
+}
+
+setInterval(updateIntegrationStock, 1000 * 60) // 1min

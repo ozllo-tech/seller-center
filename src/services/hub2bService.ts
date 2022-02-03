@@ -289,8 +289,6 @@ export const getSKU = async ( sku: string, idTenant: any ) => {
 
 export const getStockHub2b = async (variation_id: any) => {
 
-    await renewAccessTokenHub2b()
-
     const URL_STOCK = HUB2B_URL_V2 + `/inventory/${variation_id}/stocks` + "?access_token=" + HUB2B_CREDENTIALS.access_token
 
     const response = await requestHub2B(URL_STOCK)
@@ -300,8 +298,8 @@ export const getStockHub2b = async (variation_id: any) => {
     const stock = response.data[0]
 
     stock
-        ? log("Get List Orders success", "EVENT", getFunctionName())
-        : log("Get List Orders error", "EVENT", getFunctionName(), "WARN")
+        ? log(`Get stock from SKU ${variation_id} success`, "EVENT", getFunctionName())
+        : log(`Get stock from SKU ${variation_id} error`, "EVENT", getFunctionName(), "WARN")
 
     return stock
 }
