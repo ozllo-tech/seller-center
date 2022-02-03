@@ -15,6 +15,7 @@ import { ObjectID } from "mongodb"
 import { CATEGORIES, SUBCATEGORIES } from "../models/category"
 import { HUB2B_TENANT } from "../utils/consts"
 import { retrieveTenants } from "../repositories/hub2TenantRepository"
+import { findShopInfoByUserEmail } from "../repositories/accountRepository"
 
 /**
  * Save a new product
@@ -539,4 +540,24 @@ export const updateIntegrationStock = async() => {
     })
 }
 
+export const updateIntegrationProducts = async() => {
+
+    const accounts = await retrieveTenants()
+
+    if (!accounts) return null
+
+    accounts.forEach(async (account: any) => {
+
+        await renewAccessTokenHub2b(false, account.idTenant)
+
+        const shopInfo = await findShopInfoByUserEmail(account.email)
+
+        if (!shopInfo) return null
+
+        importProduct(account.idTenant, shopInfo._id)
+    })
+}
+
 setInterval(updateIntegrationStock, 1000 * 60) // 1min
+
+setInterval(updateIntegrationProducts, 500 * 60 * 60) // 30min

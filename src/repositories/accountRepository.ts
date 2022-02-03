@@ -384,3 +384,25 @@ export const findContactByUserID = async ( userId: string ): Promise<Contact | n
         return null
     }
 }
+
+/**
+ * Find shop information by user email
+ *
+ * @param email
+ */
+export const findShopInfoByUserEmail = async (email: string): Promise<ShopInfo | null> => {
+
+    try {
+
+        const shopInfo = await shopInfoCollection.findOne({ email })
+
+        return shopInfo
+
+    } catch (error) {
+
+        if (error instanceof MongoError || error instanceof Error)
+            log(error.message, 'EVENT', `Account Repository - ${getFunctionName()}`, 'ERROR')
+
+        return null
+    }
+}
