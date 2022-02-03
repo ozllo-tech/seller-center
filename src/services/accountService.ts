@@ -6,7 +6,6 @@ import { Account, Address, BankInfo, Contact, PersonalInfo, ShopInfo } from "../
 import { createOrUpdateAddress, createOrUpdateBankInfo, createOrUpdatePersonalInfo, createOrUpdateShopInfo, createOrUpdateContact, findAddressByUserID, findBankInfoByUserID, findContactByUserID, findPersonalInfoByUserID, findShopInfoByID, findShopInfoByUserID } from "../repositories/accountRepository"
 import { log } from "../utils/loggerUtil"
 import { formatDate, getFunctionName, parseDate } from "../utils/util"
-import { createTenant } from '../services/hub2bTenantService'
 
 /**
  * Creates new Personal Information
