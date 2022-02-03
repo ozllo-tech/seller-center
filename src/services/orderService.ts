@@ -202,6 +202,19 @@ export const sendTracking = async (order_id: string, data: any): Promise<HUB2B_T
 
     const orderTracking = await postTrackingHub2b(order_id, tracking)
 
+    if (orderTracking) {
+
+        const status: HUB2B_Status = {
+            status: 'Shipped',
+            updatedDate: nowIsoDateHub2b(),
+            active: true,
+            message: ''
+        }
+
+        await findOneOrderAndModify("order.reference.id", order_id, { "order.status": status })
+
+    }
+
     orderTracking
         ? log(`Tracking sent`, 'EVENT', getFunctionName())
         : log(`Could not send tracking`, 'EVENT', getFunctionName(), 'ERROR')
