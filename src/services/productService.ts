@@ -560,4 +560,4 @@ export const updateIntegrationProducts = async() => {
 
 // setInterval(updateIntegrationStock, 1000 * 60) // 1min
 
-setInterval(updateIntegrationProducts, 500 * 60 * 60) // 30min
+// setInterval(updateIntegrationProducts, 500 * 60 * 60) // 30min

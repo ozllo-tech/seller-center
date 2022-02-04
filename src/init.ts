@@ -78,5 +78,5 @@ export const init = async () => {
 
     //updateIntegrationStock()
 
-    updateIntegrationProducts()
+    //updateIntegrationProducts()
 }
