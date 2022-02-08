@@ -490,7 +490,7 @@ export const mapSku = async (products: Product[], idTenant: any) => {
 
     // TODO: testar chamar todos os skus de uma vez
     response.data.forEach( (item: any) => {
-        if ('ERROR_EXISTING_MAP' == item.code) updateHub2bSkuStatus(item.sourceSKU, 3, Number(HUB2B_SALES_CHANEL), idTenant)
+        if ('ERROR_EXISTING_MAP' == item?.code) updateHub2bSkuStatus(item.sourceSKU, 3, Number(HUB2B_SALES_CHANEL), idTenant)
     })
 
     response
