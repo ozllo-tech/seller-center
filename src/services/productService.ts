@@ -347,10 +347,10 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
                     images,
                     category: productHub2b.categorization ?
                         CATEGORIES.filter( category =>
-                            category.value === productHub2b.categorization.source.name )[0].code : 0,
+                            category.value === productHub2b.categorization.source.name )[0]?.code : 0,
                     subcategory: productHub2b.categorization ?
                         SUBCATEGORIES.filter(
-                            subcategory => subcategory.value === productHub2b.categorization.destination.name )[0].code : 0,
+                            subcategory => subcategory.value === productHub2b.categorization.destination.name )[0]?.code : 0,
                     nationality: 0,
                     name: productHub2b.name,
                     description: productHub2b.description.sourceDescription,
