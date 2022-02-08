@@ -448,13 +448,12 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
  */
  export const getProductsInHub2b = async (idTenant: any): Promise<HUB2B_Catalog_Product[] | null> => {
 
-    await renewAccessTokenHub2b(false, idTenant)
+    const access = await renewAccessTokenHub2b(false, idTenant)
 
-    // TODO: solve gambiarra.
-    // if ('object' === typeof(access)) {
-    //     log(`Could not get access token from tenant ${idTenant}`, 'EVENT', getFunctionName(), 'ERROR')
-    //     return null
-    // }
+    if ('object' === typeof(access)) { // TODO: solve gambiarra.
+        log(`Could not get access token from tenant ${idTenant}`, 'EVENT', getFunctionName(), 'ERROR')
+        return null
+    }
 
     // TODO: Filter by more than one status in order to get stock and price updates (2,3 status).
 
