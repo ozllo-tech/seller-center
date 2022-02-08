@@ -200,6 +200,6 @@ export const recoverLateCredential = async () => {
     HUB2B_CREDENTIALS = credential
 }
 
-setInterval( async () => await renewAccessTokenHub2b( true ), 3600 * 60 * 1000 )
+setInterval( async () => await renewAccessTokenHub2b( true ), 3600 * 60 * 1000 ) // 60h
 
-setInterval( deleteAllInvalid, 2 * 60 * 1000 )
+setInterval( deleteAllInvalid, 2 * 60 * 1000 ) // 2min
