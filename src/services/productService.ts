@@ -7,7 +7,7 @@ import { log } from "../utils/loggerUtil"
 import { getFunctionName } from "../utils/util"
 import { createNewProduct, createVariation, deleteVariation, findProductByShopIdAndName, findProductById, findProductsByShopId, findVariationById, updateProductById, updateVariationById, createManyProducts, findVariationsByProductId } from "../repositories/productRepository"
 import productEventEmitter from "../events/product"
-import { HUB2B_CREDENTIALS, renewAccessTokenHub2b } from "./hub2bAuhService"
+import { renewAccessTokenHub2b, TENANT_CREDENTIALS } from "./hub2bAuhService"
 import { getStockHub2b, requestHub2B, updateHub2bSkuStatus } from "./hub2bService"
 import { HUB2B_URL_V2, HUB2B_MARKETPLACE, HUB2B_SALES_CHANEL } from "../utils/consts"
 import { HUB2B_Catalog_Product } from "../models/hub2b"
@@ -459,7 +459,7 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
 
     const CATALOG_URL = HUB2B_URL_V2 +
       "/catalog/product/" + HUB2B_MARKETPLACE + "/" + idTenant +
-      "?idProductStatus=2&onlyWithDestinationSKU=false&access_token=" + HUB2B_CREDENTIALS.access_token
+        "?idProductStatus=2&onlyWithDestinationSKU=false&access_token=" + TENANT_CREDENTIALS.access_token
 
     const response = await requestHub2B( CATALOG_URL, 'GET' )
     if ( !response ) return null
@@ -478,7 +478,7 @@ export const mapSku = async (products: Product[], idTenant: any) => {
     await renewAccessTokenHub2b(false, idTenant)
 
     const CATALOG_URL = HUB2B_URL_V2 +
-        "/catalog/product/mapsku/" + HUB2B_SALES_CHANEL + "?access_token=" + HUB2B_CREDENTIALS.access_token
+        "/catalog/product/mapsku/" + HUB2B_SALES_CHANEL + "?access_token=" + TENANT_CREDENTIALS.access_token
 
     let data = new Array()
 

@@ -19,6 +19,24 @@ export let HUB2B_CREDENTIALS: HUB2B_Credentials = {
     update_at: 0
 }
 
+export let TENANT_CREDENTIALS: HUB2B_Credentials = {
+    tenant_id: '',
+    access_token: '',
+    expires_in: 7200,
+    refresh_token: '',
+    token_type: 'bearer',
+    update_at: 0
+}
+
+export let AGENCY_CREDENTIALS: HUB2B_Credentials = {
+    tenant_id: '9999',
+    access_token: '',
+    expires_in: 7200,
+    refresh_token: '',
+    token_type: 'bearer',
+    update_at: 0
+}
+
 export const isAccessTokenValidHub2b = ( credentials: HUB2B_Credentials ) => {
 
     const now = Math.floor( nowInSeconds() )
@@ -70,18 +88,42 @@ export const generateAccessTokenV2Hub2b = async (idTenant = null , agency = fals
 
     if ( !response ) return null
 
-    HUB2B_CREDENTIALS = response.data
-    HUB2B_CREDENTIALS.tenant_id = agency ? '9999' : idTenant || HUB2B_TENANT
-
-    HUB2B_CREDENTIALS.access_token
+    response.data.access_token
         ? log( "Access Token obtido com sucesso", "EVENT", getFunctionName() )
         : log( "Não foi passível obter o token de acesso", "EVENT", getFunctionName(), "WARN" )
 
-    HUB2B_CREDENTIALS.update_at = Math.floor( nowInSeconds() )
+    response.data.update_at = Math.floor( nowInSeconds() )
 
-    await createCredential()
+    if (idTenant) {
+
+        TENANT_CREDENTIALS = response.data
+
+        TENANT_CREDENTIALS.tenant_id = idTenant
+
+        await createCredential(TENANT_CREDENTIALS)
+
+        return TENANT_CREDENTIALS.access_token
+    }
+
+    if (agency) {
+
+        AGENCY_CREDENTIALS = response.data
+
+        AGENCY_CREDENTIALS.tenant_id = '9999'
+
+        await createCredential(AGENCY_CREDENTIALS)
+
+        return AGENCY_CREDENTIALS.access_token
+    }
+
+    HUB2B_CREDENTIALS = response.data
+
+    HUB2B_CREDENTIALS.tenant_id = HUB2B_TENANT
+
+    await createCredential(HUB2B_CREDENTIALS)
 
     return HUB2B_CREDENTIALS.access_token
+
 }
 
 /**
@@ -89,9 +131,9 @@ export const generateAccessTokenV2Hub2b = async (idTenant = null , agency = fals
  *
  * @param user  `User`
  */
-export const createCredential = async (): Promise<void> => {
+export const createCredential = async (data: any): Promise<void> => {
 
-    const credential = await saveCredential( HUB2B_CREDENTIALS )
+    const credential = await saveCredential( data )
 
     credential
         ? log( `New HUB2B credential stored`, 'EVENT', getFunctionName() )
@@ -141,9 +183,12 @@ export const renewAccessTokenHub2b = async ( force = false, idTenant = null, age
 
         if (!auth) return await generateAccessTokenV2Hub2b(idTenant)
 
+        // TODO: check if it's possible (or necessary) to refresh token for TENANT_CREDENTIALS.
+
         if (!isAccessTokenValidHub2b(auth)) return await generateAccessTokenV2Hub2b(idTenant)
 
-        HUB2B_CREDENTIALS = auth
+        TENANT_CREDENTIALS = auth
+
     }
 
     if (agency) {
@@ -152,13 +197,13 @@ export const renewAccessTokenHub2b = async ( force = false, idTenant = null, age
 
         if (!auth) return await generateAccessTokenV2Hub2b(null, true)
 
+        // TODO: check if it's possible (or necessary) to refresh token for AGENCY_CREDENTIALS.
+
         if (!isAccessTokenValidHub2b(auth)) return await generateAccessTokenV2Hub2b(null, true)
 
-        HUB2B_CREDENTIALS = auth
+        AGENCY_CREDENTIALS = auth
 
     }
-
-    HUB2B_CREDENTIALS.tenant_id = agency ? '9999' : idTenant || HUB2B_TENANT
 
     if ( !force && isAccessTokenValidHub2b( HUB2B_CREDENTIALS ) ) return
 
@@ -177,16 +222,15 @@ export const renewAccessTokenHub2b = async ( force = false, idTenant = null, age
 
     if (!response) return await generateAccessTokenV2Hub2b()
 
+    response.data.access_token
+        ? log("Token atualizado com sucesso", "EVENT", getFunctionName())
+        : log("Não foi passível atualizar o token de acesso", "EVENT", getFunctionName(), "WARN")
+
+    response.data.update_at = nowInSeconds() / 60
+
     HUB2B_CREDENTIALS = response.data
-    HUB2B_CREDENTIALS.tenant_id = agency ? '9999' : idTenant || HUB2B_TENANT
 
-    HUB2B_CREDENTIALS.access_token
-        ? log( "Token atualizado com sucesso", "EVENT", getFunctionName() )
-        : log( "Não foi passível atualizar o token de acesso", "EVENT", getFunctionName(), "WARN" )
-
-    HUB2B_CREDENTIALS.update_at = nowInSeconds() / 60
-
-    await createCredential()
+    await createCredential(HUB2B_CREDENTIALS)
 
     return HUB2B_CREDENTIALS.access_token
 }

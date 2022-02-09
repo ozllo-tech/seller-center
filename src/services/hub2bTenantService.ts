@@ -9,7 +9,7 @@ import { saveTenantCredential } from "../repositories/hub2TenantCredentialReposi
 import { log } from "../utils/loggerUtil"
 import { getFunctionName } from "../utils/util"
 import { HUB2B_URL_V2, HUB2B_TENANT } from "../utils/consts"
-import { HUB2B_CREDENTIALS, renewAccessTokenHub2b } from "./hub2bAuhService"
+import { AGENCY_CREDENTIALS, renewAccessTokenHub2b } from "./hub2bAuhService"
 import { requestHub2B } from "./hub2bService"
 
 /**
@@ -69,7 +69,7 @@ export const createTenant = async ( body: any ): Promise<HUB2B_Tenants | null> =
     await renewAccessTokenHub2b(false, null, true)
 
     const SETUP_URL = HUB2B_URL_V2 +
-      "/Setup/Tenants/" + idTenant + "?access_token=" + HUB2B_CREDENTIALS.access_token
+      "/Setup/Tenants/" + idTenant + "?access_token=" + AGENCY_CREDENTIALS.access_token
 
     const response = await requestHub2B( SETUP_URL, 'GET' )
     if ( !response ) return null
@@ -94,7 +94,7 @@ export const setupTenantsHub2b = async (body: any) => {
     await renewAccessTokenHub2b(false, null, true)
 
     const SETUP_URL = HUB2B_URL_V2 +
-      "/Setup/Tenants?SendPasswordEmail=true&access_token=" + HUB2B_CREDENTIALS.access_token
+        "/Setup/Tenants?SendPasswordEmail=true&access_token=" + AGENCY_CREDENTIALS.access_token
 
     const response = await requestHub2B( SETUP_URL, 'POST', body )
     if ( !response ) return null
@@ -119,7 +119,7 @@ export const setupTenantsHub2b = async (body: any) => {
     await renewAccessTokenHub2b(false, null, true)
 
     const SETUP_URL = HUB2B_URL_V2 +
-      "/Setup/Tenants/" + idTenant + "/Credentials?access_token=" + HUB2B_CREDENTIALS.access_token
+        "/Setup/Tenants/" + idTenant + "/Credentials?access_token=" + AGENCY_CREDENTIALS.access_token
 
     const response = await requestHub2B( SETUP_URL, 'POST' )
     if ( !response ) return null
@@ -181,7 +181,7 @@ export const setupTenantsHub2b = async (body: any) => {
     await renewAccessTokenHub2b(false, null, true)
 
     const SETUP_URL = HUB2B_URL_V2 +
-      "/Setup/Tenants/" + body.idTenant + "?access_token=" + HUB2B_CREDENTIALS.access_token
+        "/Setup/Tenants/" + body.idTenant + "?access_token=" + AGENCY_CREDENTIALS.access_token
 
     const response = await requestHub2B( SETUP_URL, 'PUT', body )
     if ( !response ) return null
