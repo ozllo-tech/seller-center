@@ -347,12 +347,8 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
                 const product: Product = {
                     shop_id: new ObjectID(shop_id),
                     images,
-                    category: productHub2b.categorization ?
-                        CATEGORIES.filter( category =>
-                            category.value === productHub2b?.categorization?.source?.name )[0]?.code : 0,
-                    subcategory: productHub2b.categorization ?
-                        SUBCATEGORIES.filter(
-                            subcategory => subcategory.value === productHub2b?.categorization?.destination?.name )[0]?.code : 0,
+                    category: findMatchingCategory(productHub2b),
+                    subcategory: findMatchingSubcategory(productHub2b),
                     nationality: 0,
                     name: productHub2b.name,
                     description: productHub2b.description.sourceDescription,
@@ -459,9 +455,7 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
 
     // TODO: Filter by more than one status in order to get stock and price updates (2,3 status).
 
-    const CATALOG_URL = HUB2B_URL_V2 +
-      "/catalog/product/" + HUB2B_MARKETPLACE + "/" + idTenant +
-        "?idProductStatus=2&onlyWithDestinationSKU=false&access_token=" + TENANT_CREDENTIALS.access_token
+    const CATALOG_URL = HUB2B_URL_V2 + "/catalog/product/" + HUB2B_MARKETPLACE + "/" + idTenant + "?idProductStatus=2&onlyWithDestinationSKU=false&access_token=" + TENANT_CREDENTIALS.access_token
 
     const response = await requestHub2B( CATALOG_URL, 'GET' )
     if ( !response ) return null
@@ -558,6 +552,20 @@ export const updateIntegrationProducts = async() => {
 
         importProduct(account.idTenant, shopInfo._id)
     })
+}
+
+export const findMatchingCategory = (productHub2b : HUB2B_Catalog_Product) => {
+
+    if (!productHub2b.categorization.source.name) return 0
+
+    return SUBCATEGORIES.filter(subcategory => subcategory.value === productHub2b.categorization.source.name)[0]?.categoryCode || 0
+}
+
+export const findMatchingSubcategory = (productHub2b : HUB2B_Catalog_Product) => {
+
+    if (!productHub2b.categorization.source.name) return 0
+
+    return SUBCATEGORIES.filter( subcategory => subcategory.value === productHub2b.categorization.source.name)[0]?.code || 0
 }
 
 // setInterval(updateIntegrationStock, 1000 * 60) // 1min
