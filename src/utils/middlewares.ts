@@ -206,7 +206,6 @@ export const isVariationFromProduct = async ( req: Request, res: Response, next:
           ownerEmail: Joi.string().required(),
           ownerPhoneNumber: Joi.string().required(),
           idAgency: Joi.number(),
-          stateInscription: Joi.string().required(),
           address: {
               zipCode: Joi.string().required(),
               street: Joi.string().required(),
@@ -238,7 +237,6 @@ export const isVariationFromProduct = async ( req: Request, res: Response, next:
           ownerEmail: Joi.string().required(),
           ownerPhoneNumber: Joi.string().required(),
           idAgency: Joi.number(),
-          stateInscription: Joi.string().required(),
           address: {
               zipCode: Joi.string().required(),
               street: Joi.string().required(),

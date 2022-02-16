@@ -277,7 +277,7 @@ export interface HUB2B_Tenants {
     ownerEmail: string,
     ownerPhoneNumber: string,
     idAgency: number,
-    stateInscription: string,
+    stateInscription?: string,
     address: {
         zipCode: string,
         street: string,
