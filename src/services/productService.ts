@@ -417,6 +417,18 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
                         }
                     })
                 }
+
+                // Update category.
+
+                if (productExists.subcategory !== Number(productHub2b?.categorization?.source?.code)) {
+
+                    const productUpdated = await updateProductById(productExists._id, {
+                        category: findMatchingCategory(productHub2b),
+                        subcategory: findMatchingSubcategory(productHub2b)
+                    })
+
+                    if (productUpdated) products.push(productUpdated)
+                }
             }
         }
 
