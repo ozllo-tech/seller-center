@@ -150,6 +150,8 @@ export const updateProduct = async (_id: any, patch: any): Promise<Product | nul
 
     if (patch.images) delete patch.images
 
+    delete patch._id
+
     const product = await updateProductById(_id, patch)
 
     product
