@@ -76,7 +76,5 @@ export const init = async () => {
 
     setInterval(async () => await integrateHub2bOrders(), INTEGRATION_INTERVAL)
 
-    //updateIntegrationStock()
-
-    //updateIntegrationProducts()
+    updateIntegrationProducts()
 }
