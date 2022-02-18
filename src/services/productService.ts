@@ -568,14 +568,14 @@ export const updateIntegrationProducts = async() => {
 
 export const findMatchingCategory = (productHub2b : HUB2B_Catalog_Product) => {
 
-    if (!productHub2b.categorization.source.name) return 0
+    if (!productHub2b?.categorization?.source?.name) return 0
 
     return SUBCATEGORIES.filter(subcategory => subcategory.value === productHub2b.categorization.source.name)[0]?.categoryCode || 0
 }
 
 export const findMatchingSubcategory = (productHub2b : HUB2B_Catalog_Product) => {
 
-    if (!productHub2b.categorization.source.name) return 0
+    if (!productHub2b?.categorization?.source?.name) return 0
 
     return SUBCATEGORIES.filter( subcategory => subcategory.value === productHub2b.categorization.source.name)[0]?.code || 0
 }
