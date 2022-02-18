@@ -579,7 +579,3 @@ export const findMatchingSubcategory = (productHub2b : HUB2B_Catalog_Product) =>
 
     return SUBCATEGORIES.filter( subcategory => subcategory.value === productHub2b.categorization.source.name)[0]?.code || 0
 }
-
-setInterval(updateIntegrationStock, 1000 * 60) // 1min
-
-setInterval(updateIntegrationProducts, 500 * 60 * 60) // 30min

@@ -246,4 +246,4 @@ export const recoverLateCredential = async () => {
 
 setInterval( async () => await renewAccessTokenHub2b( true ), 3600 * 60 * 1000 ) // 60h
 
-setInterval( deleteAllInvalid, 2 * 60 * 1000 ) // 2min
+setInterval( async () => await deleteAllInvalid(), 2 * 60 * 1000 ) // 2min
