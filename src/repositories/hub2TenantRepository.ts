@@ -126,3 +126,20 @@ export const deleteTenant = async ( access_token: string ): Promise<boolean> => 
         return false
     }
 }
+
+export const findTenantByOwnerEmail = async ( email: string ): Promise<HUB2B_Tenants | null> => {
+
+    try {
+
+        return await hub2bTenantCollection.findOne({ ownerEmail: email } )
+
+    } catch ( error ) {
+
+        if ( error instanceof MongoError || error instanceof Error )
+
+            log( error.message, 'EVENT', `HUB2B tenant Repository - ${ getFunctionName() }`, 'ERROR' )
+
+        return null
+
+    }
+}

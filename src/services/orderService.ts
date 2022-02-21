@@ -5,13 +5,15 @@
 import { HUB2B_Order, HUB2B_Invoice, HUB2B_Tracking, HUB2B_Integration, HUB2B_Order_Webhook, HUB2B_Status, HUB2B_Product_Order } from "../models/hub2b"
 import { Order, OrderIntegration } from "../models/order"
 import { findLastIntegrationOrder, findOrderByShopId, newIntegrationHub2b, newOrderHub2b, findOneOrderAndModify } from "../repositories/orderRepository"
-import { HUB2B_TENANT, PROJECT_HOST } from "../utils/consts"
+import { HUB2B_MARKETPLACE, HUB2B_TENANT, PROJECT_HOST } from "../utils/consts"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName, nowIsoDateHub2b } from "../utils/util"
-import { listAllOrdersHub2b, listOrdersHub2bByTime, postInvoiceHub2b, postTrackingHub2b, getTrackingHub2b, setupIntegrationHub2b, getInvoiceHub2b, getOrderHub2b } from "./hub2bService"
+import { listAllOrdersHub2b, listOrdersHub2bByTime, postInvoiceHub2b, postTrackingHub2b, getTrackingHub2b, setupIntegrationHub2b, getInvoiceHub2b, getOrderHub2b, postOrderHub2b } from "./hub2bService"
 import { findProductByVariation, updateStockByQuantitySold } from "./productService"
 import { getToken } from "../utils/cryptUtil"
 import orderEventEmitter from "../events/orders"
+import { findTenantfromShopID } from "./hub2bTenantService"
+import { renewAccessTokenHub2b } from "./hub2bAuhService"
 
 export const INTEGRATION_INTERVAL = 1000 * 60 * 60 // 1 hour
 
@@ -135,7 +137,7 @@ export const savNewOrder = async (shop_id: string, order: HUB2B_Order) => {
 
         const shopOrderStatus = shop_orders[i].order.status.status
 
-        const shopOrderId = shop_orders[i].order.reference.id
+        const shopOrderId = shop_orders[i].order.reference.id || 0
 
         if (orderId == shopOrderId && orderStatus != shopOrderStatus) {
 
@@ -146,6 +148,13 @@ export const savNewOrder = async (shop_id: string, order: HUB2B_Order) => {
     if (shop_orders.filter(_order => _order.order.reference.id == order.reference.id).length) return
 
     const newOrder = await newOrderHub2b({ order, shop_id })
+
+    if (newOrder) {
+
+        const tenant = await findTenantfromShopID(newOrder.shop_id)
+
+        if (tenant) orderEventEmitter.emit('integration', newOrder, tenant.idTenant)
+    }
 
     newOrder
         ? log(`Order ${order.reference.id} saved.`, 'EVENT', getFunctionName())
@@ -332,4 +341,37 @@ export const updateStatus = async (order_id: string, status: string, webhook = f
     }
 
     return update
+}
+
+export const sendOrderToTenant = async (order: HUB2B_Order, tenantID: any): Promise<HUB2B_Order | null> => {
+
+    await renewAccessTokenHub2b(false, tenantID)
+
+    order.reference.system.source = HUB2B_MARKETPLACE
+
+    order.reference.idTenant = tenantID
+
+    const orderID = order.reference.id
+
+    delete order.reference.id
+
+    const orderHub2b = await postOrderHub2b(order)
+
+    if (orderHub2b) {
+
+        const fields = {
+            tenant : {
+                id: tenantID,
+                order: orderID,
+            }
+        }
+
+        await findOneOrderAndModify('order.reference.id', orderID, fields)
+    }
+
+    (orderHub2b)
+        ? log(`Order ${orderID} sent to tenant ${tenantID} as ${orderHub2b.reference.id}`, 'EVENT', getFunctionName())
+        : log(`Could not send order ${orderID} to tenant ${tenantID}`, 'EVENT', getFunctionName(), 'ERROR')
+
+    return order
 }

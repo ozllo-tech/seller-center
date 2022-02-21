@@ -48,7 +48,7 @@ export interface HUB2B_Product {
 export interface HUB2B_Reference {
     idTenant: number,
     store: string,
-    id: number,
+    id?: number,
     virtual: string,
     source: string,
     destination: string,

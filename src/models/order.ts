@@ -7,7 +7,8 @@ import { HUB2B_Order } from "./hub2b"
 export interface Order {
     _id?: any,
     shop_id: any,
-    order: HUB2B_Order
+    order: HUB2B_Order,
+    tenant?: Tenant_Order
 }
 
 export interface OrderIntegration {
@@ -15,4 +16,9 @@ export interface OrderIntegration {
     lastUpdate: string,
     updateFrom: string,
     updateTo: string,
+}
+
+export interface Tenant_Order {
+    id: any,
+    order: any,
 }

@@ -10,7 +10,7 @@ import { findTenantCredential } from "../repositories/hub2TenantCredentialReposi
 import { HUB2B_ACCESS_KEY_V1, HUB2B_URL_V2, PROJECT_HOST, HUB2B_TENANT, HUB2B_URL_V1 } from "../utils/consts"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName, logAxiosError, logResponse, nowIsoDate } from "../utils/util"
-import { HUB2B_CREDENTIALS, renewAccessTokenHub2b } from "./hub2bAuhService"
+import { HUB2B_CREDENTIALS, renewAccessTokenHub2b, TENANT_CREDENTIALS } from "./hub2bAuhService"
 
 // Default
 export const HUB2B_DEFAULT_HEADERS = {
@@ -350,26 +350,21 @@ export const updatePriceHub2b = async (variation_id: any, price: number, price_d
     return response.data
 }
 
-// TODO -> Implementar
-export const postOrderHub2b = async () => {
+export const postOrderHub2b = async (order: HUB2B_Order) => {
 
-    await renewAccessTokenHub2b()
+    const URL_ORDERS = HUB2B_URL_V2 + "/Orders" + "?access_token=" + TENANT_CREDENTIALS.access_token
 
-    const URL_ORDERS = HUB2B_URL_V2 + "/Orders" + "?access_token=" + HUB2B_CREDENTIALS.access_token
-
-    const body = {}
-
-    const response = await requestHub2B(URL_ORDERS, 'POST', body)
+    const response = await requestHub2B(URL_ORDERS, 'POST', order)
 
     if (!response) return null
 
-    const orders = response.data.response
+    const orderHub2b = response.data
 
-    orders
-        ? log("POST Orders success", "EVENT", getFunctionName())
-        : log("POST Orders error", "EVENT", getFunctionName(), "WARN")
+    orderHub2b
+        ? log(`Order sent`, "EVENT", getFunctionName())
+        : log(`Can't sent order`, "EVENT", getFunctionName(), "WARN")
 
-    return orders
+    return orderHub2b
 }
 
 export const getOrderHub2b = async (order_id: string) => {
