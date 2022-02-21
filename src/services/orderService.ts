@@ -8,7 +8,7 @@ import { findLastIntegrationOrder, findOrderByShopId, newIntegrationHub2b, newOr
 import { HUB2B_MARKETPLACE, HUB2B_TENANT, PROJECT_HOST } from "../utils/consts"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName, nowIsoDateHub2b } from "../utils/util"
-import { listAllOrdersHub2b, listOrdersHub2bByTime, postInvoiceHub2b, postTrackingHub2b, getTrackingHub2b, setupIntegrationHub2b, getInvoiceHub2b, getOrderHub2b, postOrderHub2b } from "./hub2bService"
+import { listAllOrdersHub2b, listOrdersHub2bByTime, postInvoiceHub2b, postTrackingHub2b, getTrackingHub2b, setupIntegrationHub2b, getInvoiceHub2b, getOrderHub2b, postOrderHub2b, updateStatusHub2b } from "./hub2bService"
 import { findProductByVariation, updateStockByQuantitySold } from "./productService"
 import { getToken } from "../utils/cryptUtil"
 import orderEventEmitter from "../events/orders"
@@ -305,7 +305,7 @@ export const updateStatus = async (order_id: string, status: string, webhook = f
         if (orderHub2b) saveOrders([orderHub2b])
     }
 
-    if (update?.value) orderEventEmitter.emit('updated', order_id, status)
+    if (update?.value) orderEventEmitter.emit('updated', update.value, status)
 
     if (update?.value && "Approved" == status) orderEventEmitter.emit('approved', update.value)
 
@@ -362,16 +362,32 @@ export const sendOrderToTenant = async (order: HUB2B_Order, tenantID: any): Prom
         const fields = {
             tenant : {
                 id: tenantID,
-                order: orderID,
+                order: orderHub2b.reference.id,
             }
         }
 
         await findOneOrderAndModify('order.reference.id', orderID, fields)
     }
 
-    (orderHub2b)
+    orderHub2b
         ? log(`Order ${orderID} sent to tenant ${tenantID} as ${orderHub2b.reference.id}`, 'EVENT', getFunctionName())
         : log(`Could not send order ${orderID} to tenant ${tenantID}`, 'EVENT', getFunctionName(), 'ERROR')
 
     return order
+}
+
+export const syncOrderStatus = async (order: Order, status: any): Promise<HUB2B_Order | null> => {
+
+    if (!order?.tenant) return null
+
+    await renewAccessTokenHub2b(false, order.tenant.id)
+
+    const orderHub2b = await updateStatusHub2b(order.tenant.order, order.order.status)
+
+    orderHub2b
+        ? log(`Order ${order.order.reference.id} is in sync with order ${order.tenant.order} from tenant ${order.tenant.id}.`, 'EVENT', getFunctionName())
+        : log(`Couldn't sync order ${order.order.reference.id} with order ${order.tenant.order} from tenant ${order.tenant.id}.`, 'EVENT', getFunctionName(), 'ERROR')
+
+    return null
+
 }

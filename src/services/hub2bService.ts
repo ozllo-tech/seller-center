@@ -534,25 +534,19 @@ export const getTrackingHub2b = async (order_id: string) => {
     return tracking
 }
 
-export const updateStatusHub2b = async (order_id: string, _status: HUB2B_Status) => {
+export const updateStatusHub2b = async (order_id: string, status: HUB2B_Status) => {
 
-    await renewAccessTokenHub2b()
+    const URL_STATUS = HUB2B_URL_V2 + `/Orders/${order_id}/Status` + "?access_token=" + TENANT_CREDENTIALS.access_token
 
-    const URL_STATUS = HUB2B_URL_V2 + `/Orders/${order_id}/Status` + "?access_token=" + HUB2B_CREDENTIALS.access_token
-
-    const body = _status
-
-    const response = await requestHub2B(URL_STATUS, 'PUT', body)
+    const response = await requestHub2B(URL_STATUS, 'PUT', status)
 
     if (!response) return null
 
-    const status = response.data
+    response.data
+        ? log(`Order ${order_id} status has been updated.`, "EVENT", getFunctionName())
+        : log(`Could not update order ${order_id} status.`, "EVENT", getFunctionName(), "WARN")
 
-    status
-        ? log("Get Tracking success", "EVENT", getFunctionName())
-        : log("Get Tracking error", "EVENT", getFunctionName(), "WARN")
-
-    return status
+    return response.data
 }
 
 // #############################################################

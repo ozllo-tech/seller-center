@@ -5,12 +5,12 @@
 import events from 'events'
 import { postInvoiceHub2b, updateStatusHub2b } from '../services/hub2bService'
 import { sendOrderEmailToSeller } from '../services/mailService'
-import { sendOrderToTenant, sendTracking } from '../services/orderService'
+import { sendOrderToTenant, sendTracking, syncOrderStatus } from '../services/orderService'
 import { log } from '../utils/loggerUtil'
 
 const orderEventEmitter = new events.EventEmitter()
 
-orderEventEmitter.on('updated', (orderId,status) => log(`Atualizando status do pedido ${orderId} para ${status}`,'EVENT', 'onOrderUpdatedEvent', 'INFO'))
+orderEventEmitter.on('updated', (order,status) => syncOrderStatus(order,status))
 
 orderEventEmitter.on( 'approved', ( order ) => {
 
