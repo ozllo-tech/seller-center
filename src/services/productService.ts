@@ -12,7 +12,7 @@ import { getStockHub2b, requestHub2B, updateHub2bSkuStatus } from "./hub2bServic
 import { HUB2B_URL_V2, HUB2B_MARKETPLACE, HUB2B_SALES_CHANEL } from "../utils/consts"
 import { HUB2B_Catalog_Product } from "../models/hub2b"
 import { ObjectID } from "mongodb"
-import { CATEGORIES, SUBCATEGORIES } from "../models/category"
+import { SUBCATEGORIES } from "../models/category"
 import { HUB2B_TENANT } from "../utils/consts"
 import { retrieveTenants } from "../repositories/hub2TenantRepository"
 import { findShopInfoByUserEmail } from "../repositories/accountRepository"
@@ -411,8 +411,8 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
 
                 if (Array.isArray(productExists.variations)) {
                     productExists.variations.forEach(async (variation) => {
-                        if (variation.stock !== productHub2b.stocks.virtualStock) { // stocks.sourceStock ?
-                            await updateVariationById(variation._id, { stock: productHub2b.stocks.virtualStock }) // stocks.sourceStock ?
+                        if (variation.stock !== productHub2b.stocks.sourceStock) {
+                            await updateVariationById(variation._id, { stock: productHub2b.stocks.sourceStock })
                         }
                     })
                 }
