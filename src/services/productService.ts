@@ -375,7 +375,6 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
                             const productId = productInserted._id
                             const productUpdated = await updateProductById(productId, { sku: productHub2b.skus.source })
                             if (productUpdated) {
-                                productEventEmitter.emit('update', productUpdated, HUB2B_TENANT )
                                 products.push(productUpdated)
                             }
                         }
@@ -558,11 +557,10 @@ export const updateIntegrationProducts = async() => {
 
         await renewAccessTokenHub2b(false, account.idTenant)
 
-        const shopInfo = await findShopInfoByUserEmail(account.email)
+        const shopInfo = await findShopInfoByUserEmail(account.ownerEmail)
 
-        if (!shopInfo) return null
+        if (shopInfo) await importProduct(account.idTenant, shopInfo._id)
 
-        importProduct(account.idTenant, shopInfo._id)
     })
 }
 

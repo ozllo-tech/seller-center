@@ -7,6 +7,7 @@ import { Address, BankInfo, ShopInfo, Contact, PersonalInfo } from "../models/ac
 import { addressCollection, bankInfoCollection, contactCollection, personalInfoCollection, shopInfoCollection } from "../utils/db/collections"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName } from "../utils/util"
+import { findOneUser } from "./userRepository"
 
 // #####################  PersonalInfo  ############################ //
 
@@ -393,8 +394,11 @@ export const findContactByUserID = async ( userId: string ): Promise<Contact | n
 export const findShopInfoByUserEmail = async (email: string): Promise<ShopInfo | null> => {
 
     try {
+        const user = await findOneUser( {email} )
 
-        const shopInfo = await shopInfoCollection.findOne({ email })
+        if (!user) return null
+
+        const shopInfo = await shopInfoCollection.findOne({ userId: user._id })
 
         return shopInfo
 
