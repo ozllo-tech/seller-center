@@ -11,7 +11,6 @@ import { getFunctionName } from "../utils/util"
 import { HUB2B_URL_V2, HUB2B_TENANT } from "../utils/consts"
 import { AGENCY_CREDENTIALS, renewAccessTokenHub2b } from "./hub2bAuhService"
 import { requestHub2B } from "./hub2bService"
-import { findShopInfoByID } from "../repositories/accountRepository"
 import { findUserByShopId } from "../repositories/userRepository"
 
 /**
@@ -214,13 +213,9 @@ export const setupTenantsHub2b = async (body: any) => {
     return tenant
 }
 
-export const findTenantfromShopID = async (shopID: any): Promise<HUB2B_Tenants | null> => {
+export const findTenantfromShopID = async (shopID: string): Promise<HUB2B_Tenants | null> => {
 
-    const shopInfo = await findShopInfoByID(shopID)
-
-    if ( !shopInfo ) return null
-
-    const user = await findUserByShopId(shopInfo._id)
+    const user = await findUserByShopId(shopID)
 
     if ( !user ) return null
 
