@@ -10,7 +10,7 @@ import { decodeJWT, isJWTTokenValid } from './cryptUtil'
 import { invalidProductReference, invalidVariationReference } from './errors/errors'
 import { notFound, createHttpStatus, HttpStatusResponse, unauthorized, internalServerError } from './httpStatus'
 import { logger, log } from './loggerUtil'
-import { celebrate, Segments, Joi } from 'celebrate';
+import { celebrate, Segments, Joi } from 'celebrate'
 
 /**
  * Middleware para capturar status 404 e criar error
@@ -273,4 +273,18 @@ export const isOrderInvoiceable = async (req: Request, res: Response, next: Next
     req.order = order
 
     next()
+}
+
+export const validateSystemPayload = () => {
+
+    const names = ['bseller', 'idealeware', 'ihub', 'infracommerce' , 'loja_integrada' , 'magento' , 'magento_2' , 'opencart' , 'tray' , 'vtex' , 'bling' , 'eccosys' , 'linx_emillenium' , 'linx_commerce' , 'linx_oms' , 'softvar' , 'tiny']
+
+    // https://stackoverflow.com/questions/59861503/joi-validator-conditional-schema
+
+    return celebrate({
+        [Segments.BODY]: {
+            name: Joi.string().required().valid(...names),
+            data: Joi.object().required()
+        }
+    })
 }

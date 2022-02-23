@@ -5,6 +5,7 @@ import { Address, BankInfo, Contact, PersonalInfo, ShopInfo } from '../../models
 import { Product, Variation } from '../../models/product'
 import { Order, OrderIntegration } from '../../models/order'
 import { HUB2B_Credentials, HUB2B_Tenants, HUB2B_Users, HUB2B_TenantCredentials } from '../../models/hub2b'
+import { System_Integration } from '../../models/system'
 
 export const USER_COLLECTION = 'user'
 export const ACTIVATION_TOKEN_COLLECTION = 'activation_token'
@@ -21,6 +22,7 @@ export const HUB2B_AUTH_COLLECTION = 'hub2b_auth'
 export const HUB2B_TENANT_COLLECTION = 'hub2b_tenant'
 export const HUB2B_USER_COLLECTION = 'hub2b_user'
 export const HUB2B_TENANT_CREDENTIAL_COLLECTION = 'hub2b_tenant_credential'
+export const SYSTEM_INTEGRATION_COLLECTION = 'system_integration'
 
 let userCollection: Collection<User>
 let accessTokenCollection: Collection<AccessToken>
@@ -37,6 +39,7 @@ let hub2bAuthCollection: Collection<HUB2B_Credentials>
 let hub2bTenantCollection: Collection<HUB2B_Tenants>
 let hub2bUserCollection: Collection<HUB2B_Users>
 let hub2bTenantCredentialCollection : Collection<HUB2B_TenantCredentials>
+let systemIntegrationCollection: Collection<System_Integration>
 
 export const createCollections = async ( database: Db ) => {
 
@@ -55,6 +58,7 @@ export const createCollections = async ( database: Db ) => {
     hub2bTenantCollection = database.collection<HUB2B_Tenants>( HUB2B_TENANT_COLLECTION )
     hub2bUserCollection = database.collection<HUB2B_Users>( HUB2B_USER_COLLECTION )
     hub2bTenantCredentialCollection = database.collection<HUB2B_TenantCredentials>( HUB2B_TENANT_CREDENTIAL_COLLECTION )
+    systemIntegrationCollection = database.collection<System_Integration>(SYSTEM_INTEGRATION_COLLECTION )
 
     await startIndexes()
 }
@@ -78,5 +82,6 @@ export {
     hub2bAuthCollection,
     hub2bTenantCollection,
     hub2bUserCollection,
-    hub2bTenantCredentialCollection
+    hub2bTenantCredentialCollection,
+    systemIntegrationCollection
 }
