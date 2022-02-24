@@ -384,3 +384,24 @@ export const deleteVariation = async ( variation_id: string ): Promise<boolean> 
         return false
     }
 }
+
+export const deleteProductById = async ( product_id: string ): Promise<boolean> => {
+
+    try {
+        const query = await productCollection.deleteOne({ _id: new ObjectID(product_id)})
+
+        const result = query.deletedCount ? query.deletedCount >= 1 : false
+
+        if (result) productEventEmitter.emit('delete', product_id)
+
+        return result
+
+    } catch (error) {
+
+        if (error instanceof MongoError || error instanceof Error)
+
+            log(error.message, 'EVENT', `Product Repository - ${getFunctionName()}`, 'ERROR')
+
+        return false
+    }
+}

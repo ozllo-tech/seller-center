@@ -30,7 +30,7 @@ productEventEmitter.on( 'delete', ( productId: any, idTenant: any ) => {
 
     deleteProdutoHub2b( productId, idTenant )
 
-} )
+})
 
 productEventEmitter.on( 'update_stock', ( variation: Variation ) => {
 

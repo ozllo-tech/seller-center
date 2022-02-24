@@ -4,7 +4,7 @@
 
 import { Router, Request, Response, NextFunction } from 'express'
 import { deleteVariation } from '../repositories/productRepository'
-import { createNewVariation, createProduct, findProductsByShop, updateProduct, updateProductImages, updateProductPrice, updateProductVariation, updateProductVariationStock, importProduct } from '../services/productService'
+import { createNewVariation, createProduct, findProductsByShop, updateProduct, updateProductImages, updateProductPrice, updateProductVariation, updateProductVariationStock, importProduct, deleteProduct } from '../services/productService'
 import { uploadProductPicture } from '../services/uploadService'
 import { badRequest, createHttpStatus, internalServerError, noContent, ok } from '../utils/httpStatus'
 import { log } from '../utils/loggerUtil'
@@ -69,6 +69,21 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     return res
         .status(ok.status)
         .send(product)
+})
+
+router.delete('/:product_id', isProductFromShop, async (req: Request, res: Response, next: NextFunction) => {
+
+    const result = await deleteProduct(req.params.product_id)
+
+    if (!result)
+        return res
+            .status(internalServerError.status)
+            .send(createHttpStatus(internalServerError))
+
+    return res
+        .status(ok.status)
+        .send(result)
+
 })
 
 /**

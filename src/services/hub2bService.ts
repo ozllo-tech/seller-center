@@ -217,12 +217,12 @@ export const deleteProdutoHub2b = async ( product_id: string, idTenant: any ) =>
 
     if (response?.data.error) {
 
-        log("Não foi possível deletar produto no HUB2B", "EVENT", getFunctionName(), "WARN")
+        log("Não foi possível deletar SKU na HUB2B", "EVENT", getFunctionName(), "WARN")
 
         return null
     }
 
-    log("Produto deletado com sucesso no HUB2B", "EVENT", getFunctionName())
+    log("SKU deletado com sucesso na HUB2B", "EVENT", getFunctionName())
 
     response && logResponse(response)
 }
