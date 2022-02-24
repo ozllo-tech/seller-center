@@ -142,14 +142,11 @@ export const updateVariationById = async ( _id: any, patch: any ): Promise<Produ
 
         const product = await findProductById(result.value.product_id)
 
-        const idTenant = patch.idTenant | Number(HUB2B_TENANT) // TODO: remover idTenant?
+        productEventEmitter.emit('update_stock', result.value )
 
-        if (!isSubset(result.value, patch)) {
+        const idTenant = patch.idTenant | Number(HUB2B_TENANT) // TODO: review this patch.idTenant
 
-            patch.stock
-                ? productEventEmitter.emit('update_stock', result.value, idTenant)
-                : productEventEmitter.emit('update', product, idTenant)
-        }
+        if (!isSubset(result.value, patch)) productEventEmitter.emit('update', product, idTenant)
 
         return product
 
