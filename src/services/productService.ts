@@ -274,9 +274,13 @@ export const createNewVariation = async (body: any): Promise<Variation | null> =
         ? log( `Variation ${ variation._id } has been created.`, 'EVENT', getFunctionName() )
         : log( `Variation could not be created.`, 'EVENT', getFunctionName() )
 
-    const idTenant = body.idTenant | Number(HUB2B_TENANT)
+    if (variation) {
 
-    productEventEmitter.emit( 'update', await findProductByVariation( variation?._id ), idTenant )
+        const idTenant = body.idTenant | Number(HUB2B_TENANT)
+
+        productEventEmitter.emit( 'update', await findProductByVariation( variation._id ), idTenant )
+
+    }
 
     return variation
 }
