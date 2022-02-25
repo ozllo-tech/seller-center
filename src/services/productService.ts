@@ -5,7 +5,7 @@
 import { Product, Variation } from "../models/product"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName } from "../utils/util"
-import { createNewProduct, createVariation, deleteVariation, findProductByShopIdAndName, findProductById, findProductsByShopId, findVariationById, updateProductById, updateVariationById, createManyProducts, findVariationsByProductId } from "../repositories/productRepository"
+import { createNewProduct, createVariation, deleteVariation, findProductByShopIdAndName, findProductById, findProductsByShopId, findVariationById, updateProductById, updateVariationById, createManyProducts, findVariationsByProductId, deleteProductById } from "../repositories/productRepository"
 import productEventEmitter from "../events/product"
 import { renewAccessTokenHub2b, TENANT_CREDENTIALS } from "./hub2bAuhService"
 import { getStockHub2b, requestHub2B, updateHub2bSkuStatus } from "./hub2bService"
@@ -285,6 +285,7 @@ export const createNewVariation = async (body: any): Promise<Variation | null> =
     return variation
 }
 
+// TODO: review or remove this function.
 export const deleteVariationById = async ( variation_id: string, patch: any ): Promise<boolean> => {
 
     let result = await deleteVariation(variation_id)
@@ -580,4 +581,23 @@ export const findMatchingSubcategory = (productHub2b : HUB2B_Catalog_Product) =>
     if (!productHub2b?.categorization?.source?.name) return 0
 
     return SUBCATEGORIES.filter( subcategory => subcategory.value === productHub2b.categorization.source.name)[0]?.code || 0
+}
+
+export const deleteProduct = async (productId: any) => {
+
+    const result = await deleteProductById(productId)
+
+    if (!result) return null
+
+    const variations = await findVariationsByProductId(productId)
+
+    if (!variations) return null
+
+    for (const variation of variations) await deleteVariation(variation._id)
+
+    result
+        ? log(`Product ${productId} has been deleted.`, "EVENT", getFunctionName())
+        : log(`Could not delete product ${productId}.`, "EVENT", getFunctionName(), "WARN")
+
+    return result
 }
