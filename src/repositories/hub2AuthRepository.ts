@@ -90,7 +90,7 @@ export const findAuthByTenant = async (idTenant: any): Promise<HUB2B_Credentials
 
     try {
 
-        return hub2bAuthCollection.findOne({ tenant_id: idTenant })
+        return await hub2bAuthCollection.findOne({ tenant_id: idTenant })
 
     } catch (error) {
 
