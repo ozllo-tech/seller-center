@@ -306,11 +306,11 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
  *
  * @param idTenant
  */
- export const importProduct = async (idTenant: any, shop_id: any): Promise<Product[] | null> => {
+ export const importProduct = async (idTenant: any, shop_id: any, status = '2'): Promise<Product[] | null> => {
 
     const products: Product[] = []
     const productsWithoutVariation: Product[] = []
-    const productsInHub2b = await getProductsInHub2b(idTenant)
+    const productsInHub2b = await getProductsInHub2b(idTenant, status)
 
     if (productsInHub2b) {
 
@@ -460,7 +460,7 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
  *
  * @returns
  */
- export const getProductsInHub2b = async (idTenant: any): Promise<HUB2B_Catalog_Product[] | null> => {
+ export const getProductsInHub2b = async (idTenant: any, status = '2'): Promise<HUB2B_Catalog_Product[] | null> => {
 
     const access = await renewAccessTokenHub2b(false, idTenant)
 
@@ -471,7 +471,7 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
 
     // TODO: Filter by more than one status in order to get stock and price updates (2,3 status).
 
-    const CATALOG_URL = HUB2B_URL_V2 + "/catalog/product/" + HUB2B_MARKETPLACE + "/" + idTenant + "?idProductStatus=2&onlyWithDestinationSKU=false&access_token=" + TENANT_CREDENTIALS.access_token
+    const CATALOG_URL = `${HUB2B_URL_V2}/catalog/product/${HUB2B_MARKETPLACE}/${idTenant}?idProductStatus=${status}&onlyWithDestinationSKU=false&access_token=${TENANT_CREDENTIALS.access_token}`
 
     const response = await requestHub2B( CATALOG_URL, 'GET' )
     if ( !response ) return null
@@ -532,7 +532,7 @@ export const updateIntegrationStock = async() => {
 
         await renewAccessTokenHub2b(false, account.idTenant)
 
-        const products = await getProductsInHub2b(account.idTenant)
+        const products = await getProductsInHub2b(account.idTenant,'3')
 
         if (!products) return null
 
@@ -572,7 +572,7 @@ export const updateIntegrationProducts = async() => {
 
         const shopInfo = await findShopInfoByUserEmail(account.ownerEmail)
 
-        if (shopInfo) await importProduct(account.idTenant, shopInfo._id)
+        if (shopInfo) await importProduct(account.idTenant, shopInfo._id, '3')
     }
 
     log(`Finish integration products update.`, "EVENT", getFunctionName())
