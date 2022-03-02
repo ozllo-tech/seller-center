@@ -3,7 +3,7 @@
 //
 
 import { HUB2B_Tenants } from "../models/hub2b"
-import { saveTenant, updateTenant, findHub2bTenantByIdTenant, findTenantByOwnerEmail } from "../repositories/hub2TenantRepository"
+import { saveTenant, updateTenant, findHub2bTenantByIdTenant, findTenantByOwnerEmail, retrieveTenants } from "../repositories/hub2TenantRepository"
 import { saveUser } from "../repositories/hub2UserRepository"
 import { saveTenantCredential } from "../repositories/hub2TenantCredentialRepository"
 import { log } from "../utils/loggerUtil"
@@ -224,5 +224,15 @@ export const findTenantfromShopID = async (shopID: string): Promise<HUB2B_Tenant
     if ( !tenant ) return null
 
     return tenant
+
+}
+
+export const getTenantAuths = async () => {
+
+    const accounts = await retrieveTenants()
+
+    if ( !accounts ) return null
+
+    accounts.forEach(async (account:any) => await renewAccessTokenHub2b(false, account.idTenant))
 
 }

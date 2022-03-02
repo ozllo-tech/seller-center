@@ -527,6 +527,8 @@ export const updateIntegrationStock = async() => {
 
     if (!accounts) return null
 
+    log(`Updating integration stocks.`, "EVENT", getFunctionName() )
+
     accounts.forEach(async (account:any) => {
 
         await renewAccessTokenHub2b( false, account.idTenant)
@@ -557,6 +559,8 @@ export const updateIntegrationProducts = async() => {
     const accounts = await retrieveTenants()
 
     if (!accounts) return null
+
+    log(`Updating integration products.`, "EVENT", getFunctionName())
 
     accounts.forEach(async (account: any) => {
 
