@@ -522,36 +522,40 @@ export const updateStockByQuantitySold = async (variationId: any, quantity: any)
 
 export const updateIntegrationStock = async() => {
 
-    // 1 - For each tenant account GET all variations in repository.
     const accounts = await retrieveTenants()
 
     if (!accounts) return null
 
-    log(`Updating integration stocks.`, "EVENT", getFunctionName() )
+    log(`Start integration stocks update.`, "EVENT", getFunctionName() )
 
-    accounts.forEach(async (account:any) => {
+    for await( const account of accounts) {
 
-        await renewAccessTokenHub2b( false, account.idTenant)
+        await renewAccessTokenHub2b(false, account.idTenant)
 
-        // 2 - Call GET v2/inventory/{sku}/stocks for each variation/sku.
         const products = await getProductsInHub2b(account.idTenant)
 
         if (!products) return null
 
-        products.forEach(async (product: any) => {
+        for await( const product of products) {
 
             const stock = await getStockHub2b(product.skus.source)
 
-            const variation = await findVariationsByProductId(product.skus.destination)
+            const variations = await findVariationsByProductId(product.skus.destination)
 
-            if (!variation || !stock) return null
+            if (!variations || !stock) return null
 
-            variation.forEach(async (variation: any) => {
-                // 3 - If stock in HUB2B is different from varriations in seller center, call updateProductVariationStock.
+            for await( const variation of variations) {
+
+                await updateProductVariationStock(variation._id, { stock: Number(stock) })
+
                 if (variation.stock != stock.available) await updateProductVariationStock(variation._id, { stock: stock.available })
-            })
-        })
-    })
+            }
+
+        }
+    }
+
+    log(`Finish integration stocks update.`, "EVENT", getFunctionName())
+
 }
 
 export const updateIntegrationProducts = async() => {
@@ -560,17 +564,18 @@ export const updateIntegrationProducts = async() => {
 
     if (!accounts) return null
 
-    log(`Updating integration products.`, "EVENT", getFunctionName())
+    log(`Start integration products update.`, "EVENT", getFunctionName())
 
-    accounts.forEach(async (account: any) => {
+    for await (const account of accounts) {
 
         await renewAccessTokenHub2b(false, account.idTenant)
 
         const shopInfo = await findShopInfoByUserEmail(account.ownerEmail)
 
         if (shopInfo) await importProduct(account.idTenant, shopInfo._id)
+    }
 
-    })
+    log(`Finish integration products update.`, "EVENT", getFunctionName())
 }
 
 export const findMatchingCategory = (productHub2b : HUB2B_Catalog_Product) => {

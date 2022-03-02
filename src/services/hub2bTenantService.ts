@@ -233,6 +233,6 @@ export const getTenantAuths = async () => {
 
     if ( !accounts ) return null
 
-    accounts.forEach(async (account:any) => await renewAccessTokenHub2b(false, account.idTenant))
+    for await (let account of accounts) return await renewAccessTokenHub2b(false, account.idTenant)
 
 }
