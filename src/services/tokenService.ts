@@ -14,7 +14,7 @@ const TWO_DAYS_IN_SECONDS = 172800
 
 /**
  * Crea
- * 
+ *
  * @param user  `User`
  */
 export const generateAccessToken = async ( user: User ): Promise<AccessToken | null> => {
@@ -56,15 +56,15 @@ export const removeAccessToken = async ( token: string ): Promise<boolean | null
 
 
 export const isTokenValid = async ( token: string ): Promise<AccessToken | null> => {
-    
+
     if ( !token ) return null
-    
+
     const activateToken = await findAccessTokenByToken( token )
-    
+
     if ( !activateToken ) return null
-    
+
     if ( nowInSeconds() > activateToken.expires_at ) return null
-    
+
     return activateToken
 
 }
@@ -86,4 +86,4 @@ export const deleteAllInvalid = async () => {
     } )
 }
 
-//setInterval( deleteAllInvalid, 2 * 60 * 1000 )
+setInterval( deleteAllInvalid, 2 * 60 * 1000 ) // 2min
