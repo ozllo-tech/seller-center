@@ -175,7 +175,7 @@ export const deleteAllInvalid = async () => {
     } )
 }
 
-export const renewAccessTokenHub2b = async ( force = false, idTenant = null, agency = false ) => {
+export const renewAccessTokenHub2b = async ( force = false, idTenant: any, agency = false ) => {
 
     if (idTenant) {
 
@@ -239,11 +239,11 @@ export const recoverLateCredential = async () => {
 
     const credential = await findValidCredential()
 
-    if (!isAccessTokenValidHub2b(credential)) return await renewAccessTokenHub2b(true)
+    if (!isAccessTokenValidHub2b(credential)) return await renewAccessTokenHub2b(true, false)
 
     HUB2B_CREDENTIALS = credential
 }
 
-setInterval( async () => await renewAccessTokenHub2b( true ), 3600 * 60 * 1000 ) // 60h
+setInterval( async () => await renewAccessTokenHub2b( true, false ), 3600 * 60 * 1000 ) // 60h
 
 setInterval( async () => await deleteAllInvalid(), 2 * 60 * 1000 ) // 2min
