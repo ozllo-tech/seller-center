@@ -181,13 +181,13 @@ export const renewAccessTokenHub2b = async ( force = false, idTenant = null, age
 
         const auth = await findAuthByTenant(idTenant)
 
-        if (!auth) return await generateAccessTokenV2Hub2b(idTenant)
+        if (!auth || !isAccessTokenValidHub2b(auth)) return await generateAccessTokenV2Hub2b(idTenant)
 
         // TODO: check if it's possible (or necessary) to refresh token for TENANT_CREDENTIALS.
 
-        if (!isAccessTokenValidHub2b(auth)) return await generateAccessTokenV2Hub2b(idTenant)
-
         TENANT_CREDENTIALS = auth
+
+        return TENANT_CREDENTIALS.access_token
 
     }
 
@@ -195,13 +195,13 @@ export const renewAccessTokenHub2b = async ( force = false, idTenant = null, age
 
         const auth = await findAuthByTenant('9999')
 
-        if (!auth) return await generateAccessTokenV2Hub2b(null, true)
+        if (!auth || !isAccessTokenValidHub2b(auth)) return await generateAccessTokenV2Hub2b(null, true)
 
         // TODO: check if it's possible (or necessary) to refresh token for AGENCY_CREDENTIALS.
 
-        if (!isAccessTokenValidHub2b(auth)) return await generateAccessTokenV2Hub2b(null, true)
-
         AGENCY_CREDENTIALS = auth
+
+        return AGENCY_CREDENTIALS.access_token
 
     }
 
