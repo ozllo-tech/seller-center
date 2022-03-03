@@ -532,21 +532,20 @@ export const updateIntegrationStock = async() => {
 
         await renewAccessTokenHub2b(false, account.idTenant)
 
+        // TODO: replace this call by databse query (all skus from shop).
         const products = await getProductsInHub2b(account.idTenant,'3')
 
         if (!products) return null
 
         for await( const product of products) {
 
-            const stock = await getStockHub2b(product.skus.source)
+            const stock = await getStockHub2b(product.skus.source, account.idTenant)
 
             const variations = await findVariationsByProductId(product.skus.destination)
 
             if (!variations || !stock) return null
 
             for await( const variation of variations) {
-
-                await updateProductVariationStock(variation._id, { stock: Number(stock) })
 
                 if (variation.stock != stock.available) await updateProductVariationStock(variation._id, { stock: stock.available })
             }
