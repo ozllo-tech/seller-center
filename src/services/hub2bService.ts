@@ -297,13 +297,13 @@ export const getStockHub2b = async (sku: any, idTenant: any) => {
 
     if (!response) return null
 
-    const stock = response.data[0]
+    const stock = response.data
 
     stock
         ? log(`Get stock from SKU ${sku} success`, "EVENT", getFunctionName())
         : log(`Get stock from SKU ${sku} error`, "EVENT", getFunctionName(), "WARN")
 
-    return stock
+    return stock[0]
 }
 
 export const updateStockHub2b = async (variation_id: any, stock: number) => {
