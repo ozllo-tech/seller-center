@@ -82,9 +82,9 @@ export const init = async () => {
 
     await updateIntegrationProducts()
 
-    // await updateIntegrationStock()
-
     setIntervalAsync(() => updateIntegrationProducts(), 500 * 60 * 60) // 30min
+
+    // await updateIntegrationStock()
 
     // setIntervalAsync(() => updateIntegrationStock(), 1000 * 60) // 1min
 

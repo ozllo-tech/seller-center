@@ -8,7 +8,7 @@ import { getFunctionName } from "../utils/util"
 import { createNewProduct, createVariation, deleteVariation, findProductByShopIdAndName, findProductById, findProductsByShopId, findVariationById, updateProductById, updateVariationById, createManyProducts, findVariationsByProductId, deleteProductById } from "../repositories/productRepository"
 import productEventEmitter from "../events/product"
 import { renewAccessTokenHub2b, TENANT_CREDENTIALS } from "./hub2bAuhService"
-import { getStockHub2b, requestHub2B, updateHub2bSkuStatus } from "./hub2bService"
+import { getStockHub2b, requestHub2B } from "./hub2bService"
 import { HUB2B_URL_V2, HUB2B_MARKETPLACE, HUB2B_SALES_CHANEL } from "../utils/consts"
 import { HUB2B_Catalog_Product } from "../models/hub2b"
 import { ObjectID } from "mongodb"
@@ -447,10 +447,7 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
         }
     }
 
-    // TODO: filter products[]
-    // check if productsInHub2b[i].skus.destination is already filled
-    // or if productsInHub2b[i].status.id != 3 before call mapsku.
-    if (products.length > 0) await mapSku(products, idTenant)
+    if ('2' === status && products.length > 0) await mapSku(products, idTenant)
 
     return products
 }
@@ -499,11 +496,6 @@ export const mapSku = async (products: Product[], idTenant: any) => {
     const response = await requestHub2B(CATALOG_URL, 'POST', JSON.stringify(data), { "Content-type": "application/json" } )
 
     if ( !response ) return null
-
-    // TODO: testar chamar todos os skus de uma vez
-    response.data.forEach( (item: any) => {
-        if ('ERROR_EXISTING_MAP' == item?.code) updateHub2bSkuStatus(item.sourceSKU, 3, Number(HUB2B_SALES_CHANEL), idTenant)
-    })
 
     response
         ? log(`SKUs from Tenant ${idTenant} has been mapped.`, "EVENT", getFunctionName() )
