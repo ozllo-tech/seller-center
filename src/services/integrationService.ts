@@ -1,11 +1,13 @@
+import { ObjectID } from "mongodb"
 import { System_Integration } from "../models/system"
-import { createSystemIntegrationData, findOneSystemIntegrationData } from "../repositories/systemRepository"
+import { updateSystemIntegrationData, findOneSystemIntegrationData } from "../repositories/systemRepository"
+import { getTinyInfo } from "./systemTinyService"
 
 export const saveSystemIntegrationData = async (shopID: string, system: any) => {
 
-    const _system : System_Integration = { shop_id: shopID, name: system.name,  data: system.data }
+    const _system : System_Integration = { shop_id: shopID, name: system.name,  data: system.data, active: false }
 
-    const newSystemData = await createSystemIntegrationData(_system)
+    const newSystemData = await updateSystemIntegrationData(_system)
 
     if (!newSystemData) return null
 
@@ -21,4 +23,25 @@ export const findSystemByShopID = async (shopID: string) => {
     if (!system) return null
 
     return system
+}
+
+export const activateSystemIntegration = async (systemID: string) => {
+
+    const system = await findOneSystemIntegrationData('_id', new ObjectID(systemID))
+
+    if (!system  || 'tiny' !== system.name) return null
+
+    // Test system integration
+
+    const tinyInfo = await getTinyInfo(system.data.token)
+
+    system.active = 'OK' == tinyInfo.retorno?.status ? true : false
+
+    // If pass, change system active status to true
+
+    const result = await updateSystemIntegrationData(system)
+
+    if (!tinyInfo || !result) return null
+
+    return tinyInfo
 }

@@ -4,9 +4,10 @@ import { systemIntegrationCollection } from "../utils/db/collections"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName } from "../utils/util"
 
-export const createSystemIntegrationData = async ( system: System_Integration ): Promise<boolean> => {
+export const updateSystemIntegrationData = async ( system: System_Integration ): Promise<boolean> => {
 
     try {
+
         const result = await systemIntegrationCollection.updateOne({shop_id: system.shop_id}, {$set: system }, {upsert: true})
 
         return result.result.ok === 1
@@ -14,6 +15,7 @@ export const createSystemIntegrationData = async ( system: System_Integration ):
     } catch (error) {
 
         if (error instanceof MongoError || error instanceof Error)
+
             log(error.message, 'EVENT', `System Repository - ${getFunctionName()}`, 'ERROR')
 
         return false
@@ -21,10 +23,12 @@ export const createSystemIntegrationData = async ( system: System_Integration ):
 
 }
 
-export const findOneSystemIntegrationData = async ( where: any, by: any ): Promise<System_Integration|null> => {
+export const findOneSystemIntegrationData = async ( where: any, by: any ): Promise<any|null> => {
 
     try {
+
         const filter = { [where]: by }
+
         const result = await systemIntegrationCollection.findOne(filter)
 
         return result
