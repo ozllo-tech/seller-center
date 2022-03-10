@@ -76,13 +76,13 @@ export const init = async () => {
 
     await integrateHub2bOrders(start, nowIsoDateHub2b())
 
-    setInterval(async () => await integrateHub2bOrders(), INTEGRATION_INTERVAL)
-
     await getTenantAuths()
 
     await updateIntegrationProducts()
 
-    setIntervalAsync(() => updateIntegrationProducts(), 500 * 60 * 60) // 30min
+    setInterval(async () => await integrateHub2bOrders(), INTEGRATION_INTERVAL)
+
+    // setIntervalAsync(() => updateIntegrationProducts(), 500 * 60 * 60) // 30min
 
     // await updateIntegrationStock()
 
