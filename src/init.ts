@@ -88,7 +88,7 @@ export const init = async () => {
 
     await integrateHub2bOrders(start, nowIsoDateHub2b())
 
-    await getTenantAuths()
+    // await getTenantAuths()
 
     // await updateIntegrationProducts()
 
