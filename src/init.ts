@@ -74,6 +74,18 @@ export const init = async () => {
 
     start = '2021-12-03T00:00:00'
 
+    end = '2022-01-02T23:59:59'
+
+    await integrateHub2bOrders(start, end)
+
+    start = '2022-01-03T00:00:00'
+
+    end = '2022-02-01T23:59:59'
+
+    await integrateHub2bOrders(start, end)
+
+    start = '2022-02-02T00:00:00'
+
     await integrateHub2bOrders(start, nowIsoDateHub2b())
 
     await getTenantAuths()
