@@ -90,7 +90,7 @@ export const init = async () => {
 
     await getTenantAuths()
 
-    await updateIntegrationProducts()
+    // await updateIntegrationProducts()
 
     setInterval(async () => await integrateHub2bOrders(), INTEGRATION_INTERVAL)
 
