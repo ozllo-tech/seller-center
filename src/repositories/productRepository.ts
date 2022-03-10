@@ -312,6 +312,8 @@ export const findVariationsByProductId = async ( product_id: string ): Promise<V
  */
 export const findVariationById = async ( variation_id: string ): Promise<Variation | null> => {
 
+    if (!ObjectID.isValid(variation_id)) return null
+
     try {
 
         const query = { _id: new ObjectID( variation_id ) }
