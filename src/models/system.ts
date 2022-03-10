@@ -97,7 +97,7 @@ export interface SOFTVAR {
 
 export interface TINY {
     token: string,
-    ecommerce_id?: string,
+    ecommerce_id: string,
 }
 
 export type SystemName = 'bseller' | 'idealeware' | 'ihub' | 'infracommerce' | 'loja_integrada' | 'magento' | 'magento_2' | 'opencart' | 'tray' | 'vtex' | 'bling' | 'eccosys' | 'linx_emillenium' | 'linx_commerce' | 'linx_oms' | 'softvar' | 'tiny'

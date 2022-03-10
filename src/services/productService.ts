@@ -45,7 +45,7 @@ export const createProduct = async (body: any): Promise<Product | null> => {
         variations
     } = body
 
-    const shop_id = body.shop
+    const shop_id = body.shop || body.shop_id
 
     const ref_product: Product = {
         shop_id,

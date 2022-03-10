@@ -32,4 +32,5 @@ export interface Variation {
     flavor?: string,
     gluten_free?: boolean,
     lactose_free?: boolean,
+    mapping_id?: string
 }

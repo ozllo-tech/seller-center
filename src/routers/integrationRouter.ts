@@ -5,6 +5,7 @@ import { updateStatus } from '../services/orderService';
 import { authMiddleware, userCanAccessShop, validateSystemPayload } from '../utils/middlewares';
 import { activateSystemIntegration, findSystemByShopID, saveSystemIntegrationData } from '../services/integrationService';
 import { ObjectID } from 'mongodb';
+import { importTinyProduct } from '../services/systemTinyService';
 
 const router = Router()
 
@@ -73,6 +74,19 @@ router.post('/system/:id/activate', [authMiddleware, userCanAccessShop], async (
             .send(createHttpStatus(internalServerError))
 
     return res.status(ok.status).send(result)
+
+})
+
+router.post('/system/tiny/webhook/product', async (req: Request, res: Response, next: NextFunction) => {
+
+    const result = await importTinyProduct(req.body)
+
+    if (!result)
+        return res
+            .status(internalServerError.status)
+            .send(createHttpStatus(internalServerError))
+
+    return res.status(ok.status).send(JSON.stringify(result))
 
 })
 
