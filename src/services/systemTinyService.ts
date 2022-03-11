@@ -5,13 +5,14 @@ import { getFunctionName, logAxiosError } from "../utils/util"
 import { Product, Variation } from "../models/product"
 import { ObjectID } from "mongodb"
 import { Tiny_Product, Tiny_Product_Map, Tiny_Variacoes } from "../models/tinyProduct"
-import { createProduct, findProduct, updateProductVariationStock } from "./productService"
+import { createProduct, findProduct, updateProductPrice, updateProductVariationStock } from "./productService"
 import { createVariation, deleteVariation, findVariationById, updateProductById, updateVariationById } from "../repositories/productRepository"
 import { SUBCATEGORIES } from "../models/category"
 import { COLORS } from "../models/color"
 import { SIZES_DEFAULT } from "../models/size"
 import { FLAVORS } from "../models/flavors"
 import { Tiny_Stock } from "../models/tinyStock"
+import { Tiny_Price } from "../models/tinyPrice"
 
 export const requestTiny = async (url: string, method: Method, token: string, body?: any): Promise<any> => {
 
@@ -116,7 +117,7 @@ function parseTinyProduct(tinyProduct: Tiny_Product, shop_id: ObjectID): Product
         length: parseFloat(tinyProduct.dados.comprimentoEmbalagem) || parseFloat(tinyProduct.dados.diametroEmbalagem),
         weight: parseFloat(tinyProduct.dados.pesoLiquido) || parseFloat(tinyProduct.dados.pesoBruto),
         price: parseFloat(tinyProduct.dados.preco),
-        price_discounted: parseFloat(tinyProduct.dados.precoPromocional),
+        price_discounted: parseFloat(tinyProduct.dados.precoPromocional) || parseFloat(tinyProduct.dados.preco),
         ean: tinyProduct.dados.gtin,
         sku: tinyProduct.dados.idMapeamento,
         variations: [],
@@ -279,10 +280,26 @@ async function updateExistingProduct(tinyProduct: Tiny_Product, existingProduct:
 
 export const updateTinyStock = async (stock: Tiny_Stock): Promise<Product|null> => {
 
-    const updatedStock = await updateProductVariationStock(stock.dados.skuMapeamento, { stock: stock.dados.saldo })
+    const updatedProduct = await updateProductVariationStock(stock.dados.skuMapeamento, { stock: stock.dados.saldo })
 
-    if (!updatedStock) return null
+    if (!updatedProduct) return null
 
-    return updatedStock
+    return updatedProduct
+
+}
+
+export const updateTinyPrice = async (price: Tiny_Price): Promise<Product|null> => {
+
+    const productID = price.dados.skuMapeamentoPai.length ? price.dados.skuMapeamentoPai : price.dados.skuMapeamento
+
+    const priceDiscounted = parseFloat(price.dados.precoPromocional) || parseFloat(price.dados.preco)
+
+    const patch = { price: parseFloat(price.dados.preco), price_discounted: priceDiscounted }
+
+    const updatedProduct = await updateProductPrice(productID, patch)
+
+    if (!updatedProduct) return null
+
+    return updatedProduct
 
 }
