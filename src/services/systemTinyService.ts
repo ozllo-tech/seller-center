@@ -238,14 +238,18 @@ function mapTinyProduct(product: Product, tinyProduct: Tiny_Product): Tiny_Produ
 
 async function updateExistingProduct(tinyProduct: Tiny_Product, existingProduct: Product, shopID: ObjectID) {
 
-    let updatedProduct = await updateProductById(existingProduct._id, parseTinyProduct(tinyProduct, shopID))
+    const product = parseTinyProduct(tinyProduct, shopID)
+
+    delete product.variations
+
+    let updatedProduct = await updateProductById(existingProduct._id, product)
 
     if (!updatedProduct) return null
 
     // Delete no longer existing tinyVariations.
 
     if (Array.isArray(existingProduct.variations) && tinyProduct.dados.variacoes.length < existingProduct.variations.length) {
-        existingProduct.variations?.forEach( (variation, index) => {
+        existingProduct.variations?.forEach((variation, index) => {
             if (variation._id.toString() !== tinyProduct.dados.variacoes[index]?.skuMapeamento) {
                 deleteVariation(variation._id)
             }
@@ -258,13 +262,9 @@ async function updateExistingProduct(tinyProduct: Tiny_Product, existingProduct:
 
         if (existingVariation) {
 
-            updatedProduct = await updateVariationById(existingVariation._id, {
-                ...existingVariation,
-                ...parseTinyVariation(variation, existingProduct._id)
-            })
-        }
+            updatedProduct = await updateVariationById(existingVariation._id, parseTinyVariation(variation, existingProduct._id))
 
-        if (!existingVariation) {
+        } else {
 
             const newVariation = await createVariation(parseTinyVariation(variation, existingProduct._id))
 
