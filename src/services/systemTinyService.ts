@@ -5,12 +5,13 @@ import { getFunctionName, logAxiosError } from "../utils/util"
 import { Product, Variation } from "../models/product"
 import { ObjectID } from "mongodb"
 import { Tiny_Product, Tiny_Product_Map, Tiny_Variacoes } from "../models/tinyProduct"
-import { createProduct, findProduct } from "./productService"
+import { createProduct, findProduct, updateProductVariationStock } from "./productService"
 import { createVariation, deleteVariation, findVariationById, updateProductById, updateVariationById } from "../repositories/productRepository"
 import { SUBCATEGORIES } from "../models/category"
 import { COLORS } from "../models/color"
 import { SIZES_DEFAULT } from "../models/size"
 import { FLAVORS } from "../models/flavors"
+import { Tiny_Stock } from "../models/tinyStock"
 
 export const requestTiny = async (url: string, method: Method, token: string, body?: any): Promise<any> => {
 
@@ -274,4 +275,14 @@ async function updateExistingProduct(tinyProduct: Tiny_Product, existingProduct:
     if (!updatedProduct) return null
 
     return mapTinyProduct(updatedProduct, tinyProduct)
+}
+
+export const updateTinyStock = async (stock: Tiny_Stock): Promise<Product|null> => {
+
+    const updatedStock = await updateProductVariationStock(stock.dados.skuMapeamento, { stock: stock.dados.saldo })
+
+    if (!updatedStock) return null
+
+    return updatedStock
+
 }
