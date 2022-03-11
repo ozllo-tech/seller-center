@@ -5,7 +5,7 @@ import { getFunctionName, logAxiosError } from "../utils/util"
 import { Product, Variation } from "../models/product"
 import { ObjectID } from "mongodb"
 import { Tiny_Product, Tiny_Product_Map, Tiny_Variacoes } from "../models/tinyProduct"
-import { createProduct, deleteVariationById, findProduct } from "./productService"
+import { createProduct, findProduct } from "./productService"
 import { createVariation, deleteVariation, findVariationById, updateProductById, updateVariationById } from "../repositories/productRepository"
 import { SUBCATEGORIES } from "../models/category"
 import { COLORS } from "../models/color"
@@ -136,6 +136,7 @@ function parseTinyProduct(tinyProduct: Tiny_Product, shop_id: ObjectID): Product
     }
 
     tinyProduct.dados.variacoes.forEach(tinyVariation => {
+
         product.variations?.push({
             stock: tinyVariation.estoqueAtual,
             size: findMatchingSize(tinyVariation),
@@ -146,6 +147,8 @@ function parseTinyProduct(tinyProduct: Tiny_Product, shop_id: ObjectID): Product
             lactose_free: false,
             mapping_id: tinyVariation.idMapeamento
         })
+
+        if (tinyVariation.anexos.length) product.images.push(...tinyVariation.anexos.map(anexo => anexo.url))
     })
 
     return product
