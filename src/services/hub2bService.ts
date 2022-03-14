@@ -9,7 +9,7 @@ import { SALES_CHANNEL_HUB2B } from "../models/salesChannelHub2b"
 import { findTenantCredential } from "../repositories/hub2TenantCredentialRepository"
 import { HUB2B_ACCESS_KEY_V1, HUB2B_URL_V2, PROJECT_HOST, HUB2B_TENANT, HUB2B_URL_V1 } from "../utils/consts"
 import { log } from "../utils/loggerUtil"
-import { getFunctionName, logAxiosError, logResponse, nowIsoDate } from "../utils/util"
+import { getFunctionName, logAxiosError, logResponse, nowIsoDate, waitforme } from "../utils/util"
 import { HUB2B_CREDENTIALS, renewAccessTokenHub2b, TENANT_CREDENTIALS } from "./hub2bAuhService"
 
 // Default
@@ -165,6 +165,8 @@ export const criarProdutoHub2b = async ( hub2productList: HUB2B_Product[], idTen
 
     const URL = HUB2B_URL_V1 + "/setsku/" + (idTenant || HUB2B_TENANT)
 
+    await waitforme(1000)
+
     const response = await requestHub2B(URL, 'POST', hub2productList, HUB2B_HEADERS_V1)
 
     if (response?.data.error) {
@@ -182,6 +184,8 @@ export const criarProdutoHub2b = async ( hub2productList: HUB2B_Product[], idTen
 export const updateProdutoHub2b = async ( patch: any[], idTenant: any ) => {
 
     const URL = HUB2B_URL_V1 + "/setsku/" + (idTenant || HUB2B_TENANT)
+
+    await waitforme(1000)
 
     const response = await requestHub2B(URL, 'POST', patch, HUB2B_HEADERS_V1)
 
@@ -203,6 +207,8 @@ export const updateProdutoHub2b = async ( patch: any[], idTenant: any ) => {
 export const deleteProdutoHub2b = async ( product_id: string, idTenant: any ) => {
 
     const URL = HUB2B_URL_V1 + "/removeproduct/" + (idTenant || HUB2B_TENANT)
+
+    await waitforme(1000)
 
     const body = SALES_CHANNEL_HUB2B.map(channel => {
         return {
@@ -317,6 +323,8 @@ export const updateStockHub2b = async (variation_id: any, stock: number) => {
         warehouseId: 0
     }
 
+    await waitforme(1000)
+
     const response = await requestHub2B(URL_STOCK, 'PUT', body)
 
     if (!response) return null
@@ -340,6 +348,8 @@ export const updatePriceHub2b = async (variation_id: any, price: number, price_d
         base: price,
         sale: price_discounted
     }
+
+    await waitforme(1000)
 
     const response = await requestHub2B(URL_PRICE, 'PUT', body)
 
