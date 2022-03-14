@@ -369,11 +369,15 @@ export const postOrderHub2b = async (order: HUB2B_Order) => {
     return orderHub2b
 }
 
-export const getOrderHub2b = async (order_id: string) => {
+export const getOrderHub2b = async (order_id: string, idTenant = false) => {
 
-    await renewAccessTokenHub2b(false, false)
+    idTenant
+        ? await renewAccessTokenHub2b(false, idTenant)
+        : await renewAccessTokenHub2b(false, false)
 
-    const URL_ORDER = HUB2B_URL_V2 + "/Orders/" + order_id + "?access_token=" + HUB2B_CREDENTIALS.access_token
+    const accessToken = idTenant ? TENANT_CREDENTIALS.access_token : HUB2B_CREDENTIALS.access_token
+
+    const URL_ORDER = HUB2B_URL_V2 + "/Orders/" + order_id + "?access_token=" + accessToken
 
     const body = {}
 
@@ -455,11 +459,15 @@ export const listAllOrdersHub2b = async (): Promise<HUB2B_Order[] | null> => {
     return orders
 }
 
-export const postInvoiceHub2b = async (order_id: string, _invoice: any) => {
+export const postInvoiceHub2b = async (order_id: string, _invoice: any, idTenant: any) => {
 
-    await renewAccessTokenHub2b(false, false)
+    idTenant
+        ? await renewAccessTokenHub2b(false, idTenant)
+        : await renewAccessTokenHub2b(false, false)
 
-    const URL_INVOICE = HUB2B_URL_V2 + `/Orders/${order_id}/Invoice` + "?access_token=" + HUB2B_CREDENTIALS.access_token
+    const accessToken = idTenant ? TENANT_CREDENTIALS.access_token : HUB2B_CREDENTIALS.access_token
+
+    const URL_INVOICE = HUB2B_URL_V2 + `/Orders/${order_id}/Invoice` + "?access_token=" + accessToken
 
     const body = _invoice
 
@@ -496,11 +504,15 @@ export const getInvoiceHub2b = async (order_id: string) => {
 }
 
 // Não é permitido enviar os dados de rastreio sem antes ter enviado a nota fiscal.
-export const postTrackingHub2b = async (order_id: string, _tracking: HUB2B_Tracking) => {
+export const postTrackingHub2b = async (order_id: string, _tracking: HUB2B_Tracking, idTenant: any) => {
 
-    await renewAccessTokenHub2b(false, false)
+    idTenant
+        ? await renewAccessTokenHub2b(false, idTenant)
+        : await renewAccessTokenHub2b(false, false)
 
-    const URL_TRACKING = HUB2B_URL_V2 + `/Orders/${order_id}/Tracking` + "?access_token=" + HUB2B_CREDENTIALS.access_token
+    const accessToken = idTenant ? TENANT_CREDENTIALS.access_token : HUB2B_CREDENTIALS.access_token
+
+    const URL_TRACKING = HUB2B_URL_V2 + `/Orders/${order_id}/Tracking` + "?access_token=" + accessToken
 
     const body = _tracking
 
@@ -620,9 +632,9 @@ const homologHub2b = async () => {
 
     const listarPedidos = await listAllOrdersHub2b()
 
-    const upNFe = await postInvoiceHub2b(pedido1, invoice)
+    const upNFe = await postInvoiceHub2b(pedido1, invoice, false)
 
-    const track = await postTrackingHub2b(pedido1, rastreio)
+    const track = await postTrackingHub2b(pedido1, rastreio, false)
 
     const upStatus = await updateStatusHub2b(pedido1, status)
 
