@@ -296,7 +296,11 @@ export const updateStatus = async (order_id: string, status: string, webhook = f
 
     const update = await findOneOrderAndModify("order.reference.id", order_id, fields) // update.value = Order
 
-    if ( webhook && 'Pending' == status && !update?.value) {
+    if (!update?.value) return update
+
+    const order = update.value
+
+    if ( webhook && 'Pending' == status) {
 
         // Check if this is a new order and save it.
 
@@ -305,30 +309,30 @@ export const updateStatus = async (order_id: string, status: string, webhook = f
         if (orderHub2b) saveOrders([orderHub2b])
     }
 
-    if (update?.value) orderEventEmitter.emit('updated', update.value, status)
+    if (order) orderEventEmitter.emit('updated', order, status)
 
-    if (update?.value && "Approved" == status) orderEventEmitter.emit('approved', update.value)
+    if ("Approved" == status) orderEventEmitter.emit('approved', order)
 
     // TODO: check if order comes from an agency subaccount. If not, it can only be from the main account. So, do nothing.
 
-    if (update?.value && "Invoiced" == status) {
+    if ("Invoiced" == status) {
 
         const invoice = await getInvoiceHub2b(order_id)
 
         if (invoice) orderEventEmitter.emit('invoiced', order_id, invoice)
 
         // Foreach SKU in order, decrease stock by quantity sold.
-        update.value.order.products.forEach(product => updateStockByQuantitySold(product.sku, product.quantity))
+        order.order.products.forEach(product => updateStockByQuantitySold(product.sku, product.quantity))
     }
 
-    if (update?.value && "Shipped" == status) {
+    if ("Shipped" == status) {
 
         const tracking = await getTrackingHub2b(order_id)
 
         if (tracking) orderEventEmitter.emit('shipped', order_id, tracking)
     }
 
-    if (update?.value && "Delivered" == status) {
+    if ("Delivered" == status) {
 
         const status: HUB2B_Status = {
             active: true,
