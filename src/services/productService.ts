@@ -7,9 +7,8 @@ import { log } from "../utils/loggerUtil"
 import { getFunctionName } from "../utils/util"
 import { createNewProduct, createVariation, deleteVariation, findProductByShopIdAndName, findProductById, findProductsByShopId, findVariationById, updateProductById, updateVariationById, createManyProducts, findVariationsByProductId, deleteProductById } from "../repositories/productRepository"
 import productEventEmitter from "../events/product"
-import { renewAccessTokenHub2b, TENANT_CREDENTIALS } from "./hub2bAuhService"
-import { getStockHub2b, requestHub2B } from "./hub2bService"
-import { HUB2B_URL_V2, HUB2B_MARKETPLACE, HUB2B_SALES_CHANEL } from "../utils/consts"
+import { renewAccessTokenHub2b } from "./hub2bAuhService"
+import { getCatalogHub2b, getStockHub2b, mapskuHub2b, requestHub2B } from "./hub2bService"
 import { HUB2B_Catalog_Product } from "../models/hub2b"
 import { ObjectID } from "mongodb"
 import { SUBCATEGORIES } from "../models/category"
@@ -459,50 +458,30 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
  */
  export const getProductsInHub2b = async (idTenant: any, status = '2'): Promise<HUB2B_Catalog_Product[] | null> => {
 
-    const access = await renewAccessTokenHub2b(false, idTenant)
-
-    if ('object' === typeof(access)) { // TODO: solve gambiarra.
-        log(`Could not get access token from tenant ${idTenant}`, 'EVENT', getFunctionName(), 'ERROR')
-        return null
-    }
-
-    // TODO: Filter by more than one status in order to get stock and price updates (2,3 status).
-
-    const CATALOG_URL = `${HUB2B_URL_V2}/catalog/product/${HUB2B_MARKETPLACE}/${idTenant}?idProductStatus=${status}&onlyWithDestinationSKU=false&access_token=${TENANT_CREDENTIALS.access_token}`
-
-    const response = await requestHub2B( CATALOG_URL, 'GET' )
-    if ( !response ) return null
-
-    const productsHub2b: HUB2B_Catalog_Product[] = response.data
+    const productsHub2b = await getCatalogHub2b(status, idTenant)
 
     productsHub2b
         ? log( "GET Products in hub2b success", "EVENT", getFunctionName() )
         : log( "GET Products in hub2b error", "EVENT", getFunctionName(), "WARN" )
+
+    if (!productsHub2b) return null
 
     return productsHub2b
 }
 
 export const mapSku = async (products: Product[], idTenant: any) => {
 
-    await renewAccessTokenHub2b(false, idTenant)
+    const data = products.map(item => ({ sourceSKU: item.sku, destinationSKU: item._id }))
 
-    const CATALOG_URL = HUB2B_URL_V2 +
-        "/catalog/product/mapsku/" + HUB2B_SALES_CHANEL + "?access_token=" + TENANT_CREDENTIALS.access_token
+    const mapping = await mapskuHub2b(data, idTenant)
 
-    let data = new Array()
-
-    products.forEach( item => data.push({ sourceSKU: item.sku, destinationSKU: item._id }))
-
-    const response = await requestHub2B(CATALOG_URL, 'POST', JSON.stringify(data), { "Content-type": "application/json" } )
-
-    if ( !response ) return null
-
-    response
+    mapping
         ? log(`SKUs from Tenant ${idTenant} has been mapped.`, "EVENT", getFunctionName() )
         : log(`Could not map SKUs from Tenant ${idTenant}.`, "EVENT", getFunctionName(), "WARN" )
 
-    return response.data
+    if (!mapping) return null
 
+    return mapping
 }
 
 export const updateStockByQuantitySold = async (variationId: any, quantity: any) => {
