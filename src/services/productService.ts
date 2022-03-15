@@ -536,7 +536,7 @@ export const updateIntegrationStock = async() => {
 
             for await (const variation of product.variations) {
 
-                const hub2bStock = await getStockHub2b(product.sku, account.idTenant)
+                const hub2bStock = await getStockHub2b(variation._id, account.idTenant)
 
                 if (!hub2bStock) continue
 
