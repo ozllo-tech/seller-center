@@ -581,11 +581,13 @@ export const getCatalogHub2b = async (status: string, idTenant: any): Promise<HU
 
     const accessToken = idTenant ? TENANT_CREDENTIALS.access_token : HUB2B_CREDENTIALS.access_token
 
-    const CATALOG_URL = HUB2B_URL_V2
+    let CATALOG_URL = HUB2B_URL_V2
         + `/catalog/product/${HUB2B_MARKETPLACE}/${idTenant}`
         + `?access_token=${accessToken}`
         + `&idProductStatus=${status}`
         + `&onlyWithDestinationSKU=false`
+
+    if ('2' === status) CATALOG_URL += `&limit=10`
 
     const response = await requestHub2B(CATALOG_URL, 'GET')
 
