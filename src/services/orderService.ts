@@ -174,7 +174,7 @@ export const sendInvoice = async (order: any, data: any) : Promise<HUB2B_Invoice
 
     // TODO: maybe check if product has available stock before send invoice.
 
-    const res = await postInvoiceHub2b(order.reference.id, invoice)
+    const res = await postInvoiceHub2b(order.reference.id, invoice, false)
 
     if (res) {
 
@@ -209,7 +209,7 @@ export const sendTracking = async (order_id: string, data: any): Promise<HUB2B_T
         shippingService: data.shippingService
     }
 
-    const orderTracking = await postTrackingHub2b(order_id, tracking)
+    const orderTracking = await postTrackingHub2b(order_id, tracking, false)
 
     if (orderTracking) {
 
@@ -292,11 +292,7 @@ export const setupWebhookIntegration = async(): Promise<HUB2B_Order_Webhook | nu
 
 export const updateStatus = async (order_id: string, status: string, webhook = false) => {
 
-    const fields = { "order.status.status": status, "order.status.updatedDate": nowIsoDateHub2b() }
-
-    const update = await findOneOrderAndModify("order.reference.id", order_id, fields) // update.value = Order
-
-    if ( webhook && 'Pending' == status && !update?.value) {
+    if ( webhook && 'Pending' == status) {
 
         // Check if this is a new order and save it.
 
@@ -305,30 +301,19 @@ export const updateStatus = async (order_id: string, status: string, webhook = f
         if (orderHub2b) saveOrders([orderHub2b])
     }
 
-    if (update?.value) orderEventEmitter.emit('updated', update.value, status)
+    const fields = { "order.status.status": status, "order.status.updatedDate": nowIsoDateHub2b() }
 
-    if (update?.value && "Approved" == status) orderEventEmitter.emit('approved', update.value)
+    const update = await findOneOrderAndModify("order.reference.id", order_id, fields) // update.value = Order
 
-    // TODO: check if order comes from an agency subaccount. If not, it can only be from the main account. So, do nothing.
+    if (!update?.value) return update
 
-    if (update?.value && "Invoiced" == status) {
+    const order = update.value
 
-        const invoice = await getInvoiceHub2b(order_id)
+    if (order) orderEventEmitter.emit('updated', order, status)
 
-        if (invoice) orderEventEmitter.emit('invoiced', order_id, invoice)
+    if ("Approved" == status) orderEventEmitter.emit('approved', order)
 
-        // Foreach SKU in order, decrease stock by quantity sold.
-        update.value.order.products.forEach(product => updateStockByQuantitySold(product.sku, product.quantity))
-    }
-
-    if (update?.value && "Shipped" == status) {
-
-        const tracking = await getTrackingHub2b(order_id)
-
-        if (tracking) orderEventEmitter.emit('shipped', order_id, tracking)
-    }
-
-    if (update?.value && "Delivered" == status) {
+    if ("Delivered" == status) {
 
         const status: HUB2B_Status = {
             active: true,
@@ -339,6 +324,8 @@ export const updateStatus = async (order_id: string, status: string, webhook = f
 
         orderEventEmitter.emit('delivered', order_id, status)
     }
+
+    await syncIntegrationOrderStatus(order, status)
 
     return update
 }
@@ -383,18 +370,58 @@ export const sendOrderToTenant = async (order: HUB2B_Order, tenantID: any): Prom
     return order
 }
 
-export const syncOrderStatus = async (order: Order, status: any): Promise<HUB2B_Order | null> => {
+export const syncIntegrationOrderStatus = async (order: Order, status: string) => {
 
     if (!order?.tenant) return null
 
-    await renewAccessTokenHub2b(false, order.tenant.id)
+    const order_id = order.order.reference.id?.toString()
 
-    const orderHub2b = await updateStatusHub2b(order.tenant.order, order.order.status)
+    if (!order_id) return null
 
-    orderHub2b
-        ? log(`Order ${order.order.reference.id} is in sync with order ${order.tenant.order} from tenant ${order.tenant.id}.`, 'EVENT', getFunctionName())
-        : log(`Couldn't sync order ${order.order.reference.id} with order ${order.tenant.order} from tenant ${order.tenant.id}.`, 'EVENT', getFunctionName(), 'ERROR')
+    const orderHub2b: HUB2B_Order = await getOrderHub2b(order.tenant.order, order.tenant.id)
 
-    return null
+    if (!orderHub2b) return null
 
+    if ("Invoiced" == status && "Approved" == orderHub2b.status.status) {
+
+        const invoice = await getInvoiceHub2b(order_id)
+
+        if (!invoice) {
+
+            log(`Could not retrieve invoice for order ${order_id}`, 'EVENT', getFunctionName(), 'ERROR')
+
+            return null
+        }
+
+        const invoiced = await postInvoiceHub2b(order.tenant.order, invoice, order.tenant.id)
+
+        if (invoiced) return orderEventEmitter.emit('invoiced', order.tenant.order, invoiced)
+    }
+
+    if ("Shipped" == status && "Invoiced" == orderHub2b.status.status) {
+
+        const tracking = await getTrackingHub2b(order_id)
+
+        if (!tracking) {
+
+            log(`Could not retrieve tracking for order ${order_id}`, 'EVENT', getFunctionName(), 'ERROR')
+
+            return null
+        }
+
+        const tracked = await postTrackingHub2b(order.tenant.order, tracking, order.tenant.id)
+
+        if (tracked) return orderEventEmitter.emit('shipped', order.tenant.order, tracked)
+    }
+
+    if (status !== orderHub2b.status.status) {
+
+        const updated = await updateStatusHub2b(order.tenant.order, order.order.status)
+
+        if (updated) orderEventEmitter.emit('updated', order.order, status)
+
+        updated
+            ? log(`Order ${order_id} is in sync with order ${order.tenant.order} from tenant ${order.tenant.id}.`, 'EVENT', getFunctionName())
+            : log(`Couldn't sync order ${order_id} with order ${order.tenant.order} from tenant ${order.tenant.id}.`, 'EVENT', getFunctionName(), 'ERROR')
+    }
 }

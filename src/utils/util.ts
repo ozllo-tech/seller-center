@@ -276,3 +276,7 @@ export const isSubset = (superObj: any, subObj: any): boolean => {
 export const equalArray = (array1: any, array2: any) => {
     return JSON.stringify(array1) == JSON.stringify(array2)
 }
+
+export const waitforme = (ms: number) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}

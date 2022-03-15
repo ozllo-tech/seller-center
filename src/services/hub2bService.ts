@@ -3,13 +3,13 @@
 //
 
 import axios, { Method } from "axios"
-import { HUB2B_Invoice, HUB2B_Product, HUB2B_Status, HUB2B_Tracking, HUB2B_Order, HUB2B_Integration } from "../models/hub2b"
+import { HUB2B_Invoice, HUB2B_Product, HUB2B_Status, HUB2B_Tracking, HUB2B_Order, HUB2B_Integration, HUB2B_Catalog_Product } from "../models/hub2b"
 import { Product } from "../models/product"
 import { SALES_CHANNEL_HUB2B } from "../models/salesChannelHub2b"
 import { findTenantCredential } from "../repositories/hub2TenantCredentialRepository"
-import { HUB2B_ACCESS_KEY_V1, HUB2B_URL_V2, PROJECT_HOST, HUB2B_TENANT, HUB2B_URL_V1 } from "../utils/consts"
+import { HUB2B_ACCESS_KEY_V1, HUB2B_URL_V2, PROJECT_HOST, HUB2B_TENANT, HUB2B_URL_V1, HUB2B_MARKETPLACE, HUB2B_SALES_CHANEL } from "../utils/consts"
 import { log } from "../utils/loggerUtil"
-import { getFunctionName, logAxiosError, logResponse, nowIsoDate } from "../utils/util"
+import { getFunctionName, logAxiosError, logResponse, nowIsoDate, waitforme } from "../utils/util"
 import { HUB2B_CREDENTIALS, renewAccessTokenHub2b, TENANT_CREDENTIALS } from "./hub2bAuhService"
 
 // Default
@@ -165,6 +165,8 @@ export const criarProdutoHub2b = async ( hub2productList: HUB2B_Product[], idTen
 
     const URL = HUB2B_URL_V1 + "/setsku/" + (idTenant || HUB2B_TENANT)
 
+    await waitforme(1000)
+
     const response = await requestHub2B(URL, 'POST', hub2productList, HUB2B_HEADERS_V1)
 
     if (response?.data.error) {
@@ -182,6 +184,8 @@ export const criarProdutoHub2b = async ( hub2productList: HUB2B_Product[], idTen
 export const updateProdutoHub2b = async ( patch: any[], idTenant: any ) => {
 
     const URL = HUB2B_URL_V1 + "/setsku/" + (idTenant || HUB2B_TENANT)
+
+    await waitforme(1000)
 
     const response = await requestHub2B(URL, 'POST', patch, HUB2B_HEADERS_V1)
 
@@ -203,6 +207,8 @@ export const updateProdutoHub2b = async ( patch: any[], idTenant: any ) => {
 export const deleteProdutoHub2b = async ( product_id: string, idTenant: any ) => {
 
     const URL = HUB2B_URL_V1 + "/removeproduct/" + (idTenant || HUB2B_TENANT)
+
+    await waitforme(1000)
 
     const body = SALES_CHANNEL_HUB2B.map(channel => {
         return {
@@ -317,6 +323,8 @@ export const updateStockHub2b = async (variation_id: any, stock: number) => {
         warehouseId: 0
     }
 
+    await waitforme(1000)
+
     const response = await requestHub2B(URL_STOCK, 'PUT', body)
 
     if (!response) return null
@@ -340,6 +348,8 @@ export const updatePriceHub2b = async (variation_id: any, price: number, price_d
         base: price,
         sale: price_discounted
     }
+
+    await waitforme(1000)
 
     const response = await requestHub2B(URL_PRICE, 'PUT', body)
 
@@ -369,11 +379,15 @@ export const postOrderHub2b = async (order: HUB2B_Order) => {
     return orderHub2b
 }
 
-export const getOrderHub2b = async (order_id: string) => {
+export const getOrderHub2b = async (order_id: string, idTenant = false) => {
 
-    await renewAccessTokenHub2b(false, false)
+    idTenant
+        ? await renewAccessTokenHub2b(false, idTenant)
+        : await renewAccessTokenHub2b(false, false)
 
-    const URL_ORDER = HUB2B_URL_V2 + "/Orders/" + order_id + "?access_token=" + HUB2B_CREDENTIALS.access_token
+    const accessToken = idTenant ? TENANT_CREDENTIALS.access_token : HUB2B_CREDENTIALS.access_token
+
+    const URL_ORDER = HUB2B_URL_V2 + "/Orders/" + order_id + "?access_token=" + accessToken
 
     const body = {}
 
@@ -455,11 +469,15 @@ export const listAllOrdersHub2b = async (): Promise<HUB2B_Order[] | null> => {
     return orders
 }
 
-export const postInvoiceHub2b = async (order_id: string, _invoice: any) => {
+export const postInvoiceHub2b = async (order_id: string, _invoice: any, idTenant: any) => {
 
-    await renewAccessTokenHub2b(false, false)
+    idTenant
+        ? await renewAccessTokenHub2b(false, idTenant)
+        : await renewAccessTokenHub2b(false, false)
 
-    const URL_INVOICE = HUB2B_URL_V2 + `/Orders/${order_id}/Invoice` + "?access_token=" + HUB2B_CREDENTIALS.access_token
+    const accessToken = idTenant ? TENANT_CREDENTIALS.access_token : HUB2B_CREDENTIALS.access_token
+
+    const URL_INVOICE = HUB2B_URL_V2 + `/Orders/${order_id}/Invoice` + "?access_token=" + accessToken
 
     const body = _invoice
 
@@ -496,11 +514,15 @@ export const getInvoiceHub2b = async (order_id: string) => {
 }
 
 // Não é permitido enviar os dados de rastreio sem antes ter enviado a nota fiscal.
-export const postTrackingHub2b = async (order_id: string, _tracking: HUB2B_Tracking) => {
+export const postTrackingHub2b = async (order_id: string, _tracking: HUB2B_Tracking, idTenant: any) => {
 
-    await renewAccessTokenHub2b(false, false)
+    idTenant
+        ? await renewAccessTokenHub2b(false, idTenant)
+        : await renewAccessTokenHub2b(false, false)
 
-    const URL_TRACKING = HUB2B_URL_V2 + `/Orders/${order_id}/Tracking` + "?access_token=" + HUB2B_CREDENTIALS.access_token
+    const accessToken = idTenant ? TENANT_CREDENTIALS.access_token : HUB2B_CREDENTIALS.access_token
+
+    const URL_TRACKING = HUB2B_URL_V2 + `/Orders/${order_id}/Tracking` + "?access_token=" + accessToken
 
     const body = _tracking
 
@@ -547,6 +569,48 @@ export const updateStatusHub2b = async (order_id: string, status: HUB2B_Status) 
     response.data
         ? log(`Order ${order_id} status has been updated.`, "EVENT", getFunctionName())
         : log(`Could not update order ${order_id} status.`, "EVENT", getFunctionName(), "WARN")
+
+    return response.data
+}
+
+export const getCatalogHub2b = async (status: string, idTenant: any): Promise<HUB2B_Catalog_Product[] | null> => {
+
+    idTenant
+        ? await renewAccessTokenHub2b(false, idTenant)
+        : await renewAccessTokenHub2b(false, false)
+
+    const accessToken = idTenant ? TENANT_CREDENTIALS.access_token : HUB2B_CREDENTIALS.access_token
+
+    let CATALOG_URL = HUB2B_URL_V2
+        + `/catalog/product/${HUB2B_MARKETPLACE}/${idTenant}`
+        + `?access_token=${accessToken}`
+        + `&idProductStatus=${status}`
+        + `&onlyWithDestinationSKU=false`
+
+    if ('2' === status) CATALOG_URL += `&limit=10`
+
+    const response = await requestHub2B(CATALOG_URL, 'GET')
+
+    if (!response) return null
+
+    const productsHub2b: HUB2B_Catalog_Product[] = response.data
+
+    return productsHub2b
+}
+
+export const mapskuHub2b = async (data: any, idTenant: any) : Promise<any|null> => {
+
+    idTenant
+        ? await renewAccessTokenHub2b(false, idTenant)
+        : await renewAccessTokenHub2b(false, false)
+
+    const accessToken = idTenant ? TENANT_CREDENTIALS.access_token : HUB2B_CREDENTIALS.access_token
+
+    const CATALOG_URL = HUB2B_URL_V2 + "/catalog/product/mapsku/" + HUB2B_SALES_CHANEL + "?access_token=" + accessToken
+
+    const response = await requestHub2B(CATALOG_URL, 'POST', JSON.stringify(data), { "Content-type": "application/json" })
+
+    if (!response) return null
 
     return response.data
 }
@@ -620,9 +684,9 @@ const homologHub2b = async () => {
 
     const listarPedidos = await listAllOrdersHub2b()
 
-    const upNFe = await postInvoiceHub2b(pedido1, invoice)
+    const upNFe = await postInvoiceHub2b(pedido1, invoice, false)
 
-    const track = await postTrackingHub2b(pedido1, rastreio)
+    const track = await postTrackingHub2b(pedido1, rastreio, false)
 
     const upStatus = await updateStatusHub2b(pedido1, status)
 

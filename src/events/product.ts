@@ -13,8 +13,8 @@ productEventEmitter.on( 'create', ( product: Product, idTenant: any ) => {
 
     log( `Criando produto ${ product._id } na hub2b.`, 'EVENT', 'ProductEventEmitter' )
 
-    criarProdutoHub2b( parseProdutoToProdutoHub2( product ), idTenant )
-} )
+    criarProdutoHub2b(parseProdutoToProdutoHub2(product), idTenant)
+})
 
 productEventEmitter.on( 'update', ( product: Product, idTenant: any ) => {
 
@@ -22,13 +22,13 @@ productEventEmitter.on( 'update', ( product: Product, idTenant: any ) => {
 
     updateProdutoHub2b( parseProdutoToProdutoHub2( product ), idTenant )
 
-} )
+})
 
 productEventEmitter.on( 'delete', ( productId: any, idTenant: any ) => {
 
     log( `Deletando produto ${ productId } na hub2b.`, 'EVENT', 'ProductEventEmitter' )
 
-    deleteProdutoHub2b( productId, idTenant )
+    deleteProdutoHub2b(productId, idTenant)
 
 })
 
@@ -36,7 +36,7 @@ productEventEmitter.on( 'update_stock', ( variation: Variation ) => {
 
     log( `Updating stock from SKU ${ variation._id } in HUB2B.`, 'EVENT', 'ProductEventEmitter' )
 
-    updateStockHub2b( variation._id, Number(variation.stock ))
+    updateStockHub2b(variation._id, Number(variation.stock))
 
 })
 
@@ -45,7 +45,7 @@ productEventEmitter.on( 'update_price', ( product: Product ) => {
     log( `Updating price produto ${ product._id } na hub2b.`, 'EVENT', 'ProductEventEmitter' )
 
     product.variations && Array.isArray( product.variations ) && product.variations.forEach( variation => {
-        updatePriceHub2b( variation._id, product.price, product.price_discounted )
+        updatePriceHub2b(variation._id, product.price, product.price_discounted)
     } )
 
 } )

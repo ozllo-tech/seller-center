@@ -74,6 +74,18 @@ export const init = async () => {
 
     start = '2021-12-03T00:00:00'
 
+    end = '2022-01-02T23:59:59'
+
+    await integrateHub2bOrders(start, end)
+
+    start = '2022-01-03T00:00:00'
+
+    end = '2022-02-01T23:59:59'
+
+    await integrateHub2bOrders(start, end)
+
+    start = '2022-02-02T00:00:00'
+
     await integrateHub2bOrders(start, nowIsoDateHub2b())
 
     setInterval(async () => await integrateHub2bOrders(), INTEGRATION_INTERVAL)
@@ -82,10 +94,11 @@ export const init = async () => {
 
     await updateIntegrationProducts()
 
-    setIntervalAsync(() => updateIntegrationProducts(), 500 * 60 * 60) // 30min
+    await updateIntegrationStock()
 
-    // await updateIntegrationStock()
+    setIntervalAsync(() => updateIntegrationProducts(), 500 * 60 * 60) // 30min
 
     // setIntervalAsync(() => updateIntegrationStock(), 1000 * 60) // 1min
 
+    // TODO: Implement routine (once a day) to sync orders from main account to subaccounts (syncIntegrationOrderStatus()).
 }
