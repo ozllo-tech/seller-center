@@ -279,6 +279,40 @@ export const findProductsByShopId = async ( shop_id: string ): Promise<Product[]
     }
 }
 
+export const findProductByShopIdAndSku = async (shopId: string, sku: string): Promise<Product | null> => {
+
+    try {
+
+        const query = { shop_id: new ObjectID(shopId), sku }
+
+        const productsCursor = productCollection.aggregate([
+            {
+                $lookup:
+                {
+                    from: VARIATION_COLLECTION,
+                    localField: "_id",
+                    foreignField: "product_id",
+                    as: "variations"
+                }
+            },
+            { $match: query }
+        ])
+
+        if (!productsCursor) throw new MongoError("Could not retrieve product.")
+
+        const product = await productsCursor.toArray()
+
+        return product[0]
+
+    } catch (error) {
+
+        if (error instanceof MongoError || error instanceof Error)
+            log(error.message, 'EVENT', `Product Repository - ${getFunctionName()}`, 'ERROR')
+
+        return null
+    }
+}
+
 /**
  * Find variations by product id
  *

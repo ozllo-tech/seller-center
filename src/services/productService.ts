@@ -5,10 +5,10 @@
 import { Product, Variation } from "../models/product"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName } from "../utils/util"
-import { createNewProduct, createVariation, deleteVariation, findProductByShopIdAndName, findProductById, findProductsByShopId, findVariationById, updateProductById, updateVariationById, createManyProducts, findVariationsByProductId, deleteProductById } from "../repositories/productRepository"
+import { createNewProduct, createVariation, deleteVariation, findProductById, findProductsByShopId, findVariationById, updateProductById, updateVariationById, createManyProducts, findVariationsByProductId, deleteProductById, findProductByShopIdAndSku } from "../repositories/productRepository"
 import productEventEmitter from "../events/product"
 import { renewAccessTokenHub2b } from "./hub2bAuhService"
-import { getCatalogHub2b, getStockHub2b, mapskuHub2b, requestHub2B } from "./hub2bService"
+import { getCatalogHub2b, getStockHub2b, mapskuHub2b } from "./hub2bService"
 import { HUB2B_Catalog_Product } from "../models/hub2b"
 import { ObjectID } from "mongodb"
 import { SUBCATEGORIES } from "../models/category"
@@ -315,8 +315,7 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
 
         for await (let productHub2b of productsInHub2b) {
             const variations: Variation[] = []
-            // TODO: search by skus.source or skus.source.destination
-            const productExists = await findProductByShopIdAndName(shop_id, productHub2b.name)
+            const productExists = await findProductByShopIdAndSku(shop_id, productHub2b.skus.source)
             if (!productExists) {
                 const images: string[] = []
 
@@ -446,7 +445,7 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
         }
     }
 
-    if ('2' === status && products.length > 0) await mapSku(products, idTenant)
+    if ('2' === status && products.length > 0) mapSku(products, idTenant)
 
     return products
 }
@@ -472,6 +471,9 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
 export const mapSku = async (products: Product[], idTenant: any) => {
 
     const data = products.map(item => ({ sourceSKU: item.sku, destinationSKU: item._id }))
+
+    // TODO validate mapping before:
+    // https://developershub2b.gitbook.io/hub2b-api/api-para-seller-erp/produto/mapeamento-de-sku-ja-existente-no-canal-de-venda
 
     const mapping = await mapskuHub2b(data, idTenant)
 
