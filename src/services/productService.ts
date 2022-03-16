@@ -358,7 +358,7 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
                     brand: productHub2b.brand,
                     more_info: '',
                     ean: productHub2b.ean,
-                    sku: '',
+                    sku: productHub2b.skus.source,
                     gender: 'U',
                     height: productHub2b.dimensions.height,
                     width: productHub2b.dimensions.width,
