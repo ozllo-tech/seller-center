@@ -1,7 +1,8 @@
 import { ObjectID } from "mongodb"
+import { Order } from "../models/order"
 import { System_Integration } from "../models/system"
 import { updateSystemIntegrationData, findOneSystemIntegrationData } from "../repositories/systemRepository"
-import { getTinyInfo } from "./systemTinyService"
+import { getTinyInfo, sendTinyOrder } from "./systemTinyService"
 
 export const saveSystemIntegrationData = async (shopID: string, system: any) => {
 
@@ -44,4 +45,14 @@ export const activateSystemIntegration = async (systemID: string) => {
     if (!tinyInfo || !result) return null
 
     return tinyInfo
+}
+
+export const findIntegrationOrder = async (order: Order) => {
+
+    const system = await findOneSystemIntegrationData('shop_id', new ObjectID(order.shop_id))
+
+    if (!system) return null
+
+    if ('tiny' === system.name) return sendTinyOrder(order, system.data.token)
+
 }

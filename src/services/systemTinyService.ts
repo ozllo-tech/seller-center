@@ -13,18 +13,22 @@ import { SIZES_DEFAULT } from "../models/size"
 import { FLAVORS } from "../models/flavors"
 import { Tiny_Stock } from "../models/tinyStock"
 import { Tiny_Price } from "../models/tinyPrice"
+import { Item, Tiny_Order_Request, Tiny_Order_Response } from "../models/tinyOrder"
+import { Order } from "../models/order"
+import { findOneOrderAndModify } from "../repositories/orderRepository"
+import format from "date-fns/format"
 
-export const requestTiny = async (url: string, method: Method, token: string, body?: any): Promise<any> => {
+export const requestTiny = async (url: string, method: Method, token: string, params?: any): Promise<any> => {
 
     try {
 
         const response = await axios({
             method: method,
             url: url,
-            data: body,
             params: {
                 token: token,
                 formato: 'json',
+                ...params
             }
         })
 
@@ -302,4 +306,88 @@ export const updateTinyPrice = async (price: Tiny_Price): Promise<Product|null> 
 
     return updatedProduct
 
+}
+
+export const sendTinyOrder = async (order: Order, token: string): Promise<Tiny_Order_Response|null> => {
+
+    const orderID = order.order.reference.id
+
+    const orderRequest = JSON.stringify(parseTinyOrder(order))
+
+    const orderResponse = await requestTiny('https://api.tiny.com.br/api2/pedido.incluir.php', 'POST', token, {pedido: orderRequest})
+
+    if (!orderResponse) return null
+
+    // TODO: handle tiny response errors.
+
+    if (!orderResponse.data?.retorno?.registros?.registro?.id) return orderResponse.data
+
+    // Update order with tiny order id.
+
+    const orderUpdate = await findOneOrderAndModify('order.reference.id', orderID, {tiny_order_id: orderResponse.data.retorno.registros.registro.id})
+
+    // TODO: handle order update error
+
+    orderUpdate?.value
+        ? log(`Order ${orderID} updated with Tiny order ${orderResponse.data.retorno.registros.registro.id}`, 'EVENT', getFunctionName() )
+        : log(`Order ${orderID} not updated with Tiny order ${orderResponse.data.retorno.registros.registro.id}`, 'EVENT', getFunctionName())
+
+    return orderResponse.data
+
+}
+
+export const parseTinyOrder = (order: Order): Tiny_Order_Request => {
+
+    const hub2bOrder = order.order
+
+    // Unidade	Informe a unidade corresponde ao produto. Ex:(Un,Pç,Kg).
+
+    const items: Item[] = hub2bOrder.products.map(product => {
+        return {
+            item: {
+                codigo: product.sku,
+                descricao: product.name,
+                unidade: '',
+                quantidade: product.quantity,
+                valor_unitario: product.price
+            }
+        }
+    })
+
+    const tinyOrderRequest: Tiny_Order_Request = {
+        pedido: {
+            data_pedido: format(Date.parse(hub2bOrder.shipping.shippingDate), 'dd/MM/yyyy'),
+            data_prevista: format(Date.parse(hub2bOrder.shipping.estimatedDeliveryDate), 'dd/MM/yyyy'),
+            cliente: {
+                nome: hub2bOrder.customer.name,
+                cpf_cnpj: hub2bOrder.customer.documentNumber,
+                email: hub2bOrder.customer.email,
+                fone: hub2bOrder.customer.mobileNumber,
+            },
+            endereco_entrega: {
+                endereco: hub2bOrder.shipping.address.address,
+                numero: hub2bOrder.shipping.address.number,
+                complemento: hub2bOrder.shipping.address.additionalInfo,
+                cep: hub2bOrder.shipping.address.zipCode,
+                cidade: hub2bOrder.shipping.address.city,
+                bairro: hub2bOrder.shipping.address.neighborhood,
+                uf: hub2bOrder.shipping.address.state,
+                nome_destinatario: hub2bOrder.shipping.receiverName
+            },
+            itens: items,
+            nome_transportador: hub2bOrder.shipping.provider,
+            valor_frete: hub2bOrder.shipping.price,
+            valor_desconto: hub2bOrder.payment.totalDiscount,
+            situacao: "aberto",
+            forma_frete: hub2bOrder.shipping.service
+        },
+        ...(hub2bOrder.payment.method.length ? {forma_pagamento: hub2bOrder.payment.method} : {}),
+        ...(hub2bOrder.reference.id ? {numero_ordem_compra: hub2bOrder.reference.id.toString()} : {}),
+        ...(hub2bOrder.reference.id ? {numero_pedido_ecommerce: order._id.toString()} : {})
+    }
+
+    // TODO: map situacao with hub2b.order.status.status
+    // https://tiny.com.br/api-docs/api2-tabelas-pedidos
+
+    return tinyOrderRequest
 }

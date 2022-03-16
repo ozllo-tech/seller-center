@@ -3,6 +3,7 @@
 //
 
 import events from 'events'
+import { findIntegrationOrder } from '../services/integrationService'
 import { sendOrderEmailToSeller } from '../services/mailService'
 import { sendOrderToTenant } from '../services/orderService'
 import { log } from '../utils/loggerUtil'
@@ -41,6 +42,12 @@ orderEventEmitter.on('delivered', (orderId, status) => {
 
 })
 
-orderEventEmitter.on('integration', (order, tenantID) => sendOrderToTenant(order.order, tenantID))
+orderEventEmitter.on('integration', (order, tenantID) => {
+
+    sendOrderToTenant(order.order, tenantID)
+
+    findIntegrationOrder(order)
+
+})
 
 export default orderEventEmitter
