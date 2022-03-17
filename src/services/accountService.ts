@@ -2,6 +2,7 @@
 //      Account Service
 //
 
+import { ObjectID } from "mongodb"
 import { Account, Address, BankInfo, Contact, PersonalInfo, ShopInfo } from "../models/account"
 import { createOrUpdateAddress, createOrUpdateBankInfo, createOrUpdatePersonalInfo, createOrUpdateShopInfo, createOrUpdateContact, findAddressByUserID, findBankInfoByUserID, findContactByUserID, findPersonalInfoByUserID, findShopInfoByID, findShopInfoByUserID } from "../repositories/accountRepository"
 import { log } from "../utils/loggerUtil"
@@ -158,6 +159,8 @@ export const getAccount = async ( userId: any ): Promise<Account | null> => {
  * @param userId -
  */
 export const findShop = async ( shopId: any ): Promise<ShopInfo | null> => {
+
+    if (!ObjectID.isValid(shopId)) return null
 
     const shopInfo = await findShopInfoByID( shopId )
 

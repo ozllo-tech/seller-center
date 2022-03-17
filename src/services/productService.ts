@@ -5,11 +5,11 @@
 import { Product, Variation } from "../models/product"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName } from "../utils/util"
-import { createNewProduct, createVariation, deleteVariation, findProductById, findProductsByShopId, findVariationById, updateProductById, updateVariationById, createManyProducts, findVariationsByProductId, deleteProductById, findProductByShopIdAndSku } from "../repositories/productRepository"
+import { createNewProduct, createVariation, deleteVariation, findProductById, findProductsByShopId, findVariationById, updateProductById, updateVariationById, findVariationsByProductId, deleteProductById, findProductByShopIdAndSku } from "../repositories/productRepository"
 import productEventEmitter from "../events/product"
 import { renewAccessTokenHub2b } from "./hub2bAuhService"
 import { getCatalogHub2b, getStockHub2b, mapskuHub2b } from "./hub2bService"
-import { HUB2B_Catalog_Product } from "../models/hub2b"
+import { Catalog_Attributes, HUB2B_Catalog_Product } from "../models/hub2b"
 import { ObjectID } from "mongodb"
 import { SUBCATEGORIES } from "../models/category"
 import { HUB2B_TENANT } from "../utils/consts"
@@ -106,6 +106,8 @@ export const findProduct = async (product_id: any): Promise<Product | null> => {
  * @param variation_id - variation_id
  */
 export const findProductByVariation = async (variation_id: any): Promise<Product | null> => {
+
+    if (!ObjectID.isValid(variation_id)) return null
 
     const variation = await findVariationById(variation_id)
 
@@ -308,44 +310,22 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
  export const importProduct = async (idTenant: any, shop_id: any, status = '2'): Promise<Product[] | null> => {
 
     const products: Product[] = []
-    const productsWithoutVariation: Product[] = []
+
     const productsInHub2b = await getProductsInHub2b(idTenant, status)
 
     if (productsInHub2b) {
 
         for await (let productHub2b of productsInHub2b) {
-            const variations: Variation[] = []
+
+            const variations: Variation[] = [createVariationFromHub2bAttributes(productHub2b)]
+
             const productExists = await findProductByShopIdAndSku(shop_id, productHub2b.skus.source)
+
             if (!productExists) {
+
                 const images: string[] = []
 
-                productHub2b.images.forEach((imageHub2b) => {
-                    images.push(imageHub2b.url)
-                })
-
-                if (productHub2b.attributes.length > 0) {
-                    let size: string = ''
-                    let color: string = ''
-
-                    productHub2b.attributes.forEach((attribute) => {
-                        if (attribute.name.indexOf("tamanho" || "size") != -1) {
-                            size = attribute.value
-                        }
-                        if (attribute.name.indexOf("cor" || "color") != -1) {
-                            size = attribute.value
-                        }
-                        const variation: Variation = {
-                            size,
-                            voltage: null,
-                            stock: productHub2b.stocks.sourceStock,
-                            color,
-                            flavor: '',
-                            gluten_free: false,
-                            lactose_free: false,
-                        }
-                        variations.push(variation)
-                    })
-                }
+                productHub2b.images.forEach((imageHub2b) => images.push(imageHub2b.url))
 
                 const product: Product = {
                     shop_id: new ObjectID(shop_id),
@@ -358,32 +338,26 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
                     brand: productHub2b.brand,
                     more_info: '',
                     ean: productHub2b.ean,
-                    sku: '',
+                    sku: productHub2b.skus.source,
                     gender: 'U',
-                    height: productHub2b.dimensions.height,
-                    width: productHub2b.dimensions.width,
-                    length: productHub2b.dimensions.length,
-                    weight: productHub2b.dimensions.weight,
+                    height: productHub2b.dimensions.height * 100,
+                    width: productHub2b.dimensions.width * 100,
+                    length: productHub2b.dimensions.length * 100,
+                    weight: productHub2b.dimensions.weight * 1000,
                     price: productHub2b.destinationPrices.priceBase,
                     price_discounted: productHub2b.destinationPrices.priceSale,
-                    variations,
                     is_active: true
                 }
 
-                if(product) {
+                const productInserted = await createNewProduct( product, variations )
+
+                if (productInserted) {
+
                     log(`Product ${product.name} has been created.`, 'EVENT', getFunctionName())
-                    if (variations.length > 0) {
-                        const productInserted = await createNewProduct( product, variations )
-                        if (productInserted) {
-                            const productId = productInserted._id
-                            const productUpdated = await updateProductById(productId, { sku: productHub2b.skus.source })
-                            if (productUpdated) {
-                                products.push(productUpdated)
-                            }
-                        }
-                    } else {
-                        productsWithoutVariation.push(product)
-                    }
+
+                    productEventEmitter.emit('create', product)
+
+                    products.push(productInserted)
                 }
             }
 
@@ -431,16 +405,6 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
 
                     if (productUpdated) products.push(productUpdated)
                 }
-            }
-        }
-
-        if (productsWithoutVariation.length > 0) {
-            const createdProducts = await createManyProducts( productsWithoutVariation )
-
-            if ( !createdProducts ) {
-                log( 'Could not create Products', 'EVENT', getFunctionName(), 'ERROR' )
-            } else {
-                products.push.apply(products, productsWithoutVariation)
             }
         }
     }
@@ -584,4 +548,20 @@ export const deleteProduct = async (productId: any) => {
         : log(`Could not delete product ${productId}.`, "EVENT", getFunctionName(), "WARN")
 
     return result
+}
+
+export const createVariationFromHub2bAttributes = (productHub2b:HUB2B_Catalog_Product): Variation => {
+
+    const variation: Variation = { stock: productHub2b.stocks.sourceStock }
+
+    productHub2b.attributes.forEach((attribute:Catalog_Attributes) => {
+
+        if (attribute.name.toLowerCase().indexOf("tamanho" || "size" || 'tam') != -1) variation.size = attribute.value
+
+        if (attribute.name.toLowerCase().indexOf("cor" || "color") != -1)  variation.color = attribute.value
+
+        if (attribute.name.toLowerCase().indexOf("sabor" || "flavor") != -1) variation.flavor = attribute.value
+    })
+
+    return variation
 }
