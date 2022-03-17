@@ -5,7 +5,7 @@
 import { Product, Variation } from "../models/product"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName } from "../utils/util"
-import { createNewProduct, createVariation, deleteVariation, findProductById, findProductsByShopId, findVariationById, updateProductById, updateVariationById, createManyProducts, findVariationsByProductId, deleteProductById, findProductByShopIdAndSku } from "../repositories/productRepository"
+import { createNewProduct, createVariation, deleteVariation, findProductById, findProductsByShopId, findVariationById, updateProductById, updateVariationById, findVariationsByProductId, deleteProductById, findProductByShopIdAndSku } from "../repositories/productRepository"
 import productEventEmitter from "../events/product"
 import { renewAccessTokenHub2b } from "./hub2bAuhService"
 import { getCatalogHub2b, getStockHub2b, mapskuHub2b } from "./hub2bService"
@@ -346,7 +346,6 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
                     weight: productHub2b.dimensions.weight,
                     price: productHub2b.destinationPrices.priceBase,
                     price_discounted: productHub2b.destinationPrices.priceSale,
-                    variations,
                     is_active: true
                 }
 
