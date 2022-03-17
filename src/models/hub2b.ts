@@ -221,18 +221,7 @@ export interface HUB2B_Catalog_Product {
         rank: number
       }
     ],
-    attributes: [
-      {
-        idAttribute: number,
-        idProduct: number,
-        idAttributeName: number,
-        idAttributeValue: number,
-        name: string,
-        value: string,
-        attributeType: string,
-        idTenant: number
-      }
-    ],
+    attributes: Catalog_Attributes[],
     warranty: number,
     productURL: string,
     sourcePrices: {
@@ -265,6 +254,16 @@ export interface HUB2B_Catalog_Product {
         source: string,
         destination: any
     }
+}
+export interface Catalog_Attributes {
+    idAttribute: number,
+    idProduct: number,
+    idAttributeName: number,
+    idAttributeValue: number,
+    name: string,
+    value: string,
+    attributeType: string,
+    idTenant: number
 }
 export interface HUB2B_Tenants {
     _id?: any,
