@@ -303,6 +303,8 @@ export const findShopInfoByUserID = async ( userId: string ): Promise<ShopInfo |
  */
 export const findShopInfoByID = async ( _id: string ): Promise<ShopInfo | null> => {
 
+    if (!ObjectID.isValid(_id)) return null
+
     try {
 
         const projection = { userId: 1, name: 1 }

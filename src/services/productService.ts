@@ -107,6 +107,8 @@ export const findProduct = async (product_id: any): Promise<Product | null> => {
  */
 export const findProductByVariation = async (variation_id: any): Promise<Product | null> => {
 
+    if (!ObjectID.isValid(variation_id)) return null
+
     const variation = await findVariationById(variation_id)
 
     variation

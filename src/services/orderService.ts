@@ -14,6 +14,7 @@ import { getToken } from "../utils/cryptUtil"
 import orderEventEmitter from "../events/orders"
 import { findTenantfromShopID } from "./hub2bTenantService"
 import { renewAccessTokenHub2b } from "./hub2bAuhService"
+import { ObjectID } from "mongodb"
 
 export const INTEGRATION_INTERVAL = 1000 * 60 * 60 // 1 hour
 
@@ -110,6 +111,8 @@ export const saveOrders = async (orderList: HUB2B_Order[]) => {
     for (let i = 0; i < orderList.length; i++) {
 
         const orderHub2 = orderList[i]
+
+        if (!ObjectID.isValid(orderHub2.products[0].sku)) continue
 
         const product = await findProductByVariation(orderHub2.products[0].sku)
 
