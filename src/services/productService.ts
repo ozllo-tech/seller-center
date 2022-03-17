@@ -302,6 +302,8 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
     return result
 }
 
+let offset = 0
+
 /**
  * Import products hub2b
  *
@@ -311,7 +313,16 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
 
     const products: Product[] = []
 
-    const productsInHub2b = await getProductsInHub2b(idTenant, status)
+    const productsInHub2b = await getProductsInHub2b(idTenant, status, offset)
+
+    const productsWithNoCategory = productsInHub2b?.filter((product: HUB2B_Catalog_Product) => !product?.categorization?.source)
+
+    if ('2' === status && productsWithNoCategory?.length === 10) {
+
+        offset += productsWithNoCategory.length
+
+        log(`Importing products from hub2b. Offset: ${offset}`, 'EVENT', getFunctionName())
+    }
 
     if (!productsInHub2b) return null
 
@@ -424,9 +435,9 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
  *
  * @returns
  */
- export const getProductsInHub2b = async (idTenant: any, status = '2'): Promise<HUB2B_Catalog_Product[] | null> => {
+ export const getProductsInHub2b = async (idTenant: any, status = '2', offset = 0): Promise<HUB2B_Catalog_Product[] | null> => {
 
-    const productsHub2b = await getCatalogHub2b(status, idTenant)
+    const productsHub2b = await getCatalogHub2b(status, offset, idTenant)
 
     productsHub2b
         ? log( "GET Products in hub2b success", "EVENT", getFunctionName() )
@@ -516,20 +527,22 @@ export const updateIntegrationProducts = async() => {
 
         const shopInfo = await findShopInfoByUserEmail(account.ownerEmail)
 
+        // TODO: deal with default getProductsInHub2b() results limit (50).
+
         if (shopInfo) await importProduct(account.idTenant, shopInfo._id, '3')
     }
 
     log(`Finish integration products update.`, "EVENT", getFunctionName())
 }
 
-export const findMatchingCategory = (productHub2b : HUB2B_Catalog_Product) => {
+export const findMatchingCategory = (productHub2b : HUB2B_Catalog_Product): number => {
 
     if (!productHub2b?.categorization?.source?.name) return 0
 
     return SUBCATEGORIES.filter(subcategory => subcategory.value === productHub2b.categorization.source.name)[0]?.categoryCode || 0
 }
 
-export const findMatchingSubcategory = (productHub2b : HUB2B_Catalog_Product) => {
+export const findMatchingSubcategory = (productHub2b : HUB2B_Catalog_Product): number => {
 
     if (!productHub2b?.categorization?.source?.name) return 0
 
