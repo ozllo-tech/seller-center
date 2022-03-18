@@ -12,6 +12,8 @@ export const init = async () => {
 
     await recoverLateCredential()
 
+    await recoverLateCredential()
+
     let start = '2021-06-01T00:00:00'
 
     let end = '2021-09-30T23:59:59'
@@ -98,7 +100,7 @@ export const init = async () => {
 
     setIntervalAsync(() => updateIntegrationProducts(), 500 * 60 * 60) // 30min
 
-    // setIntervalAsync(() => updateIntegrationStock(), 1000 * 60) // 1min
+    setIntervalAsync(() => updateIntegrationStock(), 10000 * 60) // 10min
 
     // TODO: Implement routine (once a day) to sync orders from main account to subaccounts (syncIntegrationOrderStatus()).
 }

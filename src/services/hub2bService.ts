@@ -573,7 +573,7 @@ export const updateStatusHub2b = async (order_id: string, status: HUB2B_Status) 
     return response.data
 }
 
-export const getCatalogHub2b = async (status: string, idTenant: any): Promise<HUB2B_Catalog_Product[] | null> => {
+export const getCatalogHub2b = async (status: string, offset: number,  idTenant: any): Promise<HUB2B_Catalog_Product[] | null> => {
 
     idTenant
         ? await renewAccessTokenHub2b(false, idTenant)
@@ -586,6 +586,7 @@ export const getCatalogHub2b = async (status: string, idTenant: any): Promise<HU
         + `?access_token=${accessToken}`
         + `&idProductStatus=${status}`
         + `&onlyWithDestinationSKU=false`
+        + `&offset=${offset}`
 
     if ('2' === status) CATALOG_URL += `&limit=10`
 

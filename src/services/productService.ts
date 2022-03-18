@@ -302,6 +302,8 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
     return result
 }
 
+let offset = 0
+
 /**
  * Import products hub2b
  *
@@ -311,100 +313,116 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
 
     const products: Product[] = []
 
-    const productsInHub2b = await getProductsInHub2b(idTenant, status)
+    const productsInHub2b = await getProductsInHub2b(idTenant, status, offset)
 
-    if (productsInHub2b) {
+    const productsWithNoCategory = productsInHub2b?.filter((product: HUB2B_Catalog_Product) => !product?.categorization?.source)
 
-        for await (let productHub2b of productsInHub2b) {
+    if ('2' === status && productsWithNoCategory?.length === 10) {
 
-            const variations: Variation[] = [createVariationFromHub2bAttributes(productHub2b)]
+        offset += productsWithNoCategory.length
 
-            const productExists = await findProductByShopIdAndSku(shop_id, productHub2b.skus.source)
+        log(`Importing products from hub2b. Offset: ${offset}`, 'EVENT', getFunctionName())
+    }
 
-            if (!productExists) {
+    if (!productsInHub2b) return null
 
-                const images: string[] = []
+    for await (let productHub2b of productsInHub2b) {
 
-                productHub2b.images.forEach((imageHub2b) => images.push(imageHub2b.url))
+        const variations: Variation[] = [createVariationFromHub2bAttributes(productHub2b)]
 
-                const product: Product = {
-                    shop_id: new ObjectID(shop_id),
-                    images,
-                    category: findMatchingCategory(productHub2b),
-                    subcategory: findMatchingSubcategory(productHub2b),
-                    nationality: 0,
-                    name: productHub2b.name,
-                    description: productHub2b.description.sourceDescription,
-                    brand: productHub2b.brand,
-                    more_info: '',
-                    ean: productHub2b.ean,
-                    sku: productHub2b.skus.source,
-                    gender: 'U',
-                    height: productHub2b.dimensions.height * 100,
-                    width: productHub2b.dimensions.width * 100,
-                    length: productHub2b.dimensions.length * 100,
-                    weight: productHub2b.dimensions.weight * 1000,
-                    price: productHub2b.destinationPrices.priceBase,
-                    price_discounted: productHub2b.destinationPrices.priceSale,
-                    is_active: true
-                }
+        const productExists = await findProductByShopIdAndSku(shop_id, productHub2b.skus.source)
 
-                const productInserted = await createNewProduct( product, variations )
+        const category = findMatchingCategory(productHub2b)
 
-                if (productInserted) {
+        const subcategory = findMatchingSubcategory(productHub2b)
 
-                    log(`Product ${product.name} has been created.`, 'EVENT', getFunctionName())
+        if (!subcategory) continue
 
-                    productEventEmitter.emit('create', product)
+        if (!productExists) {
 
-                    products.push(productInserted)
-                }
+            const images: string[] = []
+
+            productHub2b.images.forEach((imageHub2b) => images.push(imageHub2b.url))
+
+            const product: Product = {
+                shop_id: new ObjectID(shop_id),
+                images,
+                category: category,
+                subcategory: subcategory,
+                nationality: 0,
+                name: productHub2b.name,
+                description: productHub2b.description.sourceDescription,
+                brand: productHub2b.brand,
+                more_info: '',
+                ean: productHub2b.ean,
+                sku: productHub2b.skus.source,
+                gender: 'U',
+                height: productHub2b.dimensions.height * 100,
+                width: productHub2b.dimensions.width * 100,
+                length: productHub2b.dimensions.length * 100,
+                weight: productHub2b.dimensions.weight * 1000,
+                price: productHub2b.destinationPrices.priceBase,
+                price_discounted: productHub2b.destinationPrices.priceSale,
+                is_active: true
             }
 
-            if (productExists) {
+            const productInserted = await createNewProduct( product, variations )
 
-                // Update description.
+            if (productInserted) {
 
-                if (productExists.description !== productHub2b.description.sourceDescription) {
+                log(`Product ${product.name} has been created.`, 'EVENT', getFunctionName())
 
-                    const productUpdated = await updateProductById(productExists._id, {
-                        description: productHub2b.description.sourceDescription
-                    })
+                productEventEmitter.emit('create', product)
 
-                    if (productUpdated) products.push(productUpdated)
-                }
+                products.push(productInserted)
+            }
+        }
 
-                // Update base price and sales price.
+        if (productExists) {
 
-                if (productExists.price !== productHub2b.destinationPrices.priceBase || productExists.price_discounted !== productHub2b.destinationPrices.priceSale) {
+            if (!productHub2b.skus?.destination) products.push(productExists)
 
-                    await updateProductById(productExists._id, {
-                        price: productHub2b.destinationPrices.priceBase,
-                        price_discounted: productHub2b.destinationPrices.priceSale
-                    })
-                }
+            // Update description.
 
-                // Update stock.
+            if (productExists.description !== productHub2b.description.sourceDescription) {
 
-                if (Array.isArray(productExists.variations)) {
-                    productExists.variations.forEach(async (variation) => {
-                        if (variation.stock !== productHub2b.stocks.sourceStock) {
-                            await updateVariationById(variation._id, { stock: productHub2b.stocks.sourceStock })
-                        }
-                    })
-                }
+                const productUpdated = await updateProductById(productExists._id, {
+                    description: productHub2b.description.sourceDescription
+                })
 
-                // Update category.
+                if (productUpdated) products.push(productUpdated)
+            }
 
-                if (productExists.subcategory !== Number(productHub2b?.categorization?.source?.code)) {
+            // Update base price and sales price.
 
-                    const productUpdated = await updateProductById(productExists._id, {
-                        category: findMatchingCategory(productHub2b),
-                        subcategory: findMatchingSubcategory(productHub2b)
-                    })
+            if (productExists.price !== productHub2b.destinationPrices.priceBase || productExists.price_discounted !== productHub2b.destinationPrices.priceSale) {
 
-                    if (productUpdated) products.push(productUpdated)
-                }
+                await updateProductById(productExists._id, {
+                    price: productHub2b.destinationPrices.priceBase,
+                    price_discounted: productHub2b.destinationPrices.priceSale
+                })
+            }
+
+            // Update stock.
+
+            if (Array.isArray(productExists.variations)) {
+                productExists.variations.forEach(async (variation) => {
+                    if (variation.stock !== productHub2b.stocks.sourceStock) {
+                        await updateVariationById(variation._id, { stock: productHub2b.stocks.sourceStock })
+                    }
+                })
+            }
+
+            // Update category.
+
+            if (productExists.subcategory !== Number(productHub2b?.categorization?.source?.code)) {
+
+                const productUpdated = await updateProductById(productExists._id, {
+                    category: findMatchingCategory(productHub2b),
+                    subcategory: findMatchingSubcategory(productHub2b)
+                })
+
+                if (productUpdated) products.push(productUpdated)
             }
         }
     }
@@ -419,9 +437,9 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
  *
  * @returns
  */
- export const getProductsInHub2b = async (idTenant: any, status = '2'): Promise<HUB2B_Catalog_Product[] | null> => {
+ export const getProductsInHub2b = async (idTenant: any, status = '2', offset = 0): Promise<HUB2B_Catalog_Product[] | null> => {
 
-    const productsHub2b = await getCatalogHub2b(status, idTenant)
+    const productsHub2b = await getCatalogHub2b(status, offset, idTenant)
 
     productsHub2b
         ? log( "GET Products in hub2b success", "EVENT", getFunctionName() )
@@ -511,24 +529,30 @@ export const updateIntegrationProducts = async() => {
 
         const shopInfo = await findShopInfoByUserEmail(account.ownerEmail)
 
+        // TODO: deal with default getProductsInHub2b() results limit (50).
+
         if (shopInfo) await importProduct(account.idTenant, shopInfo._id, '3')
     }
 
     log(`Finish integration products update.`, "EVENT", getFunctionName())
 }
 
-export const findMatchingCategory = (productHub2b : HUB2B_Catalog_Product) => {
+export const findMatchingCategory = (productHub2b : HUB2B_Catalog_Product): number => {
 
     if (!productHub2b?.categorization?.source?.name) return 0
 
-    return SUBCATEGORIES.filter(subcategory => subcategory.value === productHub2b.categorization.source.name)[0]?.categoryCode || 0
+    return SUBCATEGORIES.filter(subcategory => {
+        return subcategory.value.toLowerCase() === productHub2b.categorization.source.name.toLowerCase()
+    })[0]?.categoryCode || 0
 }
 
-export const findMatchingSubcategory = (productHub2b : HUB2B_Catalog_Product) => {
+export const findMatchingSubcategory = (productHub2b : HUB2B_Catalog_Product): number => {
 
     if (!productHub2b?.categorization?.source?.name) return 0
 
-    return SUBCATEGORIES.filter( subcategory => subcategory.value === productHub2b.categorization.source.name)[0]?.code || 0
+    return SUBCATEGORIES.filter( subcategory => {
+        return subcategory.value.toLowerCase() === productHub2b.categorization.source.name.toLowerCase()
+    })[0]?.code || 0
 }
 
 export const deleteProduct = async (productId: any) => {
