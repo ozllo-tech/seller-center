@@ -333,7 +333,7 @@ let offset = 0
 
     for await (let productHub2b of productsInHub2b) {
 
-        console.log(productHub2b?.categorization)
+        console.log(productHub2b?.categorization.source.name)
 
         const variations: Variation[] = [createVariationFromHub2bAttributes(productHub2b)]
 
@@ -343,7 +343,11 @@ let offset = 0
 
         const subcategory = findMatchingSubcategory(productHub2b)
 
+        console.log(subcategory)
+
         if (!subcategory) continue
+
+        console.log('continue')
 
         if (!productExists) {
 
