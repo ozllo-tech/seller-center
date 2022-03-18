@@ -311,11 +311,17 @@ let offset = 0
  */
  export const importProduct = async (idTenant: any, shop_id: any, status = '2'): Promise<Product[] | null> => {
 
+    console.log(offset)
+
     const products: Product[] = []
 
     const productsInHub2b = await getProductsInHub2b(idTenant, status, offset)
 
     const productsWithNoCategory = productsInHub2b?.filter((product: HUB2B_Catalog_Product) => !product?.categorization?.source)
+
+    console.log(status)
+
+    console.log(productsWithNoCategory?.length)
 
     if ('2' === status && productsWithNoCategory?.length === 10) {
 
