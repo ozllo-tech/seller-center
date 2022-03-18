@@ -311,16 +311,11 @@ let offset = 0
  */
  export const importProduct = async (idTenant: any, shop_id: any, status = '2'): Promise<Product[] | null> => {
 
-    console.log(offset)
-
     const products: Product[] = []
 
     const productsInHub2b = await getProductsInHub2b(idTenant, status, offset)
 
     const productsWithNoCategory = productsInHub2b?.filter((product: HUB2B_Catalog_Product) => !product?.categorization?.source)
-
-
-    console.log(productsWithNoCategory?.length)
 
     if ('2' === status && productsWithNoCategory?.length === 10) {
 
@@ -333,8 +328,6 @@ let offset = 0
 
     for await (let productHub2b of productsInHub2b) {
 
-        console.log(productHub2b?.categorization.source.name)
-
         const variations: Variation[] = [createVariationFromHub2bAttributes(productHub2b)]
 
         const productExists = await findProductByShopIdAndSku(shop_id, productHub2b.skus.source)
@@ -343,11 +336,7 @@ let offset = 0
 
         const subcategory = findMatchingSubcategory(productHub2b)
 
-        console.log(subcategory)
-
         if (!subcategory) continue
-
-        console.log('continue')
 
         if (!productExists) {
 
@@ -550,14 +539,18 @@ export const findMatchingCategory = (productHub2b : HUB2B_Catalog_Product): numb
 
     if (!productHub2b?.categorization?.source?.name) return 0
 
-    return SUBCATEGORIES.filter(subcategory => subcategory.value === productHub2b.categorization.source.name)[0]?.categoryCode || 0
+    return SUBCATEGORIES.filter(subcategory => {
+        return subcategory.value.toLowerCase() === productHub2b.categorization.source.name.toLowerCase()
+    })[0]?.categoryCode || 0
 }
 
 export const findMatchingSubcategory = (productHub2b : HUB2B_Catalog_Product): number => {
 
     if (!productHub2b?.categorization?.source?.name) return 0
 
-    return SUBCATEGORIES.filter( subcategory => subcategory.value === productHub2b.categorization.source.name)[0]?.code || 0
+    return SUBCATEGORIES.filter( subcategory => {
+        return subcategory.value.toLowerCase() === productHub2b.categorization.source.name.toLowerCase()
+    })[0].code || 0
 }
 
 export const deleteProduct = async (productId: any) => {
