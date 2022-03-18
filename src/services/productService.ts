@@ -551,7 +551,15 @@ export const findMatchingSubcategory = (productHub2b : HUB2B_Catalog_Product): n
     if (!productHub2b?.categorization?.source?.name) return 0
 
     return SUBCATEGORIES.filter( subcategory => {
-        return subcategory.value.toLowerCase() === productHub2b.categorization.source.name.toLowerCase()
+
+        const match = subcategory.value.toLowerCase() === productHub2b.categorization.source.name.toLowerCase()
+
+        match
+            ? log(`Subcategory ${productHub2b.categorization.source.name.toLowerCase()} found.`, "EVENT", getFunctionName() )
+            : log(`Subcategory ${productHub2b.categorization.source.name.toLowerCase()} not found.`, "EVENT", getFunctionName(), "WARN" )
+
+        return match
+
     })[0]?.code || 0
 }
 
