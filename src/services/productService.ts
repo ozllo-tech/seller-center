@@ -319,7 +319,6 @@ let offset = 0
 
     const productsWithNoCategory = productsInHub2b?.filter((product: HUB2B_Catalog_Product) => !product?.categorization?.source)
 
-    console.log(status)
 
     console.log(productsWithNoCategory?.length)
 
@@ -333,6 +332,8 @@ let offset = 0
     if (!productsInHub2b) return null
 
     for await (let productHub2b of productsInHub2b) {
+
+        console.log(productHub2b?.categorization)
 
         const variations: Variation[] = [createVariationFromHub2bAttributes(productHub2b)]
 
