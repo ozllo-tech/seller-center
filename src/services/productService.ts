@@ -427,7 +427,7 @@ let offset = 0
         }
     }
 
-    if ('2' === status && products.length > 0) await mapSku(products, idTenant)
+    if ('2' === status && products.length > 0) mapSku(products, idTenant)
 
     return products
 }
