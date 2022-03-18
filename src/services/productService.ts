@@ -380,6 +380,8 @@ let offset = 0
 
         if (productExists) {
 
+            if (!productHub2b.skus?.destination) products.push(productExists)
+
             // Update description.
 
             if (productExists.description !== productHub2b.description.sourceDescription) {
