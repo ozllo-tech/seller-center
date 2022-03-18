@@ -12,93 +12,95 @@ export const init = async () => {
 
     await recoverLateCredential()
 
-    // let start = '2021-06-01T00:00:00'
+    await recoverLateCredential()
 
-    // let end = '2021-09-30T23:59:59'
+    let start = '2021-06-01T00:00:00'
 
-    // await integrateHub2bOrders(start, end)
+    let end = '2021-09-30T23:59:59'
 
-    // start = '2021-10-01T00:00:00'
+    await integrateHub2bOrders(start, end)
 
-    // end = '2021-10-31T23:59:59'
+    start = '2021-10-01T00:00:00'
 
-    // await integrateHub2bOrders(start, end)
+    end = '2021-10-31T23:59:59'
 
-    // start = '2021-11-01T00:00:00'
+    await integrateHub2bOrders(start, end)
 
-    // end = '2021-11-19T23:59:59'
+    start = '2021-11-01T00:00:00'
 
-    // await integrateHub2bOrders(start, end)
+    end = '2021-11-19T23:59:59'
 
-    // start = '2021-11-20T00:00:00'
+    await integrateHub2bOrders(start, end)
 
-    // end = '2021-11-25T23:59:59'
+    start = '2021-11-20T00:00:00'
 
-    // await integrateHub2bOrders(start, end)
+    end = '2021-11-25T23:59:59'
 
-    // start = '2021-11-26T00:00:00'
+    await integrateHub2bOrders(start, end)
 
-    // end = '2021-11-26T23:59:59'
+    start = '2021-11-26T00:00:00'
 
-    // await integrateHub2bOrders(start, end)
+    end = '2021-11-26T23:59:59'
 
-    // start = '2021-11-27T00:00:00'
+    await integrateHub2bOrders(start, end)
 
-    // end = '2021-11-27T23:59:59'
+    start = '2021-11-27T00:00:00'
 
-    // await integrateHub2bOrders(start, end)
+    end = '2021-11-27T23:59:59'
 
-    // start = '2021-11-28T00:00:00'
+    await integrateHub2bOrders(start, end)
 
-    // end = '2021-11-28T23:59:59'
+    start = '2021-11-28T00:00:00'
 
-    // await integrateHub2bOrders(start, end)
+    end = '2021-11-28T23:59:59'
 
-    // start = '2021-11-29T00:00:00'
+    await integrateHub2bOrders(start, end)
 
-    // end = '2021-11-29T23:59:59'
+    start = '2021-11-29T00:00:00'
 
-    // await integrateHub2bOrders(start, end)
+    end = '2021-11-29T23:59:59'
 
-    // start = '2021-11-30T00:00:00'
+    await integrateHub2bOrders(start, end)
 
-    // end = '2021-11-30T23:59:59'
+    start = '2021-11-30T00:00:00'
 
-    // await integrateHub2bOrders(start, end)
+    end = '2021-11-30T23:59:59'
 
-    // start = '2021-12-01T00:00:00'
+    await integrateHub2bOrders(start, end)
 
-    // end = '2021-12-02T23:59:59'
+    start = '2021-12-01T00:00:00'
 
-    // await integrateHub2bOrders(start, end)
+    end = '2021-12-02T23:59:59'
 
-    // start = '2021-12-03T00:00:00'
+    await integrateHub2bOrders(start, end)
 
-    // end = '2022-01-02T23:59:59'
+    start = '2021-12-03T00:00:00'
 
-    // await integrateHub2bOrders(start, end)
+    end = '2022-01-02T23:59:59'
 
-    // start = '2022-01-03T00:00:00'
+    await integrateHub2bOrders(start, end)
 
-    // end = '2022-02-01T23:59:59'
+    start = '2022-01-03T00:00:00'
 
-    // await integrateHub2bOrders(start, end)
+    end = '2022-02-01T23:59:59'
 
-    // start = '2022-02-02T00:00:00'
+    await integrateHub2bOrders(start, end)
 
-    await integrateHub2bOrders('2022-03-17T00:00:00', nowIsoDateHub2b())
+    start = '2022-02-02T00:00:00'
 
-    // setInterval(async () => await integrateHub2bOrders(), INTEGRATION_INTERVAL)
+    await integrateHub2bOrders(start, nowIsoDateHub2b())
+
+    setInterval(async () => await integrateHub2bOrders(), INTEGRATION_INTERVAL)
 
     await getTenantAuths()
 
-    // await updateIntegrationProducts()
+    await updateIntegrationProducts()
 
-    // await updateIntegrationStock()
+    await updateIntegrationStock()
 
-    // setIntervalAsync(() => updateIntegrationProducts(), 500 * 60 * 60) // 30min
+    setIntervalAsync(() => updateIntegrationProducts(), 500 * 60 * 60) // 30min
 
-    // setIntervalAsync(() => updateIntegrationStock(), 1000 * 60) // 1min
+    setIntervalAsync(() => updateIntegrationStock(), 10000 * 60) // 10min
 
     // TODO: Implement routine (once a day) to sync orders from main account to subaccounts (syncIntegrationOrderStatus()).
 }
