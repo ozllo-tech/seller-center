@@ -552,7 +552,7 @@ export const findMatchingSubcategory = (productHub2b : HUB2B_Catalog_Product): n
 
     return SUBCATEGORIES.filter( subcategory => {
         return subcategory.value.toLowerCase() === productHub2b.categorization.source.name.toLowerCase()
-    })[0].code || 0
+    })[0]?.code || 0
 }
 
 export const deleteProduct = async (productId: any) => {
