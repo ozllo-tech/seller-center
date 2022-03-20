@@ -302,6 +302,7 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
     return result
 }
 
+// TODO: find out a way to reset the offset to 0 when ideTenant or shop_id changes.
 let offset = 0
 
 /**
