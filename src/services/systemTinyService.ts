@@ -13,7 +13,7 @@ import { SIZES_DEFAULT } from "../models/size"
 import { FLAVORS } from "../models/flavors"
 import { Tiny_Stock } from "../models/tinyStock"
 import { Tiny_Price } from "../models/tinyPrice"
-import { Item, Tiny_Order_Request, Tiny_Order_Response } from "../models/tinyOrder"
+import { Item, ORDER_STATUS_HUB2B_TINY, Tiny_Order_Request, Tiny_Order_Response } from "../models/tinyOrder"
 import { Order } from "../models/order"
 import { findOneOrderAndModify } from "../repositories/orderRepository"
 import format from "date-fns/format"
@@ -379,7 +379,7 @@ export const parseTinyOrder = (order: Order): Tiny_Order_Request => {
             nome_transportador: hub2bOrder.shipping.provider,
             valor_frete: hub2bOrder.shipping.price,
             valor_desconto: hub2bOrder.payment.totalDiscount,
-            situacao: "aprovado",
+            situacao: ORDER_STATUS_HUB2B_TINY[hub2bOrder.status.status],
             forma_frete: hub2bOrder.shipping.service
         },
         ...(hub2bOrder.payment.method.length ? {forma_pagamento: hub2bOrder.payment.method} : {}),

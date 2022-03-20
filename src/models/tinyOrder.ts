@@ -17,7 +17,7 @@ export interface Pedido {
     valor_desconto:          number;
     numero_ordem_compra?:     string;
     numero_pedido_ecommerce?: string;
-    situacao: "aberto" | "aprovado" | "preparando_envio" | "faturado" | "pronto_envio" | "enviado" | "entregue" | "cancelado";
+    situacao:                 string;
     obs?:                    string;
     forma_envio?:            string;
     forma_frete:             string;
@@ -118,4 +118,14 @@ export interface Registro_Element {
 
 export interface Erro {
     erro: string;
+}
+
+export const ORDER_STATUS_HUB2B_TINY = {
+    Pending: "aberto",
+    Approved: "aprovado",
+    Invoiced: "faturado",
+    Shipped: "enviado",
+    Delivered: "entregue",
+    Canceled: "cancelado",
+    Completed: "entregue"
 }
