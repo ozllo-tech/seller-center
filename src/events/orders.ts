@@ -42,7 +42,7 @@ orderEventEmitter.on('delivered', (orderId, status) => {
 
 })
 
-orderEventEmitter.on('integration', (order, tenantID) => {
+orderEventEmitter.on('new', (order, tenantID) => {
 
     sendOrderToTenant(order.order, tenantID)
 

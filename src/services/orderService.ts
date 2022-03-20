@@ -156,7 +156,7 @@ export const savNewOrder = async (shop_id: string, order: HUB2B_Order) => {
 
         const tenant = await findTenantfromShopID(newOrder.shop_id)
 
-        if (tenant) orderEventEmitter.emit('integration', newOrder, tenant.idTenant)
+        if (tenant) orderEventEmitter.emit('new', newOrder, tenant.idTenant)
     }
 
     newOrder
