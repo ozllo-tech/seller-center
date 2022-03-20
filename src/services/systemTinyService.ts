@@ -319,6 +319,7 @@ export const sendTinyOrder = async (order: Order, token: string): Promise<Tiny_O
     if (!orderResponse) return null
 
     // TODO: handle tiny response errors.
+    // https://tiny.com.br/api-docs/api2-tabelas-processamento
 
     if (!orderResponse.data?.retorno?.registros?.registro?.id) return orderResponse.data
 
@@ -378,7 +379,7 @@ export const parseTinyOrder = (order: Order): Tiny_Order_Request => {
             nome_transportador: hub2bOrder.shipping.provider,
             valor_frete: hub2bOrder.shipping.price,
             valor_desconto: hub2bOrder.payment.totalDiscount,
-            situacao: "aberto",
+            situacao: "aprovado",
             forma_frete: hub2bOrder.shipping.service
         },
         ...(hub2bOrder.payment.method.length ? {forma_pagamento: hub2bOrder.payment.method} : {}),
