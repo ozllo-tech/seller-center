@@ -421,7 +421,7 @@ export const syncIntegrationOrderStatus = async (order: Order, status: string) =
 
         const updated = await updateStatusHub2b(order.tenant.order, order.order.status)
 
-        if (updated) orderEventEmitter.emit('updated', order.order, status)
+        if (updated) orderEventEmitter.emit('updated', order, status)
 
         updated
             ? log(`Order ${order_id} is in sync with order ${order.tenant.order} from tenant ${order.tenant.id}.`, 'EVENT', getFunctionName())

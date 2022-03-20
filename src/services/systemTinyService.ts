@@ -392,3 +392,34 @@ export const parseTinyOrder = (order: Order): Tiny_Order_Request => {
 
     return tinyOrderRequest
 }
+
+export const updateTinyOrderStatus = async (order: Order): Promise<Tiny_Order_Response|null> => {
+
+    const tinyOrderId = order?.tiny_order_id
+
+    if (!tinyOrderId) return null
+
+    const system = await findOneSystemIntegrationData('shop_id', new ObjectID(order.shop_id))
+
+    if (!system) return null
+
+    const tinyOrderStatus = ORDER_STATUS_HUB2B_TINY[order.order.status.status]
+
+    const data = { situacao: tinyOrderStatus, id: tinyOrderId }
+
+    const orderResponse = await requestTiny(`https://api.tiny.com.br/api2/pedido.alterar.situacao.php`, 'POST', system.data.token, data)
+
+    if (!orderResponse) return null
+
+    // TODO: handle tiny response errors.
+    // https://tiny.com.br/api-docs/api2-tabelas-processamento
+
+    if (!orderResponse.data?.retorno?.registros?.registro?.id) return orderResponse.data
+
+    orderResponse
+        ? log(`Order ${order.order.reference.id} status updated with Tiny order status ${tinyOrderStatus}`, 'EVENT', getFunctionName())
+        : log(`Order ${order.order.reference.id} status not updated with Tiny order status ${tinyOrderStatus}`, 'EVENT', getFunctionName())
+
+    return orderResponse.data
+
+}

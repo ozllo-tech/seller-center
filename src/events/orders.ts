@@ -3,16 +3,20 @@
 //
 
 import events from 'events'
+import { Order } from '../models/order'
 import { findIntegrationOrder } from '../services/integrationService'
 import { sendOrderEmailToSeller } from '../services/mailService'
 import { sendOrderToTenant } from '../services/orderService'
+import { updateTinyOrderStatus } from '../services/systemTinyService'
 import { log } from '../utils/loggerUtil'
 
 const orderEventEmitter = new events.EventEmitter()
 
-orderEventEmitter.on('updated', (order, status) => {
+orderEventEmitter.on('updated', (order: Order, status) => {
 
     log(`Order ${order.order.reference.id} has changed to ${status}.`, 'EVENT', 'onOrderUpdatedEvent', 'INFO')
+
+    updateTinyOrderStatus(order)
 
 })
 
