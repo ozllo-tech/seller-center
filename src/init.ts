@@ -12,8 +12,6 @@ export const init = async () => {
 
     await recoverLateCredential()
 
-    await recoverLateCredential()
-
     let start = '2021-06-01T00:00:00'
 
     let end = '2021-09-30T23:59:59'
