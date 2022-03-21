@@ -6,6 +6,8 @@ import { authMiddleware, userCanAccessShop, validateSystemPayload } from '../uti
 import { activateSystemIntegration, findSystemByShopID, saveSystemIntegrationData } from '../services/integrationService';
 import { ObjectID } from 'mongodb';
 import { importTinyProduct, updateTinyPrice, updateTinyStock } from '../services/systemTinyService';
+import { ORDER_STATUS_TINY_HUB2B } from '../models/tinyOrder';
+import { findOrderByField } from '../repositories/orderRepository';
 
 const router = Router()
 
@@ -114,6 +116,32 @@ router.post('/system/tiny/webhook/price', async (req: Request, res: Response, ne
 
     return res.status(ok.status).send()
 
+})
+
+router.post('/system/tiny/webhook/order', async (req: Request, res: Response, next: NextFunction) => {
+
+    const tinyOrderID = req.body?.dados?.idPedidoEcommerce
+
+    const order = await findOrderByField('tiny_order_id', Number(tinyOrderID))
+
+    const orderID = order?.order.reference.id?.toString()
+
+    if (!orderID) return res.status(ok.status).send()
+
+    const tinyStatus: string = req.body?.dados?.situacao
+
+    const hub2bStatus = Object.entries(ORDER_STATUS_TINY_HUB2B).find( ([key]) => key === tinyStatus)
+
+    if (!hub2bStatus?.[1]) return res.status(ok.status).send()
+
+    const result = await updateStatus(orderID, hub2bStatus[1])
+
+    if (!result)
+        return res
+            .status(internalServerError.status)
+            .send(createHttpStatus(internalServerError))
+
+    return res.status(ok.status).send()
 })
 
 export { router as integrationRouter }

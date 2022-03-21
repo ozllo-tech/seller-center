@@ -4,10 +4,9 @@
 
 import events from 'events'
 import { Order } from '../models/order'
-import { findIntegrationOrder } from '../services/integrationService'
 import { sendOrderEmailToSeller } from '../services/mailService'
 import { sendOrderToTenant } from '../services/orderService'
-import { updateTinyOrderStatus } from '../services/systemTinyService'
+import { sendTinyOrder, updateTinyOrderStatus } from '../services/systemTinyService'
 import { log } from '../utils/loggerUtil'
 
 const orderEventEmitter = new events.EventEmitter()
@@ -46,11 +45,15 @@ orderEventEmitter.on('delivered', (orderId, status) => {
 
 })
 
-orderEventEmitter.on('new', (order, tenantID) => {
+orderEventEmitter.on('new_from_tenant', (order, tenantID) => {
 
     sendOrderToTenant(order.order, tenantID)
 
-    findIntegrationOrder(order)
+})
+
+orderEventEmitter.on('new_from_system', (order, system) => {
+
+    if ('tiny' === system.name) sendTinyOrder(order, system.data.token)
 
 })
 

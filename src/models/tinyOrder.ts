@@ -129,3 +129,12 @@ export const ORDER_STATUS_HUB2B_TINY = {
     Canceled: "cancelado",
     Completed: "entregue"
 }
+
+export const ORDER_STATUS_TINY_HUB2B = {
+    aberto: "Pending",
+    aprovado: "Approved",
+    faturado: "Invoiced",
+    enviado: "Shipped",
+    entregue: "Delivered",
+    cancelado: "Canceled"
+}

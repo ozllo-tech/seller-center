@@ -2,7 +2,7 @@ import { ObjectID } from "mongodb"
 import { Order } from "../models/order"
 import { System_Integration } from "../models/system"
 import { updateSystemIntegrationData, findOneSystemIntegrationData } from "../repositories/systemRepository"
-import { getTinyInfo, sendTinyOrder } from "./systemTinyService"
+import { getTinyInfo } from "./systemTinyService"
 
 export const saveSystemIntegrationData = async (shopID: string, system: any) => {
 
@@ -53,6 +53,5 @@ export const findIntegrationOrder = async (order: Order) => {
 
     if (!system) return null
 
-    if ('tiny' === system.name) return sendTinyOrder(order, system.data.token)
-
+    return system
 }

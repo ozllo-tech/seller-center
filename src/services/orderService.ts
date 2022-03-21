@@ -15,6 +15,7 @@ import orderEventEmitter from "../events/orders"
 import { findTenantfromShopID } from "./hub2bTenantService"
 import { renewAccessTokenHub2b } from "./hub2bAuhService"
 import { ObjectID } from "mongodb"
+import { findIntegrationOrder } from "./integrationService"
 
 export const INTEGRATION_INTERVAL = 1000 * 60 * 60 // 1 hour
 
@@ -152,16 +153,20 @@ export const savNewOrder = async (shop_id: string, order: HUB2B_Order) => {
 
     const newOrder = await newOrderHub2b({ order, shop_id })
 
+    newOrder
+        ? log(`Order ${order.reference.id} saved.`, 'EVENT', getFunctionName())
+        : log(`Could not save order ${order.reference.id}.`, 'EVENT', getFunctionName(), 'ERROR')
+
     if (newOrder) {
 
         const tenant = await findTenantfromShopID(newOrder.shop_id)
 
-        if (tenant) orderEventEmitter.emit('new', newOrder, tenant.idTenant)
-    }
+        if (tenant) return orderEventEmitter.emit('new_from_tenant', newOrder, tenant.idTenant)
 
-    newOrder
-        ? log(`Order ${order.reference.id} saved.`, 'EVENT', getFunctionName())
-        : log(`Could not save order ${order.reference.id}.`, 'EVENT', getFunctionName(), 'ERROR')
+        const system = await findIntegrationOrder(newOrder)
+
+        if (system) return orderEventEmitter.emit('new_from_system', newOrder, system)
+    }
 }
 
 export const sendInvoice = async (order: any, data: any) : Promise<HUB2B_Invoice | null> => {
