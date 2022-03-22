@@ -15,8 +15,10 @@ import { Tiny_Stock } from "../models/tinyStock"
 import { Tiny_Price } from "../models/tinyPrice"
 import { Item, ORDER_STATUS_HUB2B_TINY, Tiny_Order_Request, Tiny_Order_Response } from "../models/tinyOrder"
 import { Order } from "../models/order"
-import { findOneOrderAndModify } from "../repositories/orderRepository"
+import { findOneOrderAndModify, findOrderByField } from "../repositories/orderRepository"
 import format from "date-fns/format"
+import { HUB2B_Invoice } from "../models/hub2b"
+import { postInvoiceHub2b } from "./hub2bService"
 
 export const requestTiny = async (url: string, method: Method, token: string, params?: any): Promise<any> => {
 
@@ -422,4 +424,32 @@ export const updateTinyOrderStatus = async (order: Order): Promise<Tiny_Order_Re
 
     return orderResponse.data
 
+}
+
+export const sendTinyInvoiceToHub = async (tinyInvoice: any): Promise<Boolean> => {
+
+    const invoiceHub: HUB2B_Invoice = {
+        key: tinyInvoice.chaveAcesso,
+        number: tinyInvoice.numero,
+        cfop: "5.102",
+        series: tinyInvoice.serie,
+        issueDate: tinyInvoice.dataEmissao,
+        totalAmount: tinyInvoice.valorNota
+    }
+
+    const order = await findOrderByField('tiny_order_id', tinyInvoice.idPedidoEcommerce)
+
+    if (!order?.order?.reference?.id) return false
+
+    const hub2bInvoiceResponse = await postInvoiceHub2b(order.order.reference.id.toString(), invoiceHub, false)
+
+    // TODO: maybe update order status to "Invoiced".
+
+    hub2bInvoiceResponse
+        ? log(`Tiny invoice ${tinyInvoice.chaveAcesso} sent to Hub2B`, 'EVENT', getFunctionName(), 'INFO')
+        : log(`Tiny Invoice ${tinyInvoice.chaveAcesso} not sent to Hub2B with key`, 'EVENT', getFunctionName(), 'WARN')
+
+    if (!hub2bInvoiceResponse) return false
+
+    return true
 }

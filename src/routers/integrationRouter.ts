@@ -5,7 +5,7 @@ import { updateStatus } from '../services/orderService';
 import { authMiddleware, userCanAccessShop, validateSystemPayload } from '../utils/middlewares';
 import { activateSystemIntegration, findSystemByShopID, saveSystemIntegrationData } from '../services/integrationService';
 import { ObjectID } from 'mongodb';
-import { importTinyProduct, updateTinyPrice, updateTinyStock } from '../services/systemTinyService';
+import { importTinyProduct, sendTinyInvoiceToHub, updateTinyPrice, updateTinyStock } from '../services/systemTinyService';
 import { ORDER_STATUS_TINY_HUB2B } from '../models/tinyOrder';
 import { findOrderByField } from '../repositories/orderRepository';
 
@@ -142,6 +142,16 @@ router.post('/system/tiny/webhook/order', async (req: Request, res: Response, ne
             .send(createHttpStatus(internalServerError))
 
     return res.status(ok.status).send()
+})
+
+router.post('/system/tiny/webhook/invoice', async (req: Request, res: Response) => {
+
+    const result = await sendTinyInvoiceToHub(req.body.dados)
+
+    if (!result) return res.status(internalServerError.status).send(createHttpStatus(internalServerError))
+
+    return res.status(ok.status).send(result)
+
 })
 
 export { router as integrationRouter }
