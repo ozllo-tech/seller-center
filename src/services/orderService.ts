@@ -299,20 +299,15 @@ export const setupWebhookIntegration = async(): Promise<HUB2B_Order_Webhook | nu
     return setup
 }
 
-export const updateStatus = async (order_id: string, status: string, webhook = false) => {
+export const updateStatus = async (order_id: string, status: string) => {
 
     const orderHub2b: HUB2B_Order = await getOrderHub2b(order_id)
-
-    if ( webhook && 'Pending' == status) {
-
-        // Check if this is a new order and save it.
-
-        if (orderHub2b) saveOrders([orderHub2b])
-    }
 
     const fields = { "order.status.status": status, "order.status.updatedDate": nowIsoDateHub2b() }
 
     const update = await findOneOrderAndModify("order.reference.id", order_id, fields) // update.value = Order
+
+    if (!update?.value && orderHub2b) saveOrders([orderHub2b]) // Check if this is a new order and save it.
 
     if (!update?.value) return update
 
@@ -336,7 +331,7 @@ export const updateStatus = async (order_id: string, status: string, webhook = f
 
     await syncIntegrationOrderStatus(order, status)
 
-    // TODO check if status is one of "Canceled"  or "Completed" before call hu2b
+    // TODO check if status is one of "Canceled"  or "Completed" before call Hub2b.
 
     if (status !== orderHub2b.status.status && order?.tiny_order_id) updateTiny2HubOrderStatus(order_id, status)
 
