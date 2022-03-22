@@ -16,6 +16,7 @@ import { findTenantfromShopID } from "./hub2bTenantService"
 import { renewAccessTokenHub2b } from "./hub2bAuhService"
 import { ObjectID } from "mongodb"
 import { findIntegrationOrder } from "./integrationService"
+import { updateTiny2HubOrderStatus } from "./systemTinyService"
 
 export const INTEGRATION_INTERVAL = 1000 * 60 * 60 // 1 hour
 
@@ -300,11 +301,11 @@ export const setupWebhookIntegration = async(): Promise<HUB2B_Order_Webhook | nu
 
 export const updateStatus = async (order_id: string, status: string, webhook = false) => {
 
+    const orderHub2b: HUB2B_Order = await getOrderHub2b(order_id)
+
     if ( webhook && 'Pending' == status) {
 
         // Check if this is a new order and save it.
-
-        const orderHub2b: HUB2B_Order = await getOrderHub2b(order_id)
 
         if (orderHub2b) saveOrders([orderHub2b])
     }
@@ -334,6 +335,10 @@ export const updateStatus = async (order_id: string, status: string, webhook = f
     }
 
     await syncIntegrationOrderStatus(order, status)
+
+    // TODO check if status is one of "Canceled"  or "Completed" before call hu2b
+
+    if (status !== orderHub2b.status.status && order?.tiny_order_id) updateTiny2HubOrderStatus(order_id, status)
 
     return update
 }
@@ -422,7 +427,9 @@ export const syncIntegrationOrderStatus = async (order: Order, status: string) =
         if (tracked) return orderEventEmitter.emit('shipped', order.tenant.order, tracked)
     }
 
-    if (status !== orderHub2b.status.status) {
+    // TODO: review this segmment. It's a mess!
+
+    if (status !== orderHub2b.status.status && !order.tiny_order_id) {
 
         const updated = await updateStatusHub2b(order.tenant.order, order.order.status)
 

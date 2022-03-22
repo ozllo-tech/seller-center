@@ -1,7 +1,7 @@
 import axios, { Method } from "axios"
 import { findOneSystemIntegrationData } from "../repositories/systemRepository"
 import { log } from "../utils/loggerUtil"
-import { getFunctionName, logAxiosError } from "../utils/util"
+import { getFunctionName, logAxiosError, nowIsoDateHub2b } from "../utils/util"
 import { Product, Variation } from "../models/product"
 import { ObjectID } from "mongodb"
 import { Tiny_Product, Tiny_Product_Map, Tiny_Variacoes } from "../models/tinyProduct"
@@ -17,8 +17,8 @@ import { Item, ORDER_STATUS_HUB2B_TINY, Tiny_Order_Request, Tiny_Order_Response 
 import { Order } from "../models/order"
 import { findOneOrderAndModify, findOrderByField } from "../repositories/orderRepository"
 import format from "date-fns/format"
-import { HUB2B_Invoice } from "../models/hub2b"
-import { postInvoiceHub2b } from "./hub2bService"
+import { HUB2B_Invoice, HUB2B_Status } from "../models/hub2b"
+import { postInvoiceHub2b, updateStatusHub2b } from "./hub2bService"
 
 export const requestTiny = async (url: string, method: Method, token: string, params?: any): Promise<any> => {
 
@@ -424,6 +424,22 @@ export const updateTinyOrderStatus = async (order: Order): Promise<Tiny_Order_Re
 
     return orderResponse.data
 
+}
+
+export const updateTiny2HubOrderStatus = async (orderID: string, status: string): Promise<Boolean> => {
+
+    const hub2bOrderStatus = {
+        active: true,
+        message: '',
+        status: status,
+        updatedDate: nowIsoDateHub2b()
+    }
+
+    const hub2bOrderStatusUpdate = await updateStatusHub2b(orderID, hub2bOrderStatus)
+
+    if (!hub2bOrderStatusUpdate) return false
+
+    return true
 }
 
 export const sendTinyInvoiceToHub = async (tinyInvoice: any): Promise<Boolean> => {
