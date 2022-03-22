@@ -107,6 +107,7 @@ export const findTinyDataByEcommerceID = async (ecommerceID: string) => {
 function parseTinyProduct(tinyProduct: Tiny_Product, shop_id: ObjectID): Product {
 
     // WARN: "brand" field can't be empty. Hub2b will not accept without it.
+    // TODO: get brand from shopInfo.
 
     const product: Product = {
         shop_id: shop_id,
@@ -346,6 +347,8 @@ export const parseTinyOrder = (order: Order): Tiny_Order_Request => {
 
     // Unidade	Informe a unidade corresponde ao produto. Ex:(Un,Pç,Kg).
 
+    // TODO: Map product name and sku with tiny. Its necessary to iterate over variations produvts and get idMapeamento, possibly.
+
     const items: Item[] = hub2bOrder.products.map(product => {
         return {
             item: {
@@ -444,22 +447,25 @@ export const updateTiny2HubOrderStatus = async (orderID: string, status: string)
 
 export const sendTinyInvoiceToHub = async (tinyInvoice: any): Promise<Boolean> => {
 
+    // TODO: Get and send cfop from XML. Send the XML file as well.
+
     const invoiceHub: HUB2B_Invoice = {
         key: tinyInvoice.chaveAcesso,
         number: tinyInvoice.numero,
-        cfop: "5.102",
         series: tinyInvoice.serie,
         issueDate: tinyInvoice.dataEmissao,
         totalAmount: tinyInvoice.valorNota
     }
 
-    const order = await findOrderByField('tiny_order_id', tinyInvoice.idPedidoEcommerce)
+    const order = await findOrderByField('order.reference.id', Number(tinyInvoice.idPedidoEcommerce))
 
-    if (!order?.order?.reference?.id) return false
+    if (!order) return false
 
-    const hub2bInvoiceResponse = await postInvoiceHub2b(order.order.reference.id.toString(), invoiceHub, false)
+    const hub2bInvoiceResponse = await postInvoiceHub2b(tinyInvoice.idPedidoEcommerce, invoiceHub, false)
 
-    // TODO: maybe update order status to "Invoiced".
+    const fields = { "order.status.status": 'Invoiced', "order.status.updatedDate": nowIsoDateHub2b() }
+
+    if (hub2bInvoiceResponse) findOneOrderAndModify('order.reference.id', Number(tinyInvoice.idPedidoEcommerce), fields )
 
     hub2bInvoiceResponse
         ? log(`Tiny invoice ${tinyInvoice.chaveAcesso} sent to Hub2B`, 'EVENT', getFunctionName(), 'INFO')

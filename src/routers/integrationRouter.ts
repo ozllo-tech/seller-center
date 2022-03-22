@@ -146,12 +146,11 @@ router.post('/system/tiny/webhook/order', async (req: Request, res: Response, ne
 
 router.post('/system/tiny/webhook/invoice', async (req: Request, res: Response) => {
 
+    if (!req.body?.dados) return res.status(badRequest.status).send(badRequest)
+
     const result = await sendTinyInvoiceToHub(req.body.dados)
 
-    if (!result) return res.status(internalServerError.status).send(createHttpStatus(internalServerError))
-
     return res.status(ok.status).send(result)
-
 })
 
 export { router as integrationRouter }
