@@ -120,9 +120,9 @@ router.post('/system/tiny/webhook/price', async (req: Request, res: Response, ne
 
 router.post('/system/tiny/webhook/order', async (req: Request, res: Response, next: NextFunction) => {
 
-    const tinyOrderID = req.body?.dados?.idPedidoEcommerce
+    const tinyOrderReferenceId = req.body?.dados?.idPedidoEcommerce
 
-    const order = await findOrderByField('tiny_order_id', Number(tinyOrderID))
+    const order = await findOrderByField('order.reference.id', Number(tinyOrderReferenceId))
 
     const orderID = order?.order.reference.id?.toString()
 

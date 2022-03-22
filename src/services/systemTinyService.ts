@@ -25,6 +25,7 @@ export const requestTiny = async (url: string, method: Method, token: string, pa
         const response = await axios({
             method: method,
             url: url,
+            headers: {"Developer-Id": "QAS4PlUW/9qBA4SwKdlz/A==" },
             params: {
                 token: token,
                 formato: 'json',
@@ -380,11 +381,10 @@ export const parseTinyOrder = (order: Order): Tiny_Order_Request => {
             valor_frete: hub2bOrder.shipping.price,
             valor_desconto: hub2bOrder.payment.totalDiscount,
             situacao: ORDER_STATUS_HUB2B_TINY[hub2bOrder.status.status],
-            forma_frete: hub2bOrder.shipping.service
+            forma_frete: hub2bOrder.shipping.service,
+            ...(hub2bOrder.payment.method.length ? {forma_pagamento: hub2bOrder.payment.method} : {}),
+            ...(hub2bOrder.reference.id ? {numero_pedido_ecommerce: hub2bOrder.reference.id.toString()} : {})
         },
-        ...(hub2bOrder.payment.method.length ? {forma_pagamento: hub2bOrder.payment.method} : {}),
-        ...(hub2bOrder.reference.id ? {numero_ordem_compra: hub2bOrder.reference.id.toString()} : {}),
-        ...(hub2bOrder.reference.id ? {numero_pedido_ecommerce: order._id.toString()} : {})
     }
 
     // TODO: map situacao with hub2b.order.status.status
