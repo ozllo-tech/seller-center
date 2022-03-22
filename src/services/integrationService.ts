@@ -49,6 +49,8 @@ export const activateSystemIntegration = async (systemID: string) => {
 
 export const findIntegrationOrder = async (order: Order) => {
 
+    if (!ObjectID.isValid(order.shop_id)) return null
+
     const system = await findOneSystemIntegrationData('shop_id', new ObjectID(order.shop_id))
 
     if (!system) return null
