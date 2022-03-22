@@ -331,8 +331,6 @@ export const updateStatus = async (order_id: string, status: string) => {
 
     await syncIntegrationOrderStatus(order, status)
 
-    // TODO check if status is one of "Canceled"  or "Completed" before call Hub2b.
-
     if (status !== orderHub2b.status.status && order?.tiny_order_id) updateTiny2HubOrderStatus(order_id, status)
 
     return update

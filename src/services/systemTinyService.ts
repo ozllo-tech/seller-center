@@ -17,8 +17,8 @@ import { Item, ORDER_STATUS_HUB2B_TINY, Tiny_Order_Request, Tiny_Order_Response 
 import { Order } from "../models/order"
 import { findOneOrderAndModify, findOrderByField } from "../repositories/orderRepository"
 import format from "date-fns/format"
-import { HUB2B_Invoice, HUB2B_Status } from "../models/hub2b"
-import { postInvoiceHub2b, updateStatusHub2b } from "./hub2bService"
+import { HUB2B_Invoice, HUB2B_Status, HUB2B_Tracking } from "../models/hub2b"
+import { postInvoiceHub2b, postTrackingHub2b, updateStatusHub2b } from "./hub2bService"
 
 export const requestTiny = async (url: string, method: Method, token: string, params?: any): Promise<any> => {
 
@@ -438,6 +438,10 @@ export const updateTiny2HubOrderStatus = async (orderID: string, status: string)
         updatedDate: nowIsoDateHub2b()
     }
 
+    // TODO: check which status can be updated.
+
+    if ('Invoiced' === status || 'Shipped' === status) return false
+
     const hub2bOrderStatusUpdate = await updateStatusHub2b(orderID, hub2bOrderStatus)
 
     if (!hub2bOrderStatusUpdate) return false
@@ -474,4 +478,37 @@ export const sendTinyInvoiceToHub = async (tinyInvoice: any): Promise<Boolean> =
     if (!hub2bInvoiceResponse) return false
 
     return true
+}
+
+export const sendTinyTrackingToHub = async (tracking: any): Promise<HUB2B_Tracking | null> => {
+
+    const now = nowIsoDateHub2b()
+
+    const data: HUB2B_Tracking = {
+        code: tracking.codigoRastreio,
+        url: tracking.urlRastreio,
+        shippingDate: now,
+        shippingProvider: tracking.formaEnvio || tracking.transportadora,
+        shippingService: tracking.formaFrete
+    }
+
+    const orderTracking = await postTrackingHub2b(tracking.idPedidoEcommerce, data, false)
+
+    if (orderTracking) {
+
+        const status: HUB2B_Status = {
+            status: 'Shipped',
+            updatedDate: now,
+            active: true,
+            message: ''
+        }
+
+        await findOneOrderAndModify("order.reference.id", tracking.idPedidoEcommerce, { "order.status": status })
+    }
+
+    orderTracking
+        ? log(`Tracking sent`, 'EVENT', getFunctionName())
+        : log(`Could not send tracking`, 'EVENT', getFunctionName(), 'ERROR')
+
+    return orderTracking
 }
