@@ -13,16 +13,11 @@ const router = Router()
 
 router.post('/order', async (req: Request, res: Response, next: NextFunction) => {
 
+    if (req.body.IdOrder == '0') return res.status(ok.status).send(req.body)
+
     const result = await updateStatus(req.body.IdOrder, req.body.OrderStatus)
 
-    if (!result)
-        return res
-            .status(internalServerError.status)
-            .send(createHttpStatus(internalServerError))
-
-    return res
-        .status(ok.status)
-        .send(req.body)
+    return res.status(ok.status).send(result)
 })
 
 router.post('/order/webhook', async (req: Request, res: Response, next: NextFunction) => {
