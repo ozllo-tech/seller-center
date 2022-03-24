@@ -107,7 +107,8 @@ export const updateProductById = async ( _id: any, patch: any ): Promise<Product
             const idTenant = patch.idTenant | Number(HUB2B_TENANT) // TODO: remove idTenant?
 
             if (patch.price || patch.price_discounted) productEventEmitter.emit('update_price', product, idTenant)
-            else productEventEmitter.emit('update', product, idTenant)
+
+            productEventEmitter.emit('update', product, idTenant)
         }
 
         return product
