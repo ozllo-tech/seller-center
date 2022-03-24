@@ -33,4 +33,5 @@ export interface Variation {
     gluten_free?: boolean,
     lactose_free?: boolean,
     mapping_id?: string
+    tiny_id?: string
 }

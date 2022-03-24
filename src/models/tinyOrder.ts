@@ -7,7 +7,7 @@ export interface Pedido {
     data_prevista:           string;
     cliente:                 Cliente;
     endereco_entrega:        Endereco_Entrega;
-    itens:                   Item[];
+    itens:                   any;
     marcadores?:             Marcador[];
     parcelas?:               Parcela[];
     nome_transportador:      string;

@@ -155,7 +155,8 @@ function parseTinyProduct(tinyProduct: Tiny_Product, shop_id: ObjectID): Product
             flavor: findMatchingFlavor(tinyVariation),
             gluten_free: false,
             lactose_free: false,
-            mapping_id: tinyVariation.idMapeamento
+            mapping_id: tinyVariation.idMapeamento,
+            tiny_id: tinyVariation.codigo
         })
 
         if (tinyVariation.anexos.length) product.images.push(...tinyVariation.anexos.map(anexo => anexo.url))
@@ -175,7 +176,8 @@ function parseTinyVariation(tinyVariation: Tiny_Variacoes, product_id: ObjectID)
         gluten_free: false,
         lactose_free: false,
         product_id: product_id,
-        mapping_id: tinyVariation.idMapeamento
+        mapping_id: tinyVariation.idMapeamento,
+        tiny_id: tinyVariation.codigo
     }
 
     return variation
@@ -316,7 +318,9 @@ export const sendTinyOrder = async (order: Order, token: string): Promise<Tiny_O
 
     const orderID = order.order.reference.id
 
-    const orderRequest = JSON.stringify(parseTinyOrder(order))
+    const tinyOrder = await parseTinyOrder(order)
+
+    const orderRequest = JSON.stringify(tinyOrder)
 
     const orderResponse = await requestTiny('https://api.tiny.com.br/api2/pedido.incluir.php', 'POST', token, {pedido: orderRequest})
 
@@ -341,25 +345,27 @@ export const sendTinyOrder = async (order: Order, token: string): Promise<Tiny_O
 
 }
 
-export const parseTinyOrder = (order: Order): Tiny_Order_Request => {
+export const parseTinyOrder = async(order: Order): Promise<Tiny_Order_Request> => {
 
     const hub2bOrder = order.order
 
     // Unidade	Informe a unidade corresponde ao produto. Ex:(Un,Pç,Kg).
 
-    // TODO: Map product name and sku with tiny. Its necessary to iterate over variations produvts and get idMapeamento, possibly.
+    const items:Item[] = []
 
-    const items: Item[] = hub2bOrder.products.map(product => {
-        return {
+    for await (const product of hub2bOrder.products) {
+
+        const variation = await findVariation(product.sku)
+        items.push( {
             item: {
-                codigo: product.sku,
+                codigo: variation?.tiny_id,
                 descricao: product.name,
                 unidade: '',
                 quantidade: product.quantity,
                 valor_unitario: product.price
             }
-        }
-    })
+        })
+    }
 
     const tinyOrderRequest: Tiny_Order_Request = {
         pedido: {
