@@ -128,21 +128,20 @@ function parseTinyProduct(tinyProduct: Tiny_Product, shop_id: ObjectID): Product
         price_discounted: parseFloat(tinyProduct.dados.precoPromocional) || parseFloat(tinyProduct.dados.preco),
         ean: tinyProduct.dados.gtin,
         sku: tinyProduct.dados.idMapeamento,
-        variations: [],
+        variations: [
+            {
+                stock: tinyProduct.dados.estoqueAtual,
+                size: '',
+                voltage: '',
+                color: '',
+                flavor: '',
+                gluten_free: false,
+                lactose_free: false,
+                mapping_id: tinyProduct.dados.idMapeamento,
+                tiny_id: tinyProduct.dados.codigo
+            }
+        ],
         is_active: true
-    }
-
-    if (tinyProduct.dados.variacoes.length == 0) {
-        // TODO: map product without variations.
-        product.variations?.push({
-            stock: tinyProduct.dados.estoqueAtual,
-            size: '',
-            voltage: '',
-            color: '',
-            flavor: '',
-            gluten_free: false,
-            lactose_free: false
-        })
     }
 
     tinyProduct.dados.variacoes.forEach(tinyVariation => {
