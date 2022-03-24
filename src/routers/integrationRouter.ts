@@ -154,7 +154,7 @@ router.post('/system/tiny/webhook/tracking', async(req: Request, res: Response) 
 
     const result = await sendTinyTrackingToHub(req.body.dados)
 
-    return res.status(ok.status).send()
+    return res.status(ok.status).send(result)
 })
 
 export { router as integrationRouter }
