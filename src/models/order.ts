@@ -8,7 +8,8 @@ export interface Order {
     _id?: any,
     shop_id: any,
     order: HUB2B_Order,
-    tenant?: Tenant_Order
+    tenant?: Tenant_Order,
+    tiny_order_id?: any
 }
 
 export interface OrderIntegration {

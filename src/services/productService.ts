@@ -44,7 +44,7 @@ export const createProduct = async (body: any): Promise<Product | null> => {
         variations
     } = body
 
-    const shop_id = body.shop
+    const shop_id = body.shop || body.shop_id
 
     const ref_product: Product = {
         shop_id,
@@ -189,6 +189,8 @@ export const updateProductImages = async (_id: any, patch: any): Promise<Product
  */
 export const updateProductPrice = async (_id: any, patch: any): Promise<Product | null> => {
 
+    if (!ObjectID.isValid(_id)) return null
+
     const { price, price_discounted } = patch
 
     const product = await updateProductById(_id, { price, price_discounted })
@@ -208,6 +210,8 @@ export const updateProductPrice = async (_id: any, patch: any): Promise<Product 
  * @param _id - product id
  */
 export const updateProductVariationStock = async (_id: any, patch: any): Promise<Product | null> => {
+
+    if (!ObjectID.isValid(_id)) return null
 
     const product = await updateVariationById(_id, patch)
 

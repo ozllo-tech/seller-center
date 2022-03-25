@@ -72,7 +72,7 @@ export interface HUB2B_Address {
 
 export interface HUB2B_Shipping {
     shippingDate: string,
-    estimatedDeliveryDate: String,
+    estimatedDeliveryDate: string,
     responsible: string,
     provider: string,
     service: string,
@@ -148,7 +148,7 @@ export interface HUB2B_Invoice {
     xml?: string,
     key: string,
     number: string,
-    cfop: string,
+    cfop?: string,
     series: string,
     totalAmount: number,
     issueDate: string,

@@ -3,15 +3,19 @@
 //
 
 import events from 'events'
+import { Order } from '../models/order'
 import { sendOrderEmailToSeller } from '../services/mailService'
 import { sendOrderToTenant } from '../services/orderService'
+import { sendTinyOrder, updateTinyOrderStatus } from '../services/systemTinyService'
 import { log } from '../utils/loggerUtil'
 
 const orderEventEmitter = new events.EventEmitter()
 
-orderEventEmitter.on('updated', (order, status) => {
+orderEventEmitter.on('updated', (order: Order, status) => {
 
     log(`Order ${order.order.reference.id} has changed to ${status}.`, 'EVENT', 'onOrderUpdatedEvent', 'INFO')
+
+    updateTinyOrderStatus(order)
 
 })
 
@@ -41,6 +45,16 @@ orderEventEmitter.on('delivered', (orderId, status) => {
 
 })
 
-orderEventEmitter.on('integration', (order, tenantID) => sendOrderToTenant(order.order, tenantID))
+orderEventEmitter.on('new_from_tenant', (order, tenantID) => {
+
+    sendOrderToTenant(order.order, tenantID)
+
+})
+
+orderEventEmitter.on('new_from_system', (order, system) => {
+
+    if ('tiny' === system.name) sendTinyOrder(order, system.data.token)
+
+})
 
 export default orderEventEmitter

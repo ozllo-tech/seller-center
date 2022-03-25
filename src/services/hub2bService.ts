@@ -558,9 +558,15 @@ export const getTrackingHub2b = async (order_id: string) => {
     return tracking
 }
 
-export const updateStatusHub2b = async (order_id: string, status: HUB2B_Status) => {
+export const updateStatusHub2b = async (order_id: string, status: any, idTenant = false) => {
 
-    const URL_STATUS = HUB2B_URL_V2 + `/Orders/${order_id}/Status` + "?access_token=" + TENANT_CREDENTIALS.access_token
+    idTenant
+        ? await renewAccessTokenHub2b(false, idTenant)
+        : await renewAccessTokenHub2b(false, false)
+
+    const accessToken = idTenant ? TENANT_CREDENTIALS.access_token : HUB2B_CREDENTIALS.access_token
+
+    const URL_STATUS = HUB2B_URL_V2 + `/Orders/${order_id}/Status` + "?access_token=" + accessToken
 
     const response = await requestHub2B(URL_STATUS, 'PUT', status)
 

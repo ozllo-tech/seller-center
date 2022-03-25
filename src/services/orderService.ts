@@ -15,6 +15,8 @@ import orderEventEmitter from "../events/orders"
 import { findTenantfromShopID } from "./hub2bTenantService"
 import { renewAccessTokenHub2b } from "./hub2bAuhService"
 import { ObjectID } from "mongodb"
+import { findIntegrationOrder } from "./integrationService"
+import { updateTiny2HubOrderStatus } from "./systemTinyService"
 
 export const INTEGRATION_INTERVAL = 1000 * 60 * 60 // 1 hour
 
@@ -152,16 +154,20 @@ export const savNewOrder = async (shop_id: string, order: HUB2B_Order) => {
 
     const newOrder = await newOrderHub2b({ order, shop_id })
 
+    newOrder
+        ? log(`Order ${order.reference.id} saved.`, 'EVENT', getFunctionName())
+        : log(`Could not save order ${order.reference.id}.`, 'EVENT', getFunctionName(), 'ERROR')
+
     if (newOrder) {
 
         const tenant = await findTenantfromShopID(newOrder.shop_id)
 
-        if (tenant) orderEventEmitter.emit('integration', newOrder, tenant.idTenant)
-    }
+        if (tenant) return orderEventEmitter.emit('new_from_tenant', newOrder, tenant.idTenant)
 
-    newOrder
-        ? log(`Order ${order.reference.id} saved.`, 'EVENT', getFunctionName())
-        : log(`Could not save order ${order.reference.id}.`, 'EVENT', getFunctionName(), 'ERROR')
+        const system = await findIntegrationOrder(newOrder)
+
+        if (system) return orderEventEmitter.emit('new_from_system', newOrder, system)
+    }
 }
 
 export const sendInvoice = async (order: any, data: any) : Promise<HUB2B_Invoice | null> => {
@@ -293,20 +299,15 @@ export const setupWebhookIntegration = async(): Promise<HUB2B_Order_Webhook | nu
     return setup
 }
 
-export const updateStatus = async (order_id: string, status: string, webhook = false) => {
+export const updateStatus = async (order_id: string, status: string) => {
 
-    if ( webhook && 'Pending' == status) {
-
-        // Check if this is a new order and save it.
-
-        const orderHub2b: HUB2B_Order = await getOrderHub2b(order_id)
-
-        if (orderHub2b) saveOrders([orderHub2b])
-    }
+    const orderHub2b: HUB2B_Order = await getOrderHub2b(order_id)
 
     const fields = { "order.status.status": status, "order.status.updatedDate": nowIsoDateHub2b() }
 
     const update = await findOneOrderAndModify("order.reference.id", order_id, fields) // update.value = Order
+
+    if (!update?.value && orderHub2b) saveOrders([orderHub2b]) // Check if this is a new order and save it.
 
     if (!update?.value) return update
 
@@ -329,6 +330,8 @@ export const updateStatus = async (order_id: string, status: string, webhook = f
     }
 
     await syncIntegrationOrderStatus(order, status)
+
+    if (status !== orderHub2b.status.status && order?.tiny_order_id) updateTiny2HubOrderStatus(order_id, status)
 
     return update
 }
@@ -417,11 +420,13 @@ export const syncIntegrationOrderStatus = async (order: Order, status: string) =
         if (tracked) return orderEventEmitter.emit('shipped', order.tenant.order, tracked)
     }
 
-    if (status !== orderHub2b.status.status) {
+    // TODO: review this segmment. It's a mess!
+
+    if (status !== orderHub2b.status.status && !order.tiny_order_id) {
 
         const updated = await updateStatusHub2b(order.tenant.order, order.order.status)
 
-        if (updated) orderEventEmitter.emit('updated', order.order, status)
+        if (updated) orderEventEmitter.emit('updated', order, status)
 
         updated
             ? log(`Order ${order_id} is in sync with order ${order.tenant.order} from tenant ${order.tenant.id}.`, 'EVENT', getFunctionName())

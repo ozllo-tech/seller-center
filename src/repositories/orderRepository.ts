@@ -117,3 +117,22 @@ export const findOneOrderAndModify = async (where: any, by: any, fields: {}) => 
         return null
     }
 }
+
+export const findOrderByField = async(field: any, value: any) => {
+
+    try {
+
+        const filter = { [field]: value }
+
+        const result = await orderCollection.findOne(filter)
+
+        return result
+
+    } catch (error) {
+
+        if (error instanceof MongoError || error instanceof Error)
+            log(error.message, 'EVENT', `User Repository - ${getFunctionName()}`, 'ERROR')
+
+        return null
+    }
+}
