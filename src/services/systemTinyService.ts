@@ -6,7 +6,7 @@ import { Product, Variation } from "../models/product"
 import { ObjectID } from "mongodb"
 import { Tiny_Product, Tiny_Product_Map, Tiny_Variacoes } from "../models/tinyProduct"
 import { createProduct, findProduct, findVariation, updateProductPrice, updateProductVariationStock } from "./productService"
-import { createVariation, deleteVariation, findVariationById, updateProductById, updateVariationById } from "../repositories/productRepository"
+import { createVariation, deleteVariation, findVariationById, findVariationsByProductId, updateProductById, updateVariationById } from "../repositories/productRepository"
 import { SUBCATEGORIES } from "../models/category"
 import { COLORS } from "../models/color"
 import { SIZES_DEFAULT } from "../models/size"
@@ -128,20 +128,23 @@ function parseTinyProduct(tinyProduct: Tiny_Product, shop_id: ObjectID): Product
         price_discounted: parseFloat(tinyProduct.dados.precoPromocional) || parseFloat(tinyProduct.dados.preco),
         ean: tinyProduct.dados.gtin,
         sku: tinyProduct.dados.idMapeamento,
-        variations: [
-            {
-                stock: tinyProduct.dados.estoqueAtual,
-                size: '',
-                voltage: '',
-                color: '',
-                flavor: '',
-                gluten_free: false,
-                lactose_free: false,
-                mapping_id: tinyProduct.dados.idMapeamento,
-                tiny_id: tinyProduct.dados.codigo
-            }
-        ],
+        variations: [],
         is_active: true
+    }
+
+    if (!tinyProduct.dados.variacoes.length) {
+
+        product.variations?.push({
+            stock: tinyProduct.dados.estoqueAtual,
+            size: '',
+            voltage: '',
+            color: '',
+            flavor: '',
+            gluten_free: false,
+            lactose_free: false,
+            mapping_id: tinyProduct.dados.idMapeamento,
+            tiny_id: tinyProduct.dados.codigo
+        })
     }
 
     tinyProduct.dados.variacoes.forEach(tinyVariation => {
@@ -256,15 +259,7 @@ async function updateExistingProduct(tinyProduct: Tiny_Product, existingProduct:
 
     if (!updatedProduct) return null
 
-    // Delete no longer existing tinyVariations.
-
-    if (Array.isArray(existingProduct.variations) && tinyProduct.dados.variacoes.length < existingProduct.variations.length) {
-        existingProduct.variations?.forEach((variation, index) => {
-            if (variation._id.toString() !== tinyProduct.dados.variacoes[index]?.skuMapeamento) {
-                deleteVariation(variation._id)
-            }
-        })
-    }
+    // TODO: Delete no longer existing tinyVariations.
 
     for await (const variation of tinyProduct.dados.variacoes) {
 
@@ -289,23 +284,33 @@ async function updateExistingProduct(tinyProduct: Tiny_Product, existingProduct:
 
 export const updateTinyStock = async (stock: Tiny_Stock): Promise<Product|null> => {
 
-    const updatedProduct = await updateProductVariationStock(stock.dados.skuMapeamento, { stock: stock.dados.saldo })
+    let variationId = stock.dados.skuMapeamento
+
+    if (!stock.dados.skuMapeamentoPai.length) {
+
+        const variation = await findVariationsByProductId(variationId)
+
+        if (!variation) return null
+
+        variationId = variation[0]._id.toString()
+    }
+
+    const updatedProduct = await updateProductVariationStock(variationId, { stock: stock.dados.saldo })
 
     if (!updatedProduct) return null
 
     return updatedProduct
-
 }
 
 export const updateTinyPrice = async (price: Tiny_Price): Promise<Product|null> => {
 
-    const productID = price.dados.skuMapeamentoPai.length ? price.dados.skuMapeamentoPai : price.dados.skuMapeamento
+    if (price.dados.skuMapeamentoPai.length) return null
 
     const priceDiscounted = parseFloat(price.dados.precoPromocional) || parseFloat(price.dados.preco)
 
     const patch = { price: parseFloat(price.dados.preco), price_discounted: priceDiscounted }
 
-    const updatedProduct = await updateProductPrice(productID, patch)
+    const updatedProduct = await updateProductPrice(price.dados.skuMapeamento, patch)
 
     if (!updatedProduct) return null
 
