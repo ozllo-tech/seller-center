@@ -16,7 +16,7 @@ import { findTenantfromShopID } from "./hub2bTenantService"
 import { renewAccessTokenHub2b } from "./hub2bAuhService"
 import { ObjectID } from "mongodb"
 import { findIntegrationOrder } from "./integrationService"
-import { updateTiny2HubOrderStatus } from "./systemTinyService"
+import { updateTiny2HubOrderStatus } from "./tiny2HubService"
 
 export const INTEGRATION_INTERVAL = 1000 * 60 * 60 // 1 hour
 

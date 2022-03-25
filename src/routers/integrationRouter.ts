@@ -5,7 +5,7 @@ import { updateStatus } from '../services/orderService';
 import { authMiddleware, userCanAccessShop, validateSystemPayload } from '../utils/middlewares';
 import { activateSystemIntegration, findSystemByShopID, saveSystemIntegrationData } from '../services/integrationService';
 import { ObjectID } from 'mongodb';
-import { importTinyProduct, sendTinyInvoiceToHub, sendTinyTrackingToHub, updateTinyPrice, updateTinyStock } from '../services/systemTinyService';
+import { importTinyProduct, sendTinyInvoiceToHub, sendTinyTrackingToHub, updateTinyPrice, updateTinyStock } from '../services/tiny2HubService';
 import { ORDER_STATUS_TINY_HUB2B } from '../models/tinyOrder';
 import { findOrderByField } from '../repositories/orderRepository';
 

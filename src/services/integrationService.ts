@@ -2,7 +2,7 @@ import { ObjectID } from "mongodb"
 import { Order } from "../models/order"
 import { System_Integration } from "../models/system"
 import { updateSystemIntegrationData, findOneSystemIntegrationData } from "../repositories/systemRepository"
-import { getTinyInfo } from "./systemTinyService"
+import { getTinyInfo } from "./tiny2HubService"
 
 export const saveSystemIntegrationData = async (shopID: string, system: any) => {
 
