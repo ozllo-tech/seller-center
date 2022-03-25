@@ -24,14 +24,9 @@ router.post('/order/webhook', async (req: Request, res: Response, next: NextFunc
 
     const webhookIntegration = await setupWebhookIntegration()
 
-    if (!webhookIntegration)
-        return res
-            .status(internalServerError.status)
-            .send(webhookIntegration)
+    if (!webhookIntegration) return res.status(internalServerError.status).send(webhookIntegration)
 
-    return res
-        .status(ok.status)
-        .send(webhookIntegration)
+    return res.status(ok.status).send(webhookIntegration)
 })
 
 router.post('/system', [authMiddleware, userCanAccessShop, validateSystemPayload()],
@@ -39,10 +34,7 @@ router.post('/system', [authMiddleware, userCanAccessShop, validateSystemPayload
 
     const result = await saveSystemIntegrationData(req.shop?._id, req.body)
 
-    if (!result)
-        return res
-            .status(internalServerError.status)
-            .send(createHttpStatus(internalServerError))
+    if (!result) return res.status(internalServerError.status).send(createHttpStatus(internalServerError))
 
     return res.status(ok.status).send(result)
 })
@@ -51,10 +43,7 @@ router.get('/system', [authMiddleware, userCanAccessShop], async (req: Request, 
 
     const result = await findSystemByShopID(req.shop?._id)
 
-    if (!result)
-        return res
-            .status(internalServerError.status)
-            .send(createHttpStatus(internalServerError))
+    if (!result) return res.status(internalServerError.status).send(createHttpStatus(internalServerError))
 
     return res.status(ok.status).send(result)
 })
@@ -65,52 +54,36 @@ router.post('/system/:id/activate', [authMiddleware, userCanAccessShop], async (
 
     const result = await activateSystemIntegration(req.params.id)
 
-    if (!result)
-        return res
-            .status(internalServerError.status)
-            .send(createHttpStatus(internalServerError))
+    if (!result) return res.status(internalServerError.status).send(createHttpStatus(internalServerError))
 
     return res.status(ok.status).send(result)
-
 })
 
 router.post('/system/tiny/webhook/product', async (req: Request, res: Response, next: NextFunction) => {
 
     const result = await importTinyProduct(req.body)
 
-    if (!result)
-        return res
-            .status(internalServerError.status)
-            .send(createHttpStatus(internalServerError))
+    if (!result) return res.status(internalServerError.status).send(createHttpStatus(internalServerError))
 
-    return res.status(ok.status).send(JSON.stringify(result))
-
+    return res.status(ok.status).send(result)
 })
 
 router.post('/system/tiny/webhook/stock', async (req: Request, res: Response, next: NextFunction) => {
 
     const result = await updateTinyStock(req.body)
 
-    if (!result)
-        return res
-            .status(internalServerError.status)
-            .send(createHttpStatus(internalServerError))
+    if (!result) return res.status(internalServerError.status).send(createHttpStatus(internalServerError))
 
-    return res.status(ok.status).send()
-
+    return res.status(ok.status).send(result)
 })
 
 router.post('/system/tiny/webhook/price', async (req: Request, res: Response, next: NextFunction) => {
 
     const result = await updateTinyPrice(req.body)
 
-    if (!result)
-        return res
-            .status(internalServerError.status)
-            .send(createHttpStatus(internalServerError))
+    if (!result) return res.status(internalServerError.status).send(createHttpStatus(internalServerError))
 
-    return res.status(ok.status).send()
-
+    return res.status(ok.status).send(result)
 })
 
 router.post('/system/tiny/webhook/order', async (req: Request, res: Response, next: NextFunction) => {
@@ -131,12 +104,9 @@ router.post('/system/tiny/webhook/order', async (req: Request, res: Response, ne
 
     const result = await updateStatus(orderID, hub2bStatus[1])
 
-    if (!result)
-        return res
-            .status(internalServerError.status)
-            .send(createHttpStatus(internalServerError))
+    if (!result) return res.status(internalServerError.status).send(createHttpStatus(internalServerError))
 
-    return res.status(ok.status).send()
+    return res.status(ok.status).send(result)
 })
 
 router.post('/system/tiny/webhook/invoice', async (req: Request, res: Response) => {

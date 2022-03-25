@@ -282,7 +282,7 @@ async function updateExistingProduct(tinyProduct: Tiny_Product, existingProduct:
     return mapTinyProduct(updatedProduct, tinyProduct)
 }
 
-export const updateTinyStock = async (stock: Tiny_Stock): Promise<Product|null> => {
+export const updateTinyStock = async (stock: Tiny_Stock): Promise<Variation|null> => {
 
     let variationId = stock.dados.skuMapeamento
 
@@ -299,7 +299,7 @@ export const updateTinyStock = async (stock: Tiny_Stock): Promise<Product|null> 
 
     if (!updatedProduct) return null
 
-    return updatedProduct
+    return updatedProduct.variations?.find(variation => variation._id.toString() == variationId) || null
 }
 
 export const updateTinyPrice = async (price: Tiny_Price): Promise<Product|null> => {
