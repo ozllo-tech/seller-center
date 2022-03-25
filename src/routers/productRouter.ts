@@ -4,7 +4,8 @@
 
 import { Router, Request, Response, NextFunction } from 'express'
 import { deleteVariation } from '../repositories/productRepository'
-import { createNewVariation, createProduct, findProductsByShop, updateProduct, updateProductImages, updateProductPrice, updateProductVariation, updateProductVariationStock, importProduct, deleteProduct } from '../services/productService'
+import { createNewVariation, createProduct, findProductsByShop, updateProduct, updateProductImages, updateProductPrice, updateProductVariation, updateProductVariationStock, deleteProduct } from '../services/productService'
+import { importProduct } from '../services/tenant2HubService'
 import { uploadProductPicture } from '../services/uploadService'
 import { badRequest, createHttpStatus, internalServerError, noContent, ok } from '../utils/httpStatus'
 import { log } from '../utils/loggerUtil'
