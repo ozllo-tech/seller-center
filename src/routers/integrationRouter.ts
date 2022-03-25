@@ -115,6 +115,8 @@ router.post('/system/tiny/webhook/invoice', async (req: Request, res: Response) 
 
     const result = await sendTinyInvoiceToHub(req.body.dados)
 
+    // TODO: treat tiny2hub errors and maybe save invoice payload in database.
+
     return res.status(ok.status).send(result)
 })
 
@@ -123,6 +125,8 @@ router.post('/system/tiny/webhook/tracking', async(req: Request, res: Response) 
     if (!req.body?.dados) return res.status(badRequest.status).send(badRequest)
 
     const result = await sendTinyTrackingToHub(req.body.dados)
+
+    // TODO: treat tiny2hub errors and maybe save tracking payload in database.
 
     return res.status(ok.status).send(result)
 })
