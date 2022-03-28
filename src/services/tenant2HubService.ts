@@ -20,7 +20,7 @@ let offset = 0
  *
  * @param idTenant
  */
-export const importProduct = async (idTenant: any, shop_id: any, status = '2'): Promise<Product[] | null> => {
+export const importProduct = async (idTenant: any, shop_id: any, status = '2', offset = 0): Promise<Product[] | null> => {
 
     const products: Product[] = []
 
@@ -91,17 +91,15 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2'): 
 
         if (productExists) {
 
-            if (!productHub2b.skus?.destination) products.push(productExists)
+            products.push(productExists)
 
             // Update description.
 
             if (productExists.description !== productHub2b.description.sourceDescription) {
 
-                const productUpdated = await updateProductById(productExists._id, {
+                await updateProductById(productExists._id, {
                     description: productHub2b.description.sourceDescription
                 })
-
-                if (productUpdated) products.push(productUpdated)
             }
 
             // Update base price and sales price.
@@ -128,12 +126,10 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2'): 
 
             if (productExists.subcategory !== Number(productHub2b?.categorization?.source?.code)) {
 
-                const productUpdated = await updateProductById(productExists._id, {
+                await updateProductById(productExists._id, {
                     category: findMatchingCategory(productHub2b),
                     subcategory: findMatchingSubcategory(productHub2b)
                 })
-
-                if (productUpdated) products.push(productUpdated)
             }
         }
     }
@@ -166,7 +162,9 @@ export const mapSku = async (products: Product[], idTenant: any) => {
     const data = products.map(item => ({ sourceSKU: item.sku, destinationSKU: item._id }))
 
     // TODO validate mapping before:
+
     // https://developershub2b.gitbook.io/hub2b-api/api-para-seller-erp/produto/mapeamento-de-sku-ja-existente-no-canal-de-venda
+    // TODO: filter products with sku already mapped. (skus.destination.length > 0 || status.id === 3)
 
     const mapping = await mapskuHub2b(data, idTenant)
 
@@ -191,13 +189,22 @@ export const updateIntegrationProducts = async () => {
 
     for await (const account of accounts) {
 
-        await renewAccessTokenHub2b(false, account.idTenant)
-
         const shopInfo = await findShopInfoByUserEmail(account.ownerEmail)
 
-        // TODO: deal with default getProductsInHub2b() results limit (50).
+        if (!shopInfo) continue
 
-        if (shopInfo) await importProduct(account.idTenant, shopInfo._id, '3')
+        // Keep looping and incrementing offset 50 by 50 until all products are retrieved.
+
+        let products
+
+        let offset = 0
+
+        do {
+            products = await importProduct(account.idTenant, shopInfo._id, '3', offset)
+
+            offset += 50
+
+        } while (products?.length)
     }
 
     log(`Finish integration products update.`, "EVENT", getFunctionName())
