@@ -7,7 +7,7 @@ import { findShopInfoByUserEmail } from "../repositories/accountRepository"
 import { retrieveTenants } from "../repositories/hub2TenantRepository"
 import { createNewProduct, findProductByShopIdAndSku, updateProductById, updateVariationById } from "../repositories/productRepository"
 import { log } from "../utils/loggerUtil"
-import { getFunctionName } from "../utils/util"
+import { getFunctionName, waitforme } from "../utils/util"
 import { renewAccessTokenHub2b } from "./hub2bAuhService"
 import { getCatalogHub2b, getStockHub2b, mapskuHub2b } from "./hub2bService"
 import { findProductsByShop, updateProductVariationStock } from "./productService"
@@ -200,6 +200,9 @@ export const updateIntegrationProducts = async () => {
         let offset = 0
 
         do {
+
+            await waitforme(1000)
+
             products = await importProduct(account.idTenant, shopInfo._id, '3', offset)
 
             offset += 50
@@ -268,6 +271,8 @@ export const updateIntegrationStock = async () => {
             if (!product.variations) continue
 
             for await (const variation of product.variations) {
+
+                await waitforme(1000)
 
                 const hub2bStock = await getStockHub2b(variation._id, account.idTenant)
 

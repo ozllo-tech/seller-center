@@ -94,11 +94,11 @@ export const init = async () => {
 
     await updateIntegrationProducts()
 
-    // await updateIntegrationStock()
+    await updateIntegrationStock()
 
     setIntervalAsync(() => updateIntegrationProducts(), 500 * 60 * 60) // 30min
 
-    // setIntervalAsync(() => updateIntegrationStock(), 10000 * 60) // 10min
+    setIntervalAsync(() => updateIntegrationStock(), 10000 * 60) // 10min
 
     // TODO: Implement routine (once a day) to sync orders from main account to subaccounts (syncIntegrationOrderStatus()).
 }
