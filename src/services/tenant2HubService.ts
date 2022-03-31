@@ -26,7 +26,7 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
 
     const variations: Variation[] = []
 
-    const existingProducts: HUB2B_Catalog_Product[] = []
+    const existingHubProducts: HUB2B_Catalog_Product[] = []
 
     const productsInHub2b = await getProductsInHub2b(idTenant, status, offset)
 
@@ -84,14 +84,12 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
                 is_active: true
             }
 
-            console.log({productHub2b})
-
             products.push(product)
         }
 
         if (productExists) {
 
-            existingProducts.push(productHub2b)
+            existingHubProducts.push(productHub2b)
 
             // Update description.
 
@@ -138,9 +136,6 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
         return products.find(a => a.sku === sku)
     })
 
-    console.log({products})
-    console.log({uniqueNewProducts})
-
     const newProducts: Product[] = []
 
     for await (const product of uniqueNewProducts) {
@@ -150,8 +145,6 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
         const productVariations = variations.filter((variation: any) => variation.parentSKU === product.sku)
 
         const productInserted = await createNewProduct(product, productVariations )
-
-        console.log({productInserted})
 
         if (productInserted) {
 
@@ -167,17 +160,25 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
 
     const existingProductsUpdated: Product[] = []
 
-    for await (const product of existingProducts) {
+    for await (const hubProduct of existingHubProducts) {
 
-        console.log({product})
+        console.log({hubProduct})
+
+        // Create variation if it doesn't exist.
+
+        // 1 - GET correspondent product in SellerCenter
+
+        // 2 - Check if variation exists. Create if not.
+
+        // 3 - Map skus.
 
         // Update Stock.
 
-        const productUpdated = await updateVariationById(new ObjectID(product.skus.destination), { stock: product.stocks.sourceStock })
+        const productUpdated = await updateVariationById(new ObjectID(hubProduct.skus.destination), { stock: hubProduct.stocks.sourceStock })
 
         if (productUpdated) {
 
-            log(`Product ${product.name} has been updated.`, 'EVENT', getFunctionName())
+            log(`Product ${hubProduct.name} has been updated.`, 'EVENT', getFunctionName())
 
             existingProductsUpdated.push(productUpdated)
         }
@@ -207,8 +208,6 @@ export const getProductsInHub2b = async (idTenant: any, status = '2', offset = 0
 }
 
 export const mapSku = async (products: Product[], idTenant: any) => {
-
-    // const data = products.map(item => ({ sourceSKU: item.sku, destinationSKU: item._id }))
 
     const data: any[] = []
 
