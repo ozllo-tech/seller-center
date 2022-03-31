@@ -10,7 +10,7 @@ import { log } from "../utils/loggerUtil"
 import { getFunctionName, waitforme } from "../utils/util"
 import { renewAccessTokenHub2b } from "./hub2bAuhService"
 import { getCatalogHub2b, getStockHub2b, mapskuHub2b } from "./hub2bService"
-import { createNewVariation, findProductsByShop, updateProductVariationStock } from "./productService"
+import { createNewVariation, findProductsByShop, updateProductImages, updateProductVariationStock } from "./productService"
 
 // TODO: find out a way to reset the offset to 0 when idTenant or shop_id changes.
 let offset = 0
@@ -162,15 +162,39 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
 
     for await (const hubProduct of existingHubProducts) {
 
-        console.log({hubProduct})
-
-        // Create variation if it doesn't exist.
-
         // 1 - GET correspondent product in SellerCenter
 
-        // 2 - Check if variation exists. Create if not.
+        const product = await findProductByShopIdAndSku(shop_id, hubProduct.groupers.parentSKU || hubProduct.skus.source)
 
-        // 3 - Map skus.
+        if (!product) continue
+
+        // 2 - Check if variation exists (Find variation by skus.sourceSKU in variation.sourceSKU). Create if not.
+
+        const hasVariation = product?.variations?.find((variation: any) => variation.sourceSKU === hubProduct.skus.source)
+
+        if (hasVariation) continue
+
+        const variation = createVariationFromHub2bAttributes(hubProduct)
+
+        variation.product_id = product._id
+
+        const newVariation = await createNewVariation(variation)
+
+        if (!newVariation) continue
+
+        product.variations?.push(newVariation)
+
+        // 3 - Update product images.
+
+        hubProduct.images.forEach((imageHub2b) => product.images.push(imageHub2b.url))
+
+        updateProductImages(product._id, product)
+
+        existingProductsUpdated.push(product)
+
+        // 4 - Map skus if skus.destinationSKU is null.
+
+        mapskuHub2b([{ sourceSKU: variation.sourceSKU, destinationSKU: newVariation._id }], idTenant)
 
         // Update Stock.
 
@@ -184,9 +208,8 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
         }
     }
 
-    console.log({existingProductsUpdated})
-
-    return products
+    // TODO: return updated itens instead  of  empry products.
+    return products || existingProductsUpdated
 }
 
 /**
