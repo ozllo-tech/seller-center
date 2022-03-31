@@ -136,6 +136,9 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
         return products.find(a => a.sku === sku)
     })
 
+    console.log({products})
+    console.log({uniqueNewProducts})
+
     const newProducts: Product[] = []
 
     for await (const product of uniqueNewProducts) {
@@ -145,6 +148,8 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
         const productVariations = variations.filter((variation: any) => variation.parentSKU === product.sku)
 
         const productInserted = await createNewProduct(product, productVariations )
+
+        console.log({productInserted})
 
         if (productInserted) {
 
