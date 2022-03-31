@@ -18,6 +18,7 @@ export interface Product {
     price_discounted: number,
     ean: string,
     sku: string,
+    sourceSKU?: string,
     variations?: Variation[] | null,
     is_active: boolean
 }
@@ -32,6 +33,8 @@ export interface Variation {
     flavor?: string,
     gluten_free?: boolean,
     lactose_free?: boolean,
-    mapping_id?: string
-    tiny_id?: string
+    mapping_id?: string,
+    tiny_id?: string,
+    parentSKU?: string,
+    sourceSKU?: string
 }

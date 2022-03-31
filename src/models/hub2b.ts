@@ -253,8 +253,18 @@ export interface HUB2B_Catalog_Product {
     skus: {
         source: string,
         destination: any
+    },
+    groupers: {
+        parentSKU: string | null,
+        grouper: string | null,
+        destinationGrouper: string | null,
+        status: {
+            id: number,
+            message: string
+        }
     }
 }
+
 export interface Catalog_Attributes {
     idAttribute: number,
     idProduct: number,

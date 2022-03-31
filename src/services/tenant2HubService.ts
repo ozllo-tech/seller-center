@@ -10,7 +10,7 @@ import { log } from "../utils/loggerUtil"
 import { getFunctionName, waitforme } from "../utils/util"
 import { renewAccessTokenHub2b } from "./hub2bAuhService"
 import { getCatalogHub2b, getStockHub2b, mapskuHub2b } from "./hub2bService"
-import { findProductsByShop, updateProductVariationStock } from "./productService"
+import { createNewVariation, findProductsByShop, updateProductVariationStock } from "./productService"
 
 // TODO: find out a way to reset the offset to 0 when idTenant or shop_id changes.
 let offset = 0
@@ -23,6 +23,10 @@ let offset = 0
 export const importProduct = async (idTenant: any, shop_id: any, status = '2', offset = 0): Promise<Product[] | null> => {
 
     const products: Product[] = []
+
+    const variations: Variation[] = []
+
+    const existingProducts: HUB2B_Catalog_Product[] = []
 
     const productsInHub2b = await getProductsInHub2b(idTenant, status, offset)
 
@@ -39,9 +43,11 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
 
     for await (let productHub2b of productsInHub2b) {
 
-        const variations: Variation[] = [createVariationFromHub2bAttributes(productHub2b)]
+        const variation = createVariationFromHub2bAttributes(productHub2b)
 
-        const productExists = await findProductByShopIdAndSku(shop_id, productHub2b.skus.source)
+        variations.push(variation)
+
+        const productExists = await findProductByShopIdAndSku(shop_id, productHub2b.groupers.parentSKU || productHub2b.skus.source)
 
         const category = findMatchingCategory(productHub2b)
 
@@ -66,7 +72,8 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
                 brand: productHub2b.brand,
                 more_info: '',
                 ean: productHub2b.ean,
-                sku: productHub2b.skus.source,
+                sku: productHub2b.groupers.parentSKU || productHub2b.skus.source,
+                sourceSKU: productHub2b.skus.source,
                 gender: 'U',
                 height: productHub2b.dimensions.height * 100,
                 width: productHub2b.dimensions.width * 100,
@@ -77,64 +84,97 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
                 is_active: true
             }
 
-            const productInserted = await createNewProduct(product, variations)
-
-            if (productInserted) {
-
-                log(`Product ${product.name} has been created.`, 'EVENT', getFunctionName())
-
-                productEventEmitter.emit('create', product)
-
-                products.push(productInserted)
-            }
+            products.push(product)
         }
 
         if (productExists) {
 
-            products.push(productExists)
+            existingProducts.push(productHub2b)
 
             // Update description.
 
-            if (productExists.description !== productHub2b.description.sourceDescription) {
+            // if (productExists.description !== productHub2b.description.sourceDescription) {
 
-                await updateProductById(productExists._id, {
-                    description: productHub2b.description.sourceDescription
-                })
-            }
+            //     await updateProductById(productExists._id, {
+            //         description: productHub2b.description.sourceDescription
+            //     })
+            // }
 
             // Update base price and sales price.
 
-            if (productExists.price !== productHub2b.destinationPrices.priceBase || productExists.price_discounted !== productHub2b.destinationPrices.priceSale) {
+            // if (productExists.price !== productHub2b.destinationPrices.priceBase || productExists.price_discounted !== productHub2b.destinationPrices.priceSale) {
 
-                await updateProductById(productExists._id, {
-                    price: productHub2b.destinationPrices.priceBase,
-                    price_discounted: productHub2b.destinationPrices.priceSale
-                })
-            }
+            //     await updateProductById(productExists._id, {
+            //         price: productHub2b.destinationPrices.priceBase,
+            //         price_discounted: productHub2b.destinationPrices.priceSale
+            //     })
+            // }
 
             // Update stock.
 
-            if (Array.isArray(productExists.variations)) {
-                productExists.variations.forEach(async (variation) => {
-                    if (variation.stock !== productHub2b.stocks.sourceStock) {
-                        await updateVariationById(variation._id, { stock: productHub2b.stocks.sourceStock })
-                    }
-                })
-            }
+            // if (Array.isArray(productExists.variations)) {
+            //     productExists.variations.forEach(async (variation) => {
+            //         if (variation.stock !== productHub2b.stocks.sourceStock) {
+            //             await updateVariationById(variation._id, { stock: productHub2b.stocks.sourceStock })
+            //         }
+            //     })
+            // }
 
             // Update category.
 
-            if (productExists.subcategory !== Number(productHub2b?.categorization?.source?.code)) {
+            // if (productExists.subcategory !== Number(productHub2b?.categorization?.source?.code)) {
 
-                await updateProductById(productExists._id, {
-                    category: findMatchingCategory(productHub2b),
-                    subcategory: findMatchingSubcategory(productHub2b)
-                })
-            }
+            //     await updateProductById(productExists._id, {
+            //         category: findMatchingCategory(productHub2b),
+            //         subcategory: findMatchingSubcategory(productHub2b)
+            //     })
+            // }
+        }
+    }
+
+    const uniqueNewProducts = Array.from(new Set(products.map(a => a.sku))).map(sku => {
+        return products.find(a => a.sku === sku)
+    })
+
+    const newProducts: Product[] = []
+
+    for await (const product of uniqueNewProducts) {
+
+        if (!product) continue
+
+        const productVariations = variations.filter((variation: any) => variation.parentSKU === product.sku)
+
+        const productInserted = await createNewProduct(product, productVariations )
+
+        if (productInserted) {
+
+            log(`Product ${product.name} has been created.`, 'EVENT', getFunctionName())
+
+            productEventEmitter.emit('create', product)
+
+            newProducts.push(productInserted)
         }
     }
 
     if ('2' === status && products.length > 0) mapSku(products, idTenant)
+
+    const existingProductsUpdated: Product[] = []
+
+    for await (const product of existingProducts) {
+
+        // Update Stock.
+
+        const productUpdated = await updateVariationById(new ObjectID(product.skus.destination), { stock: product.stocks.sourceStock })
+
+        if (productUpdated) {
+
+            log(`Product ${product.name} has been updated.`, 'EVENT', getFunctionName())
+
+            existingProductsUpdated.push(productUpdated)
+        }
+    }
+
+    console.log(existingProductsUpdated)
 
     return products
 }
@@ -159,7 +199,25 @@ export const getProductsInHub2b = async (idTenant: any, status = '2', offset = 0
 
 export const mapSku = async (products: Product[], idTenant: any) => {
 
-    const data = products.map(item => ({ sourceSKU: item.sku, destinationSKU: item._id }))
+    // const data = products.map(item => ({ sourceSKU: item.sku, destinationSKU: item._id }))
+
+    const data: any[] = []
+
+    for await (const product of products) {
+
+        if (!product?.variations) data.push({ sourceSKU: product.sourceSKU, destinationSKU: product._id })
+
+        if (!product.variations) continue
+
+        for await (const variation of product.variations) {
+
+            if (!variation._id) continue
+
+            data.push({ sourceSKU: variation.sourceSKU, destinationSKU: variation._id })
+        }
+    }
+
+    console.log(data)
 
     // TODO validate mapping before:
 
@@ -167,6 +225,8 @@ export const mapSku = async (products: Product[], idTenant: any) => {
     // TODO: filter products with sku already mapped. (skus.destination.length > 0 || status.id === 3)
 
     const mapping = await mapskuHub2b(data, idTenant)
+
+    console.log(mapping)
 
     // TODO: if not SUCCESS = code in for each mapping, log error.
 
@@ -231,10 +291,13 @@ export const findMatchingSubcategory = (productHub2b: HUB2B_Catalog_Product): nu
     })[0]?.code || 0
 }
 
-
 export const createVariationFromHub2bAttributes = (productHub2b: HUB2B_Catalog_Product): Variation => {
 
-    const variation: Variation = { stock: productHub2b.stocks.sourceStock }
+    const variation: Variation = {
+        stock: productHub2b.stocks.sourceStock,
+        sourceSKU: productHub2b.skus.source,
+        ...productHub2b.groupers.parentSKU ? { parentSKU: productHub2b.groupers.parentSKU } : { parentSKU: productHub2b.skus.source }
+    }
 
     productHub2b.attributes.forEach((attribute: Catalog_Attributes) => {
 
