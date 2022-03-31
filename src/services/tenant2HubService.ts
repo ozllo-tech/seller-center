@@ -49,6 +49,8 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
 
         const productExists = await findProductByShopIdAndSku(shop_id, productHub2b.groupers.parentSKU || productHub2b.skus.source)
 
+        console.log({productExists})
+
         const category = findMatchingCategory(productHub2b)
 
         const subcategory = findMatchingSubcategory(productHub2b)
@@ -179,7 +181,7 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
         }
     }
 
-    console.log(existingProductsUpdated)
+    console.log({existingProductsUpdated})
 
     return products
 }
