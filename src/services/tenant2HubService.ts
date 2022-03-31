@@ -169,6 +169,8 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
 
     for await (const product of existingProducts) {
 
+        console.log({product})
+
         // Update Stock.
 
         const productUpdated = await updateVariationById(new ObjectID(product.skus.destination), { stock: product.stocks.sourceStock })
