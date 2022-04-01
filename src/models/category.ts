@@ -68,7 +68,7 @@ export const subcategories_accessory: SubCategory[] = [
     {
         categoryCode: 281,
         code: 290,
-        value: "Acessórios de Cabelo "
+        value: "Acessórios de Cabelo"
     },
     {
         categoryCode: 281,

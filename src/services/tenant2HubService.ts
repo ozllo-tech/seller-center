@@ -5,12 +5,12 @@ import { Catalog_Attributes, HUB2B_Catalog_Product } from "../models/hub2b"
 import { Product, Variation } from "../models/product"
 import { findShopInfoByUserEmail } from "../repositories/accountRepository"
 import { retrieveTenants } from "../repositories/hub2TenantRepository"
-import { createNewProduct, findProductByShopIdAndSku, updateProductById, updateVariationById } from "../repositories/productRepository"
+import { createNewProduct, createVariation, findProductByShopIdAndSku, updateProductById, updateVariationById } from "../repositories/productRepository"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName, waitforme } from "../utils/util"
 import { renewAccessTokenHub2b } from "./hub2bAuhService"
 import { getCatalogHub2b, getStockHub2b, mapskuHub2b } from "./hub2bService"
-import { createNewVariation, findProductsByShop, updateProductImages, updateProductVariationStock } from "./productService"
+import { findProductByVariation, findProductsByShop, updateProductImages, updateProductVariationStock } from "./productService"
 
 // TODO: find out a way to reset the offset to 0 when idTenant or shop_id changes.
 let offset = 0
@@ -170,35 +170,20 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
 
         // 2 - Check if variation exists (Find variation by skus.sourceSKU in variation.sourceSKU). Create if not.
 
-        const hasVariation = product?.variations?.find((variation: any) => variation.sourceSKU === hubProduct.skus.source)
+        const variationExists = product?.variations?.find((variation: any) => variation.sourceSKU === hubProduct.skus.source)
 
-        if (hasVariation) continue
+        if (!variationExists) {
 
-        const variation = createVariationFromHub2bAttributes(hubProduct)
+            const productWithNewVariation = await createVariationForExistingProduct(product, hubProduct, idTenant)
 
-        variation.product_id = product._id
+           if (!productWithNewVariation) continue
 
-        const newVariation = await createNewVariation(variation)
-
-        if (!newVariation) continue
-
-        product.variations?.push(newVariation)
-
-        // 3 - Update product images.
-
-        hubProduct.images.forEach((imageHub2b) => product.images.push(imageHub2b.url))
-
-        updateProductImages(product._id, product)
-
-        existingProductsUpdated.push(product)
-
-        // 4 - Map skus if skus.destinationSKU is null.
-
-        mapskuHub2b([{ sourceSKU: variation.sourceSKU, destinationSKU: newVariation._id }], idTenant)
+            existingProductsUpdated.push(productWithNewVariation)
+        }
 
         // Update Stock.
 
-        const productUpdated = await updateVariationById(new ObjectID(hubProduct.skus.destination), { stock: hubProduct.stocks.sourceStock })
+        const productUpdated = await updateVariationById(hubProduct.skus.destination, { stock: hubProduct.stocks.sourceStock })
 
         if (productUpdated) {
 
@@ -208,8 +193,41 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
         }
     }
 
-    // TODO: return updated itens instead  of  empry products.
+    // TODO: return updated itens instead  of  empty products.
     return products || existingProductsUpdated
+}
+
+const createVariationForExistingProduct = async (product: Product, hubProduct: HUB2B_Catalog_Product, idTenant: any): Promise <Product|null> => {
+
+    const variation = createVariationFromHub2bAttributes(hubProduct)
+
+    // 2.5 - Prepare and save variation.
+
+    variation.product_id = product._id
+
+    variation.parentSKU = product.sku
+
+    variation.sourceSKU = hubProduct.skus.source
+
+    const newVariation = await createVariation(variation)
+
+    if (!newVariation) return null
+
+    productEventEmitter.emit('update', await findProductByVariation(variation._id))
+
+    product.variations?.push(newVariation)
+
+    // 3 - Update product images.
+
+    hubProduct.images.forEach((imageHub2b) => product.images.push(imageHub2b.url))
+
+    updateProductImages(product._id, product)
+
+    // 4 - Map skus if skus.destinationSKU is null.
+
+    mapskuHub2b([{ sourceSKU: variation.sourceSKU, destinationSKU: newVariation._id }], idTenant)
+
+    return product
 }
 
 /**
@@ -247,8 +265,6 @@ export const mapSku = async (products: Product[], idTenant: any) => {
             data.push({ sourceSKU: variation.sourceSKU, destinationSKU: variation._id })
         }
     }
-
-    console.log(data)
 
     // TODO validate mapping before:
 
@@ -309,6 +325,7 @@ export const findMatchingCategory = (productHub2b: HUB2B_Catalog_Product): numbe
     if (!productHub2b?.categorization?.source?.name) return 0
 
     return SUBCATEGORIES.filter(subcategory => {
+        // TODO: trim stings before compare.
         return subcategory.value.toLowerCase() === productHub2b.categorization.source.name.toLowerCase()
     })[0]?.categoryCode || 0
 }
@@ -318,6 +335,7 @@ export const findMatchingSubcategory = (productHub2b: HUB2B_Catalog_Product): nu
     if (!productHub2b?.categorization?.source?.name) return 0
 
     return SUBCATEGORIES.filter(subcategory => {
+        // TODO: trim stings before compare.
         return subcategory.value.toLowerCase() === productHub2b.categorization.source.name.toLowerCase()
     })[0]?.code || 0
 }
@@ -381,5 +399,4 @@ export const updateIntegrationStock = async () => {
     }
 
     log(`Finish integration stocks update.`, "EVENT", getFunctionName())
-
 }
