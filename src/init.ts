@@ -92,11 +92,11 @@ export const init = async () => {
 
     await getTenantAuths()
 
-    // await updateIntegrationProducts()
+    await updateIntegrationProducts()
 
     // await updateIntegrationStock()
 
-    // setIntervalAsync(() => updateIntegrationProducts(), 500 * 60 * 60) // 30min
+    setIntervalAsync(() => updateIntegrationProducts(), 500 * 60 * 60) // 30min
 
     // setIntervalAsync(() => updateIntegrationStock(), 10000 * 60) // 10min
 
