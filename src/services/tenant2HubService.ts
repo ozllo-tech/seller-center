@@ -176,6 +176,8 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
 
         if (!variationExists) {
 
+            await waitforme(1000)
+
             const productWithNewVariation = await createVariationForExistingProduct(product, hubProduct, idTenant)
 
            if (!productWithNewVariation) continue
@@ -217,9 +219,6 @@ const createVariationForExistingProduct = async (product: Product, hubProduct: H
 
     if (!newVariation) return null
 
-    await waitforme(1000)
-
-    productEventEmitter.emit('update', await findProductByVariation(variation._id))
 
     product.variations?.push(newVariation)
 
