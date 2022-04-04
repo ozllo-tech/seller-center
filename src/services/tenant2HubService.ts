@@ -13,14 +13,14 @@ import { getCatalogHub2b, getStockHub2b, mapskuHub2b } from "./hub2bService"
 import { findProductByVariation, findProductsByShop, updateProductImages, updateProductVariationStock } from "./productService"
 
 // TODO: find out a way to reset the offset to 0 when idTenant or shop_id changes.
-let offset = 0
+let OFFSET = 0
 
 /**
  * Import products hub2b
  *
  * @param idTenant
  */
-export const importProduct = async (idTenant: any, shop_id: any, status = '2', offset = 0): Promise<Product[] | null> => {
+export const importProduct = async (idTenant: any, shop_id: any, status = '2', offset = OFFSET): Promise<Product[] | null> => {
 
     const products: Product[] = []
 
@@ -34,7 +34,7 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
 
     if ('2' === status && productsWithNoCategory?.length === 10) {
 
-        offset += productsWithNoCategory.length
+        OFFSET += productsWithNoCategory.length
 
         log(`Importing products from hub2b. Offset: ${offset}`, 'EVENT', getFunctionName())
     }
@@ -218,7 +218,6 @@ const createVariationForExistingProduct = async (product: Product, hubProduct: H
     const newVariation = await createVariation(variation)
 
     if (!newVariation) return null
-
 
     product.variations?.push(newVariation)
 
