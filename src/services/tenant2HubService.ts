@@ -226,6 +226,8 @@ const createVariationForExistingProduct = async (product: Product, hubProduct: H
 
     hubProduct.images.forEach((imageHub2b) => product.images.push(imageHub2b.url))
 
+    await waitforme(1000)
+
     updateProductImages(product._id, product)
 
     // 4 - Map skus if skus.destinationSKU is null.
