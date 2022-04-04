@@ -217,6 +217,8 @@ const createVariationForExistingProduct = async (product: Product, hubProduct: H
 
     if (!newVariation) return null
 
+    await waitforme(1000)
+
     productEventEmitter.emit('update', await findProductByVariation(variation._id))
 
     product.variations?.push(newVariation)
