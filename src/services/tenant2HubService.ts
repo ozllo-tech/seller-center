@@ -150,6 +150,8 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
 
             log(`Product ${product.name} has been created.`, 'EVENT', getFunctionName())
 
+            await waitforme(1000)
+
             productEventEmitter.emit('create', product)
 
             newProducts.push(productInserted)
@@ -180,6 +182,8 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
 
             existingProductsUpdated.push(productWithNewVariation)
         }
+
+        await waitforme(1000)
 
         // Update Stock.
 
@@ -272,8 +276,6 @@ export const mapSku = async (products: Product[], idTenant: any) => {
     // TODO: filter products with sku already mapped. (skus.destination.length > 0 || status.id === 3)
 
     const mapping = await mapskuHub2b(data, idTenant)
-
-    console.log(mapping)
 
     // TODO: if not SUCCESS = code in for each mapping, log error.
 
