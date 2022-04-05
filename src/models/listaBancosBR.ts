@@ -540,5 +540,9 @@ export const BANKS: Bank[] = [
     {
         value: "757",
         name: "KEB"
+    },
+    {
+        value: "323",
+        name: "Mercado Pago"
     }
 ]
