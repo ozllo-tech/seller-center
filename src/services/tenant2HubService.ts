@@ -91,15 +91,6 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
 
             existingHubProducts.push(productHub2b)
 
-            // Update description.
-
-            // if (productExists.description !== productHub2b.description.sourceDescription) {
-
-            //     await updateProductById(productExists._id, {
-            //         description: productHub2b.description.sourceDescription
-            //     })
-            // }
-
             // Update base price and sales price.
 
             // if (productExists.price !== productHub2b.destinationPrices.priceBase || productExists.price_discounted !== productHub2b.destinationPrices.priceSale) {
@@ -107,6 +98,15 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
             //     await updateProductById(productExists._id, {
             //         price: productHub2b.destinationPrices.priceBase,
             //         price_discounted: productHub2b.destinationPrices.priceSale
+            //     })
+            // }
+
+            // Update description.
+
+            // if (productExists.description !== productHub2b.description.sourceDescription) {
+
+            //     await updateProductById(productExists._id, {
+            //         description: productHub2b.description.sourceDescription
             //     })
             // }
 
@@ -187,13 +187,19 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
 
         await waitforme(1000)
 
-        // Update Stock.
+        // Update Stock and Price.
 
-        const productUpdated = await updateVariationById(hubProduct.skus.destination, { stock: hubProduct.stocks.sourceStock })
+        const patch = {
+            price: hubProduct.destinationPrices.priceBase,
+            price_discounted: hubProduct.destinationPrices.priceSale,
+            stock: hubProduct.stocks.sourceStock
+        }
+
+        const productUpdated = await updateVariationById(hubProduct.skus.destination, patch)
 
         if (productUpdated) {
 
-            log(`Product ${hubProduct.name} has been updated.`, 'EVENT', getFunctionName())
+            log(`Product ${hubProduct.name} stock and price has been updated.`, 'EVENT', getFunctionName())
 
             existingProductsUpdated.push(productUpdated)
         }
