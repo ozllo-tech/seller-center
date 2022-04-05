@@ -199,8 +199,7 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
         }
     }
 
-    // TODO: return updated itens instead  of  empty products.
-    return products || existingProductsUpdated
+    return products.length ? products : existingProductsUpdated.length ? existingProductsUpdated : []
 }
 
 const createVariationForExistingProduct = async (product: Product, hubProduct: HUB2B_Catalog_Product, idTenant: any): Promise <Product|null> => {
