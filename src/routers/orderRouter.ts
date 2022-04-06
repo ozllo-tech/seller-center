@@ -81,4 +81,23 @@ router.post('/:id/tracking', async (req: Request, res: Response, next: NextFunct
         .send(tracking)
 })
 
+router.get('/insigths', async (req: Request, res: Response, next: NextFunction) => {
+
+    const meta = [{
+        average_shipping_time: {
+            last_week: 4, // days
+            last_month: 2, // days
+        }
+    }]
+
+    if (!meta)
+        return res
+            .status(internalServerError.status)
+            .send(createHttpStatus(internalServerError))
+
+    return res
+        .status(ok.status)
+        .send(meta)
+})
+
 export { router as orderRouter }
