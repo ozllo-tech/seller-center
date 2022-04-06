@@ -303,7 +303,13 @@ export const updateStatus = async (order_id: string, status: string) => {
 
     const orderHub2b: HUB2B_Order = await getOrderHub2b(order_id)
 
-    const fields = { "order.status.status": status, "order.status.updatedDate": nowIsoDateHub2b() }
+    const fields = {
+        "order.status.status": status,
+        "order.status.updatedDate": nowIsoDateHub2b(),
+        ...('Approved' == status ? {'meta.invoiced_at': nowIsoDateHub2b()} : {}),
+        ...('Invoiced' == status ? {'meta.invoiced_at': nowIsoDateHub2b()} : {}),
+        ...('Shipped'  == status ? {'meta.shipped_at': nowIsoDateHub2b()} : {})
+    }
 
     const update = await findOneOrderAndModify("order.reference.id", order_id, fields) // update.value = Order
 
@@ -432,4 +438,15 @@ export const syncIntegrationOrderStatus = async (order: Order, status: string) =
             ? log(`Order ${order_id} is in sync with order ${order.tenant.order} from tenant ${order.tenant.id}.`, 'EVENT', getFunctionName())
             : log(`Couldn't sync order ${order_id} with order ${order.tenant.order} from tenant ${order.tenant.id}.`, 'EVENT', getFunctionName(), 'ERROR')
     }
+}
+
+export const updateOrderMeta = (order: Order): Order => {
+
+    if ('Approved' == order.order.status.status) order.meta = {approved_at: order.order.status.updatedDate}
+
+    if ('Invoiced' == order.order.status.status) order.meta = {invoiced_at: order.order.status.updatedDate}
+
+    if ('Shipped' == order.order.status.status) order.meta = {shipped_at: order.order.status.updatedDate}
+
+    return order
 }

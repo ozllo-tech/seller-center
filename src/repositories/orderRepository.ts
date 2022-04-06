@@ -4,6 +4,7 @@
 
 import { MongoError } from "mongodb"
 import { Order, OrderIntegration } from "../models/order"
+import { updateOrderMeta } from "../services/orderService"
 import { orderCollection, orderIntegrationCollection } from "../utils/db/collections"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName } from "../utils/util"
@@ -60,7 +61,7 @@ export const newOrderHub2b = async (orderIntegration: Order): Promise<Order | nu
 
     try {
 
-        const result = await orderCollection.insertOne(orderIntegration)
+        const result = await orderCollection.insertOne(updateOrderMeta(orderIntegration))
 
         return result.ops[0] ? result.ops[0] : null
 

@@ -9,7 +9,12 @@ export interface Order {
     shop_id: any,
     order: HUB2B_Order,
     tenant?: Tenant_Order,
-    tiny_order_id?: any
+    tiny_order_id?: any,
+    meta?: {
+        approved_at?: string,
+        invoiced_at?: string,
+        shipped_at?: string
+    }
 }
 
 export interface OrderIntegration {
