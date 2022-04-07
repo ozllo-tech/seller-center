@@ -304,8 +304,6 @@ export const updateTinyStock = async (stock: Tiny_Stock): Promise<Variation|null
 
 export const updateTinyPrice = async (price: Tiny_Price): Promise<Product|null> => {
 
-    if (price.dados.skuMapeamentoPai.length) return null
-
     const priceDiscounted = parseFloat(price.dados.precoPromocional) || parseFloat(price.dados.preco)
 
     const patch = { price: parseFloat(price.dados.preco), price_discounted: priceDiscounted }
