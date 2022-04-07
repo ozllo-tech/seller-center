@@ -6,7 +6,7 @@ import events from 'events'
 import { Order } from '../models/order'
 import { sendOrderEmailToSeller } from '../services/mailService'
 import { sendOrderToTenant } from '../services/orderService'
-import { sendTinyOrder, updateTinyOrderStatus } from '../services/systemTinyService'
+import { sendTinyOrder, updateTinyOrderStatus } from '../services/tiny2HubService'
 import { log } from '../utils/loggerUtil'
 
 const orderEventEmitter = new events.EventEmitter()

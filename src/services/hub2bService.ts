@@ -208,8 +208,6 @@ export const deleteProdutoHub2b = async ( product_id: string, idTenant: any ) =>
 
     const URL = HUB2B_URL_V1 + "/removeproduct/" + (idTenant || HUB2B_TENANT)
 
-    await waitforme(1000)
-
     const body = SALES_CHANNEL_HUB2B.map(channel => {
         return {
             itemId: product_id,
@@ -323,8 +321,6 @@ export const updateStockHub2b = async (variation_id: any, stock: number) => {
         warehouseId: 0
     }
 
-    await waitforme(1000)
-
     const response = await requestHub2B(URL_STOCK, 'PUT', body)
 
     if (!response) return null
@@ -348,8 +344,6 @@ export const updatePriceHub2b = async (variation_id: any, price: number, price_d
         base: price,
         sale: price_discounted
     }
-
-    await waitforme(1000)
 
     const response = await requestHub2B(URL_PRICE, 'PUT', body)
 

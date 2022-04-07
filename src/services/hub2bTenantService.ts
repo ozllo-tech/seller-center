@@ -7,7 +7,7 @@ import { saveTenant, updateTenant, findHub2bTenantByIdTenant, findTenantByOwnerE
 import { saveUser } from "../repositories/hub2UserRepository"
 import { saveTenantCredential } from "../repositories/hub2TenantCredentialRepository"
 import { log } from "../utils/loggerUtil"
-import { getFunctionName } from "../utils/util"
+import { getFunctionName, waitforme } from "../utils/util"
 import { HUB2B_URL_V2, HUB2B_TENANT } from "../utils/consts"
 import { AGENCY_CREDENTIALS, renewAccessTokenHub2b } from "./hub2bAuhService"
 import { requestHub2B } from "./hub2bService"
@@ -233,6 +233,11 @@ export const getTenantAuths = async () => {
 
     if ( !accounts ) return null
 
-    for (let account of accounts) await renewAccessTokenHub2b(false, account.idTenant)
+    for await (let account of accounts) {
+
+        await waitforme(1000)
+
+        await renewAccessTokenHub2b(false, account.idTenant)
+    }
 
 }
