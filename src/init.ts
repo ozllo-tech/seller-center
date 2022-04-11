@@ -1,7 +1,7 @@
 import { recoverLateCredential } from "./services/hub2bAuhService"
 import { getTenantAuths } from "./services/hub2bTenantService"
 import { integrateHub2bOrders, INTEGRATION_INTERVAL } from "./services/orderService"
-import { updateIntegrationProducts, updateIntegrationStock } from "./services/tenant2HubService"
+import { updateIntegrationInvoices, updateIntegrationProducts, updateIntegrationStock } from "./services/tenant2HubService"
 import { nowIsoDateHub2b } from "./utils/util"
 import { setIntervalAsync } from "set-interval-async/dynamic"
 
@@ -95,6 +95,8 @@ export const init = async () => {
     await updateIntegrationProducts()
 
     // await updateIntegrationStock()
+
+    await updateIntegrationInvoices()
 
     setIntervalAsync(() => updateIntegrationProducts(), 500 * 60 * 60) // 30min
 

@@ -488,11 +488,15 @@ export const postInvoiceHub2b = async (order_id: string, _invoice: any, idTenant
     return invoice
 }
 
-export const getInvoiceHub2b = async (order_id: string) => {
+export const getInvoiceHub2b = async (order_id: string, idTenant = false) => {
 
-    await renewAccessTokenHub2b(false, false)
+    idTenant
+        ? await renewAccessTokenHub2b(false, idTenant)
+        : await renewAccessTokenHub2b(false, false)
 
-    const URL_INVOICE = HUB2B_URL_V2 + `/Orders/${order_id}/Invoice` + "?access_token=" + HUB2B_CREDENTIALS.access_token
+    const accessToken = idTenant ? TENANT_CREDENTIALS.access_token : HUB2B_CREDENTIALS.access_token
+
+    const URL_INVOICE = HUB2B_URL_V2 + `/Orders/${order_id}/Invoice` + "?access_token=" + accessToken
 
     const response = await requestHub2B(URL_INVOICE)
 
