@@ -337,7 +337,7 @@ export const updateStatus = async (order_id: string, status: string) => {
 
     await syncIntegrationOrderStatus(order, status)
 
-    if (status !== orderHub2b.status.status && order?.tiny_order_id) updateTiny2HubOrderStatus(order_id, status)
+    if (status !== orderHub2b?.status?.status && order?.tiny_order_id) updateTiny2HubOrderStatus(order_id, status)
 
     return update
 }
