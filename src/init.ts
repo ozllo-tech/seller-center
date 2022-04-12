@@ -100,7 +100,15 @@ export const init = async () => {
 
     await updateIntegrationTrackingCodes()
 
-    setIntervalAsync(() => updateIntegrationProducts(), 500 * 60 * 60) // 30min
+    setIntervalAsync(async () => {
+
+        await updateIntegrationProducts()
+
+        await updateIntegrationInvoices()
+
+        await updateIntegrationTrackingCodes()
+
+    }, 500 * 60 * 60) // 30min
 
     // setIntervalAsync(() => updateIntegrationStock(), 10000 * 60) // 10min
 
