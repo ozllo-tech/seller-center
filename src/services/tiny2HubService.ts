@@ -15,7 +15,7 @@ import { Tiny_Stock } from "../models/tinyStock"
 import { Tiny_Price } from "../models/tinyPrice"
 import { Item, ORDER_STATUS_HUB2B_TINY, Tiny_Order_Request, Tiny_Order_Response } from "../models/tinyOrder"
 import { Order } from "../models/order"
-import { findOneOrderAndModify, findOrderByField } from "../repositories/orderRepository"
+import { findOneOrderAndModify } from "../repositories/orderRepository"
 import format from "date-fns/format"
 import { HUB2B_Invoice, HUB2B_Status, HUB2B_Tracking } from "../models/hub2b"
 import { postInvoiceHub2b, postTrackingHub2b, updateStatusHub2b } from "./hub2bService"
@@ -457,7 +457,7 @@ export const updateTiny2HubOrderStatus = async (orderID: string, status: string)
     return true
 }
 
-export const sendTinyInvoiceToHub = async (tinyInvoice: any): Promise<Boolean> => {
+export const sendTinyInvoiceToHub = async (tinyInvoice: any): Promise<Object|null> => {
 
     // TODO: Get and send cfop from XML. Send the XML file as well.
 
@@ -469,10 +469,6 @@ export const sendTinyInvoiceToHub = async (tinyInvoice: any): Promise<Boolean> =
         totalAmount: tinyInvoice.valorNota
     }
 
-    const order = await findOrderByField('order.reference.id', Number(tinyInvoice.idPedidoEcommerce))
-
-    if (!order) return false
-
     const hub2bInvoiceResponse = await postInvoiceHub2b(tinyInvoice.idPedidoEcommerce, invoiceHub, false)
 
     const fields = { "order.status.status": 'Invoiced', "order.status.updatedDate": nowIsoDateHub2b() }
@@ -483,9 +479,10 @@ export const sendTinyInvoiceToHub = async (tinyInvoice: any): Promise<Boolean> =
         ? log(`Tiny invoice ${tinyInvoice.chaveAcesso} sent to Hub2B`, 'EVENT', getFunctionName(), 'INFO')
         : log(`Tiny Invoice ${tinyInvoice.chaveAcesso} not sent to Hub2B with key`, 'EVENT', getFunctionName(), 'WARN')
 
-    if (!hub2bInvoiceResponse) return false
+    if (!hub2bInvoiceResponse) return null
 
-    return true
+    return hub2bInvoiceResponse
+
 }
 
 export const sendTinyTrackingToHub = async (tracking: any): Promise<HUB2B_Tracking | null> => {

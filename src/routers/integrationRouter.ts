@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express'
 import { badRequest, createHttpStatus, internalServerError, ok } from '../utils/httpStatus'
 import { setupWebhookIntegration } from "../services/orderService";
 import { updateStatus } from '../services/orderService';
-import { authMiddleware, userCanAccessShop, validateSystemPayload } from '../utils/middlewares';
+import { authMiddleware, isTinyOrderInvoiceable, isTinyOrderTrackable, userCanAccessShop, validateSystemPayload } from '../utils/middlewares';
 import { activateSystemIntegration, findSystemByShopID, saveSystemIntegrationData } from '../services/integrationService';
 import { ObjectID } from 'mongodb';
 import { importTinyProduct, sendTinyInvoiceToHub, sendTinyTrackingToHub, updateTinyPrice, updateTinyStock } from '../services/tiny2HubService';
@@ -109,24 +109,24 @@ router.post('/system/tiny/webhook/order', async (req: Request, res: Response, ne
     return res.status(ok.status).send(result)
 })
 
-router.post('/system/tiny/webhook/invoice', async (req: Request, res: Response) => {
+router.post('/system/tiny/webhook/invoice', isTinyOrderInvoiceable, async (req: Request, res: Response) => {
 
     if (!req.body?.dados) return res.status(badRequest.status).send(badRequest)
 
     const result = await sendTinyInvoiceToHub(req.body.dados)
 
-    // TODO: treat tiny2hub errors and maybe save invoice payload in database.
+    if (!result) return res.status(internalServerError.status).send(createHttpStatus(internalServerError))
 
     return res.status(ok.status).send(result)
 })
 
-router.post('/system/tiny/webhook/tracking', async(req: Request, res: Response) => {
+router.post('/system/tiny/webhook/tracking', isTinyOrderTrackable, async(req: Request, res: Response) => {
 
     if (!req.body?.dados) return res.status(badRequest.status).send(badRequest)
 
     const result = await sendTinyTrackingToHub(req.body.dados)
 
-    // TODO: treat tiny2hub errors and maybe save tracking payload in database.
+    if (!result) return res.status(internalServerError.status).send(createHttpStatus(internalServerError))
 
     return res.status(ok.status).send(result)
 })

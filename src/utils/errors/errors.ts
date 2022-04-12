@@ -33,7 +33,7 @@ export const loginFail: AppError = {
     description: 'Credentials invalid.',
     tip: 'Check your login and password.',
     example: [
-        `{ 
+        `{
             \'login\': \'Your Login\',
             \'password\': \'Your Passwor\'
         }`
@@ -41,7 +41,7 @@ export const loginFail: AppError = {
 }
 
 /**
- * ERROR - Invalid Email 
+ * ERROR - Invalid Email
  */
 export const invalidEmail: AppError = {
     errorCode: 0x002,
@@ -53,7 +53,7 @@ export const invalidEmail: AppError = {
 }
 
 /**
- * ERROR - Invalid Paswword 
+ * ERROR - Invalid Paswword
  */
 export const invalidPassword: AppError = {
     errorCode: 0x003,
@@ -71,7 +71,7 @@ export const invalidPassword: AppError = {
 }
 
 /**
- * ERROR - User already exists 
+ * ERROR - User already exists
  */
 export const userExists: AppError = {
     errorCode: 0x004,
@@ -81,7 +81,7 @@ export const userExists: AppError = {
 }
 
 /**
- * ERROR - User does not exists 
+ * ERROR - User does not exists
  */
 export const userNotExists: AppError = {
     errorCode: 0x005,
@@ -118,7 +118,7 @@ export const invalidUserTypeRegistration: AppError = {
     description: 'User type invalid.',
     tip: 'The user has no reference for PJ or PF',
     example: [
-        `{ 
+        `{
             \'isPF\': \'true\'
         },
         {
@@ -609,7 +609,7 @@ export const invalidProductReference: AppError = {
     description: 'Product reference is invalid.',
     tip: 'Check the product Id.',
     example: [
-        `{ 
+        `{
             \'product_id\': \'id\'
         }`
     ]
@@ -623,7 +623,7 @@ export const invalidVariationReference: AppError = {
     description: 'Variation reference is invalid.',
     tip: 'Check the variation Id.',
     example: [
-        `{ 
+        `{
             \'variation_id\': \'id\'
         }`
     ]
@@ -637,7 +637,7 @@ export const invalidVariationReferenceToProduct: AppError = {
     description: 'Variation reference is invalid to the product reference.',
     tip: 'Check the variation Id and Product Id.',
     example: [
-        `{ 
+        `{
             \'product_id\': \'id\',
             \'variation_id\': \'id\'
         }`
@@ -649,7 +649,7 @@ export const invalidVariationVoltage: AppError = {
     description: 'Variation voltage is invalid.',
     tip: 'Check the variation voltage field.',
     example: [
-        `{ 
+        `{
             \'voltage\': \'110\',
             \'voltage\': \'220\',
             \'voltage\': \'bivolt\'
@@ -662,11 +662,29 @@ export const invalidVariationFlavor: AppError = {
     description: 'Variation flavor is invalid.',
     tip: 'Check the variation flavor field.',
     example: [
-        `{ 
+        `{
             \'flavor\': \'Neutro\',
             \'flavor\': \'Laranja\'
         }`
     ]
+}
+
+export const invalidOrderStatusReferenceToInvoice: AppError = {
+    errorCode: 0x035,
+    description: 'Pedido não está Aprovado',
+    tip: 'Consulte o status do pedido no e-commerce.',
+}
+
+export const invalidOrderStatusReferenceToShip: AppError = {
+    errorCode: 0x036,
+    description: 'Pedido não está Faturado',
+    tip: 'Consulte o status do pedido no e-commerce.',
+}
+
+export const invalidTrackingFields: AppError = {
+    errorCode: 0x037,
+    description: 'Campos obrigatórios faltando',
+    tip: 'Preencha os campos formaFrete e urlRastreio.',
 }
 
 /**
@@ -677,8 +695,8 @@ export const errorsList: AppError[] = [
 
 /**
  * Retorna um error object dependendo do código referenciado
- * 
- * @param errorCode 
+ *
+ * @param errorCode
  */
 export const findError = ( errorCode: errorCode ) => {
     return errorsList.find( error => error.errorCode === errorCode ) || voidError

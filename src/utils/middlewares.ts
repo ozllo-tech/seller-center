@@ -7,8 +7,8 @@ import { findVariation } from '../services/productService'
 import { findById } from '../services/userService'
 import { getOrderHub2b } from '../services/hub2bService'
 import { decodeJWT, isJWTTokenValid } from './cryptUtil'
-import { invalidProductReference, invalidVariationReference } from './errors/errors'
-import { notFound, createHttpStatus, HttpStatusResponse, unauthorized, internalServerError } from './httpStatus'
+import { invalidOrderStatusReferenceToInvoice, invalidOrderStatusReferenceToShip, invalidProductReference, invalidTrackingFields, invalidVariationReference } from './errors/errors'
+import { notFound, createHttpStatus, HttpStatusResponse, unauthorized, internalServerError, badRequest } from './httpStatus'
 import { logger, log } from './loggerUtil'
 import { celebrate, Segments, Joi } from 'celebrate'
 
@@ -287,4 +287,34 @@ export const validateSystemPayload = () => {
             data: Joi.object().required()
         }
     })
+}
+
+export const isTinyOrderInvoiceable = async (req: Request, res: Response, next: NextFunction) => {
+
+    const order = await getOrderHub2b(req.body.dados.idPedidoEcommerce)
+
+    if (!order) return next(createHttpStatus(badRequest))
+
+    if ('Approved' !== order.status.status) return next(createHttpStatus(badRequest, invalidOrderStatusReferenceToInvoice))
+
+    req.order = order
+
+    next()
+}
+
+export const isTinyOrderTrackable = async (req: Request, res: Response, next: NextFunction) => {
+
+    const order = await getOrderHub2b(req.body.dados.idPedidoEcommerce)
+
+    if (!order) return next(createHttpStatus(badRequest))
+
+    if ('Invoiced' !== order.status.status) return next(createHttpStatus(badRequest, invalidOrderStatusReferenceToShip))
+
+    if (!req.body?.dados?.formaFrete?.length) return next(createHttpStatus(badRequest, invalidTrackingFields))
+
+    if (!req.body?.dados?.urlRastreio?.length) return next(createHttpStatus(badRequest, invalidTrackingFields))
+
+    req.order = order
+
+    next()
 }
