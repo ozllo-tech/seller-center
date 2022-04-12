@@ -13,7 +13,7 @@ const router = Router()
 
 router.post('/order', async (req: Request, res: Response, next: NextFunction) => {
 
-    if (req.body.IdOrder == '0') return res.status(ok.status).send(req.body)
+    if (req.body.idOrder == '0' || req.body.IdOrder == '0') return res.status(ok.status).send(req.body)
 
     const result = await updateStatus(req.body.IdOrder, req.body.OrderStatus)
 

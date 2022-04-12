@@ -1,7 +1,7 @@
 import { recoverLateCredential } from "./services/hub2bAuhService"
 import { getTenantAuths } from "./services/hub2bTenantService"
 import { integrateHub2bOrders, INTEGRATION_INTERVAL } from "./services/orderService"
-import { updateIntegrationProducts, updateIntegrationStock } from "./services/tenant2HubService"
+import { updateIntegrationInvoices, updateIntegrationProducts, updateIntegrationStock, updateIntegrationTrackingCodes } from "./services/tenant2HubService"
 import { nowIsoDateHub2b } from "./utils/util"
 import { setIntervalAsync } from "set-interval-async/dynamic"
 
@@ -94,11 +94,23 @@ export const init = async () => {
 
     await updateIntegrationProducts()
 
-    // await updateIntegrationStock()
+    await updateIntegrationStock()
 
-    setIntervalAsync(() => updateIntegrationProducts(), 500 * 60 * 60) // 30min
+    await updateIntegrationInvoices()
 
-    // setIntervalAsync(() => updateIntegrationStock(), 10000 * 60) // 10min
+    await updateIntegrationTrackingCodes()
+
+    setIntervalAsync(async () => await updateIntegrationStock(), 3000 * 60) // 3min
+
+    setIntervalAsync(async () => {
+
+        await updateIntegrationProducts()
+
+        await updateIntegrationInvoices()
+
+        await updateIntegrationTrackingCodes()
+
+    }, 500 * 60 * 60) // 30min
 
     // TODO: Implement routine (once a day) to sync orders from main account to subaccounts (syncIntegrationOrderStatus()).
 }

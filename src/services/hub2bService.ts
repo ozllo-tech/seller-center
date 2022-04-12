@@ -77,11 +77,15 @@ export const requestHub2B = async (URL: string, type?: Method, body?: any, heade
     }
 }
 
-export const setupIntegrationHub2b = async (integration: HUB2B_Integration, method: Method) => {
+export const setupIntegrationHub2b = async (integration: HUB2B_Integration, method: Method, idTenant = false) => {
 
-    await renewAccessTokenHub2b(false, false)
+    idTenant
+        ? await renewAccessTokenHub2b(false, idTenant)
+        : await renewAccessTokenHub2b(false, false)
 
-    const SETUP_URL = HUB2B_URL_V2 + "/Setup/integration" + "?access_token=" + HUB2B_CREDENTIALS.access_token
+    const accessToken = idTenant ? TENANT_CREDENTIALS.access_token : HUB2B_CREDENTIALS.access_token
+
+    const SETUP_URL = `${HUB2B_URL_V2}/Setup/integration?access_token=${accessToken}`
 
     const response = await requestHub2B(SETUP_URL, method, integration)
 
@@ -94,6 +98,23 @@ export const setupIntegrationHub2b = async (integration: HUB2B_Integration, meth
         : log("Não foi passível obter o token de acesso", "EVENT", getFunctionName(), "WARN")
 
     return setup
+}
+
+export const getHub2bIntegration = async (system: string, idTenant = false) => {
+
+    idTenant
+        ? await renewAccessTokenHub2b(false, idTenant)
+        : await renewAccessTokenHub2b(false, false)
+
+    const accessToken = idTenant ? TENANT_CREDENTIALS.access_token : HUB2B_CREDENTIALS.access_token
+
+    const INTEGRATION_URL = `${HUB2B_URL_V2}/Setup/integration/${idTenant}?access_token=${accessToken}`
+
+    const response = await requestHub2B(INTEGRATION_URL, 'GET', null, {system: system})
+
+    if (!response) return null
+
+    return response.data
 }
 
 
@@ -293,6 +314,10 @@ export const getSKU = async ( sku: string, idTenant: any ) => {
 
 export const getStockHub2b = async (sku: any, idTenant: any) => {
 
+    idTenant
+        ? await renewAccessTokenHub2b(false, idTenant)
+        : await renewAccessTokenHub2b(false, false)
+
     const credential = idTenant ? TENANT_CREDENTIALS : HUB2B_CREDENTIALS
 
     const URL_STOCK = HUB2B_URL_V2 + `/inventory/${sku}/stocks` + "?access_token=" + credential.access_token
@@ -488,11 +513,15 @@ export const postInvoiceHub2b = async (order_id: string, _invoice: any, idTenant
     return invoice
 }
 
-export const getInvoiceHub2b = async (order_id: string) => {
+export const getInvoiceHub2b = async (order_id: string, idTenant = false) => {
 
-    await renewAccessTokenHub2b(false, false)
+    idTenant
+        ? await renewAccessTokenHub2b(false, idTenant)
+        : await renewAccessTokenHub2b(false, false)
 
-    const URL_INVOICE = HUB2B_URL_V2 + `/Orders/${order_id}/Invoice` + "?access_token=" + HUB2B_CREDENTIALS.access_token
+    const accessToken = idTenant ? TENANT_CREDENTIALS.access_token : HUB2B_CREDENTIALS.access_token
+
+    const URL_INVOICE = HUB2B_URL_V2 + `/Orders/${order_id}/Invoice` + "?access_token=" + accessToken
 
     const response = await requestHub2B(URL_INVOICE)
 
@@ -533,11 +562,15 @@ export const postTrackingHub2b = async (order_id: string, _tracking: HUB2B_Track
     return tracking
 }
 
-export const getTrackingHub2b = async (order_id: string) => {
+export const getTrackingHub2b = async (order_id: string, idTenant = false) => {
 
-    await renewAccessTokenHub2b(false, false)
+    idTenant
+        ? await renewAccessTokenHub2b(false, idTenant)
+        : await renewAccessTokenHub2b(false, false)
 
-    const URL_TRACKING = HUB2B_URL_V2 + `/Orders/${order_id}/Tracking` + "?access_token=" + HUB2B_CREDENTIALS.access_token
+    const accessToken = idTenant ? TENANT_CREDENTIALS.access_token : HUB2B_CREDENTIALS.access_token
+
+    const URL_TRACKING = HUB2B_URL_V2 + `/Orders/${order_id}/Tracking` + "?access_token=" + accessToken
 
     const response = await requestHub2B(URL_TRACKING)
 

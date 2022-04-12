@@ -1,16 +1,19 @@
 import { ObjectID } from "mongodb"
 import productEventEmitter from "../events/product"
 import { SUBCATEGORIES } from "../models/category"
-import { Catalog_Attributes, HUB2B_Catalog_Product } from "../models/hub2b"
+import { Catalog_Attributes, HUB2B_Catalog_Product, HUB2B_Integration, HUB2B_Invoice, HUB2B_Order_Webhook, HUB2B_Tracking } from "../models/hub2b"
+import { Order } from "../models/order"
 import { Product, Variation } from "../models/product"
 import { findShopInfoByUserEmail } from "../repositories/accountRepository"
 import { retrieveTenants } from "../repositories/hub2TenantRepository"
-import { createNewProduct, createVariation, findProductByShopIdAndSku, updateProductById, updateVariationById } from "../repositories/productRepository"
+import { createNewProduct, createVariation, findProductByShopIdAndSku, updateVariationById } from "../repositories/productRepository"
+import { PROJECT_HOST } from "../utils/consts"
+import { getToken } from "../utils/cryptUtil"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName, waitforme } from "../utils/util"
-import { renewAccessTokenHub2b } from "./hub2bAuhService"
-import { getCatalogHub2b, getStockHub2b, mapskuHub2b } from "./hub2bService"
-import { findProductByVariation, findProductsByShop, updateProductImages, updateProductVariationStock } from "./productService"
+import { getCatalogHub2b, getHub2bIntegration, getInvoiceHub2b, getOrderHub2b, getStockHub2b, getTrackingHub2b, mapskuHub2b, postInvoiceHub2b, postTrackingHub2b, setupIntegrationHub2b } from "./hub2bService"
+import { findOrdersByShop, updateStatus } from "./orderService"
+import { findProductsByShop, updateProductImages, updateProductVariationStock } from "./productService"
 
 // TODO: find out a way to reset the offset to 0 when idTenant or shop_id changes.
 let OFFSET = 0
@@ -277,6 +280,8 @@ export const mapSku = async (products: Product[], idTenant: any) => {
         }
     }
 
+    // TODO: if data.length < 2, remove array and send only one object.
+
     // TODO validate mapping before:
 
     // https://developershub2b.gitbook.io/hub2b-api/api-para-seller-erp/produto/mapeamento-de-sku-ja-existente-no-canal-de-venda
@@ -379,8 +384,6 @@ export const updateIntegrationStock = async () => {
 
     for await (const account of accounts) {
 
-        await renewAccessTokenHub2b(false, account.idTenant)
-
         const shopInfo = await findShopInfoByUserEmail(account.ownerEmail)
 
         if (!shopInfo) continue
@@ -408,4 +411,186 @@ export const updateIntegrationStock = async () => {
     }
 
     log(`Finish integration stocks update.`, "EVENT", getFunctionName())
+}
+
+export const sendInvoice2Hub = async (order: Order, idTenant: any): Promise<HUB2B_Invoice|null> => {
+
+    if (!order?.tenant?.order) return null
+
+    // Get order from tenant.
+
+    const tenantOrder = await getOrderHub2b(order.tenant.order, idTenant)
+
+    if (!tenantOrder) return null
+
+    if ("Invoiced" !== tenantOrder?.status?.status) return null
+
+    // Get invoice from tenant.
+
+    const tenantInvoice = await getInvoiceHub2b(order.tenant.order, idTenant)
+
+    if (!tenantInvoice) return null
+
+    // Send it to correspondent hub order.
+
+    if (!order?.order?.reference?.id) return null
+
+    const hubInvoice = await postInvoiceHub2b(order.order.reference.id.toString(), tenantInvoice, false)
+
+    if (!hubInvoice) return null
+
+    // Change order status to Invoiced.
+
+    updateStatus(order.order.reference.id.toString(), "Invoiced")
+
+    return hubInvoice
+}
+
+export const updateIntegrationInvoices = async () => {
+
+    const accounts = await retrieveTenants()
+
+    if (!accounts) return null
+
+    log(`Start integration invoices update.`, "EVENT", getFunctionName())
+
+    for await (const account of accounts) {
+
+        const shopInfo = await findShopInfoByUserEmail(account.ownerEmail)
+
+        if (!shopInfo) continue
+
+        const orders = await findOrdersByShop(shopInfo._id.toString()) || []
+
+        for await (const order of orders) {
+
+            if (order.order.status.status !== 'Approved') continue
+
+            if (!order?.tenant?.order)  continue
+
+            await waitforme(1000)
+
+            await sendInvoice2Hub(order, account.idTenant)
+        }
+    }
+
+    log(`Finish integration invoices update.`, "EVENT", getFunctionName())
+}
+
+export const sendTracking2Hub = async (order: Order, idTenant: any): Promise<HUB2B_Tracking | null> => {
+
+    if (!order?.tenant?.order) return null
+
+    // Get order from tenant.
+
+    const tenantOrder = await getOrderHub2b(order.tenant.order, idTenant)
+
+    if (!tenantOrder) return null
+
+    if ("Shipped" !== tenantOrder?.status?.status) return null
+
+    // Get tracking from tenant.
+
+    const tenantTracking = await getTrackingHub2b(order.tenant.order, idTenant)
+
+    if (!tenantTracking) return null
+
+    // Send it to correspondent hub order.
+
+    if (!order?.order?.reference?.id) return null
+
+    const hubTracking = await postTrackingHub2b(order.order.reference.id.toString(), tenantTracking, false)
+
+    if (!hubTracking) return null
+
+    // Change order status to Invoiced.
+
+    updateStatus(order.order.reference.id.toString(), "Shipped")
+
+    return hubTracking
+}
+
+export const updateIntegrationTrackingCodes = async () => {
+
+    const accounts = await retrieveTenants()
+
+    if (!accounts) return null
+
+    log(`Start integration tracking update.`, "EVENT", getFunctionName())
+
+    for await (const account of accounts) {
+
+        const shopInfo = await findShopInfoByUserEmail(account.ownerEmail)
+
+        if (!shopInfo) continue
+
+        const orders = await findOrdersByShop(shopInfo._id.toString()) || []
+
+        for await (const order of orders) {
+
+            if (order.order.status.status !== 'Invoiced') continue
+
+            if (!order?.tenant?.order) continue
+
+            await waitforme(1000)
+
+            await sendTracking2Hub(order, account.idTenant)
+        }
+    }
+
+    log(`Finish integration tracking update.`, "EVENT", getFunctionName())
+}
+
+export const setupOrderIntegrationWebhook = async (idTenant: any): Promise<HUB2B_Order_Webhook | null> => {
+    const integration: HUB2B_Integration = {
+        system: "ERPOrdersNotification",
+        idTenant: Number(idTenant),
+        responsibilities: [
+            {
+                type: "Orders",
+                flow: "HubTo"
+            }
+        ],
+        apiKeys: [
+            {
+                key: "URL_ERPOrdersNotification",
+                value: PROJECT_HOST + "/integration/order"
+            },
+            {
+                key: "authToken_ERPOrdersNotification",
+                value: getToken('hub2b')
+            },
+            {
+                key: "AuthKey_ERPOrdersNotification",
+                value: "Authorization"
+            },
+            {
+                key: "HUB_ID_ERPOrdersNotification",
+                value: idTenant.toString()
+            }
+        ]
+    }
+
+    const existingSetup = await getHub2bIntegration('ERPOrdersNotification', idTenant)
+
+    const method = existingSetup?.length ? 'PUT' : 'POST'
+
+    const setup = await setupIntegrationHub2b(integration, method, idTenant)
+
+    if (!setup) return null
+
+    return setup
+}
+
+export const setupIntegrationWebhooks = async () => {
+
+    const accounts = await retrieveTenants()
+
+    if (!accounts) return null
+
+    log(`Start integration webhooks setup.`, "EVENT", getFunctionName())
+
+    for await (const account of accounts) await setupOrderIntegrationWebhook(account.idTenant)
+
+    log(`Finish Start integration webhooks setup.`, "EVENT", getFunctionName())
 }
