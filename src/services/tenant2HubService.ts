@@ -1,16 +1,18 @@
 import { ObjectID } from "mongodb"
 import productEventEmitter from "../events/product"
 import { SUBCATEGORIES } from "../models/category"
-import { Catalog_Attributes, HUB2B_Catalog_Product, HUB2B_Invoice, HUB2B_Tracking } from "../models/hub2b"
+import { Catalog_Attributes, HUB2B_Catalog_Product, HUB2B_Integration, HUB2B_Invoice, HUB2B_Order_Webhook, HUB2B_Tracking } from "../models/hub2b"
 import { Order } from "../models/order"
 import { Product, Variation } from "../models/product"
 import { findShopInfoByUserEmail } from "../repositories/accountRepository"
 import { retrieveTenants } from "../repositories/hub2TenantRepository"
 import { createNewProduct, createVariation, findProductByShopIdAndSku, updateVariationById } from "../repositories/productRepository"
+import { PROJECT_HOST } from "../utils/consts"
+import { getToken } from "../utils/cryptUtil"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName, waitforme } from "../utils/util"
 import { renewAccessTokenHub2b } from "./hub2bAuhService"
-import { getCatalogHub2b, getInvoiceHub2b, getOrderHub2b, getStockHub2b, getTrackingHub2b, mapskuHub2b, postInvoiceHub2b, postTrackingHub2b } from "./hub2bService"
+import { getCatalogHub2b, getHub2bIntegration, getInvoiceHub2b, getOrderHub2b, getStockHub2b, getTrackingHub2b, mapskuHub2b, postInvoiceHub2b, postTrackingHub2b, setupIntegrationHub2b } from "./hub2bService"
 import { findOrdersByShop, updateStatus } from "./orderService"
 import { findProductsByShop, updateProductImages, updateProductVariationStock } from "./productService"
 
@@ -540,4 +542,58 @@ export const updateIntegrationTrackingCodes = async () => {
     }
 
     log(`Finish integration tracking update.`, "EVENT", getFunctionName())
+}
+
+export const setupOrderIntegrationWebhook = async (idTenant: any): Promise<HUB2B_Order_Webhook | null> => {
+    const integration: HUB2B_Integration = {
+        system: "ERPOrdersNotification",
+        idTenant: Number(idTenant),
+        responsibilities: [
+            {
+                type: "Orders",
+                flow: "HubTo"
+            }
+        ],
+        apiKeys: [
+            {
+                key: "URL_ERPOrdersNotification",
+                value: PROJECT_HOST + "/integration/order"
+            },
+            {
+                key: "authToken_ERPOrdersNotification",
+                value: getToken('hub2b')
+            },
+            {
+                key: "AuthKey_ERPOrdersNotification",
+                value: "Authorization"
+            },
+            {
+                key: "HUB_ID_ERPOrdersNotification",
+                value: idTenant.toString()
+            }
+        ]
+    }
+
+    const existingSetup = await getHub2bIntegration('ERPOrdersNotification', idTenant)
+
+    const method = existingSetup?.length ? 'PUT' : 'POST'
+
+    const setup = await setupIntegrationHub2b(integration, method, idTenant)
+
+    if (!setup) return null
+
+    return setup
+}
+
+export const setupIntegrationWebhooks = async () => {
+
+    const accounts = await retrieveTenants()
+
+    if (!accounts) return null
+
+    log(`Start integration webhooks setup.`, "EVENT", getFunctionName())
+
+    for await (const account of accounts) await setupOrderIntegrationWebhook(account.idTenant)
+
+    log(`Finish Start integration webhooks setup.`, "EVENT", getFunctionName())
 }

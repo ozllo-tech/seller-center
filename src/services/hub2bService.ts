@@ -77,11 +77,15 @@ export const requestHub2B = async (URL: string, type?: Method, body?: any, heade
     }
 }
 
-export const setupIntegrationHub2b = async (integration: HUB2B_Integration, method: Method) => {
+export const setupIntegrationHub2b = async (integration: HUB2B_Integration, method: Method, idTenant = false) => {
 
-    await renewAccessTokenHub2b(false, false)
+    idTenant
+        ? await renewAccessTokenHub2b(false, idTenant)
+        : await renewAccessTokenHub2b(false, false)
 
-    const SETUP_URL = HUB2B_URL_V2 + "/Setup/integration" + "?access_token=" + HUB2B_CREDENTIALS.access_token
+    const accessToken = idTenant ? TENANT_CREDENTIALS.access_token : HUB2B_CREDENTIALS.access_token
+
+    const SETUP_URL = `${HUB2B_URL_V2}/Setup/integration?access_token=${accessToken}`
 
     const response = await requestHub2B(SETUP_URL, method, integration)
 
@@ -94,6 +98,23 @@ export const setupIntegrationHub2b = async (integration: HUB2B_Integration, meth
         : log("Não foi passível obter o token de acesso", "EVENT", getFunctionName(), "WARN")
 
     return setup
+}
+
+export const getHub2bIntegration = async (system: string, idTenant = false) => {
+
+    idTenant
+        ? await renewAccessTokenHub2b(false, idTenant)
+        : await renewAccessTokenHub2b(false, false)
+
+    const accessToken = idTenant ? TENANT_CREDENTIALS.access_token : HUB2B_CREDENTIALS.access_token
+
+    const INTEGRATION_URL = `${HUB2B_URL_V2}/Setup/integration/${idTenant}?access_token=${accessToken}`
+
+    const response = await requestHub2B(INTEGRATION_URL, 'GET', null, {system: system})
+
+    if (!response) return null
+
+    return response.data
 }
 
 
