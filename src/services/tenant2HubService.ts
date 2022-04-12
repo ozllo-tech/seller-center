@@ -385,8 +385,6 @@ export const updateIntegrationStock = async () => {
 
     for await (const account of accounts) {
 
-        await renewAccessTokenHub2b(false, account.idTenant)
-
         const shopInfo = await findShopInfoByUserEmail(account.ownerEmail)
 
         if (!shopInfo) continue

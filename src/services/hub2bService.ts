@@ -314,6 +314,10 @@ export const getSKU = async ( sku: string, idTenant: any ) => {
 
 export const getStockHub2b = async (sku: any, idTenant: any) => {
 
+    idTenant
+        ? await renewAccessTokenHub2b(false, idTenant)
+        : await renewAccessTokenHub2b(false, false)
+
     const credential = idTenant ? TENANT_CREDENTIALS : HUB2B_CREDENTIALS
 
     const URL_STOCK = HUB2B_URL_V2 + `/inventory/${sku}/stocks` + "?access_token=" + credential.access_token
