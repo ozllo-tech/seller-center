@@ -122,8 +122,10 @@ export const setupTenantsHub2b = async (body: any) => {
 
     await renewAccessTokenHub2b(false, null, true)
 
+    // TODO: send email password only when requires manual authentication (Tray).
+
     const SETUP_URL = HUB2B_URL_V2 +
-        "/Setup/Tenants?SendPasswordEmail=true&access_token=" + AGENCY_CREDENTIALS.access_token
+        "/Setup/Tenants?SendPasswordEmail=false&access_token=" + AGENCY_CREDENTIALS.access_token
 
     const response = await requestHub2B( SETUP_URL, 'POST', body )
     if ( !response ) return null
