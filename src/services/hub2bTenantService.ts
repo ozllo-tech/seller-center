@@ -12,8 +12,7 @@ import { HUB2B_URL_V2, HUB2B_TENANT, HUB2B_AGENCY } from "../utils/consts"
 import { AGENCY_CREDENTIALS, renewAccessTokenHub2b } from "./hub2bAuhService"
 import { requestHub2B } from "./hub2bService"
 import { findUserByShopId } from "../repositories/userRepository"
-import { NextFunction, Request, Response } from "express"
-import { findAddressByUserID, findContactByUserID, findPersonalInfoByUserID, findShopInfoByID } from "../repositories/accountRepository"
+import { findAddressByUserID, findContactByUserID, findPersonalInfoByUserID } from "../repositories/accountRepository"
 import { randomUUID } from "crypto"
 
 /**
@@ -254,7 +253,6 @@ export const findTenantfromShopID = async (shopID: string): Promise<HUB2B_Tenant
     if ( !tenant ) return null
 
     return tenant
-
 }
 
 export const getTenantAuths = async () => {
@@ -270,44 +268,4 @@ export const getTenantAuths = async () => {
         await renewAccessTokenHub2b(false, account.idTenant)
     }
 
-}
-
-export const fillTenantInfo = async(req: Request, res: Response, next: NextFunction) => {
-
-    const shopId = req.shop?._id
-
-    if (!shopId?.length) return next()
-
-    const shopInfo = await findShopInfoByID(shopId)
-
-    if (!shopInfo) return next()
-
-    req.body.idAgency = HUB2B_AGENCY
-
-    req.body.name = shopInfo.name
-
-    req.body.website = ''
-
-    req.body.documentNumber = ''
-
-    req.body.companyName = ''
-
-    req.body.ownerName = ''
-
-    req.body.ownerEmail = '',
-
-    req.body.ownerPhoneNumber = ''
-
-    req.body.idAgency = '',
-
-    req.body.address = {
-        zipCode: '',
-        street: '',
-        neighborhood: '',
-        number: 0,
-        city: '',
-        state: '',
-        country: '',
-        reference: ''
-    }
 }
