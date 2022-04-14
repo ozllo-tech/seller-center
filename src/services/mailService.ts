@@ -12,6 +12,9 @@ import { generateAccessToken } from "./tokenService"
 import { resetPasswordContent } from "../models/emails/resetPassword"
 import { findUserByShopId } from "../repositories/userRepository"
 import { orderEmailContent } from "../models/emails/orderEmail"
+import { lowStockEmailContent } from "../models/emails/lowStockEmail"
+import { lateShippingEmailContent } from "../models/emails/lateShippingEmail"
+import { noProductsEmailContent } from "../models/emails/noProductsEmail"
 
 const transporter = nodemailer.createTransport( {
     service: 'gmail',
@@ -114,4 +117,53 @@ export const sendOrderEmailToSeller = async ( shop_id: string ): Promise<any> =>
     return result
 }
 
+export const sendLowStockEmailToSeller = async ( shop_id: string ): Promise<any> => {
 
+    const user = await findUserByShopId( shop_id )
+
+    if (!user) return null
+
+    // TODO: pass product and variation to template.
+
+    const result = await sendEmail(user.email, 'OZLLO360 | Atenção: seu estoque está quase acabando!', lowStockEmailContent() )
+
+    result
+        ? log(`Stock low email sent to ${user.email}`, 'EVENT', getFunctionName())
+        : log(`Could not send stock low email to ${user.email}`, 'EVENT', getFunctionName(), 'ERROR')
+
+    return result
+}
+
+export const sendLateShippingEmailToSeller = async (shop_id: string): Promise<any> => {
+
+    const user = await findUserByShopId(shop_id)
+
+    if (!user) return null
+
+    // TODO: pass product and variation to template.
+
+    const result = await sendEmail(user.email, 'OZLLO360 | Atenção: um pedido está atrasado para o despacho!', lateShippingEmailContent())
+
+    result
+        ? log(`Late shipping email sent to ${user.email}`, 'EVENT', getFunctionName())
+        : log(`Could not send late shipping email to ${user.email}`, 'EVENT', getFunctionName(), 'ERROR')
+
+    return result
+}
+
+export const sendNoProductsEmailToSeller = async (shop_id: string): Promise<any> => {
+
+    const user = await findUserByShopId(shop_id)
+
+    if (!user) return null
+
+    // TODO: pass product and variation to template.
+
+    const result = await sendEmail(user.email, 'OZLLO360 | Ainda não cadastrou nenhum produto?', noProductsEmailContent())
+
+    result
+        ? log(`No products email sent to ${user.email}`, 'EVENT', getFunctionName())
+        : log(`Could not send no pproducts email to ${user.email}`, 'EVENT', getFunctionName(), 'ERROR')
+
+    return result
+}
