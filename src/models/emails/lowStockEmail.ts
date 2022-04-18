@@ -1,8 +1,7 @@
 
 import { FRONT_END_URL } from "../../utils/consts"
-import { Product } from "../product"
 
-export const lowStockEmailContent = () => /*html*/`
+export const lowStockEmailContent = (variationName: string) => /*html*/`
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">
 
@@ -86,14 +85,9 @@ export const lowStockEmailContent = () => /*html*/`
                                                                         <table cellpadding="0" cellspacing="0" width="100%">
                                                                             <tbody>
                                                                                 <tr>
-                                                                                    <td align="center" class="esd-block-text es-p10b">
-                                                                                        <h2>Seu estoque está acabando!</h2>
-                                                                                    </td>
-                                                                                </tr>
-                                                                                <tr>
                                                                                     <td align="center" class="esd-block-text es-p10t es-p10b">
                                                                                         <h3>Olá! Tudo bem?</h3>
-                                                                                        <p>Seu produto <strong>{Nome do produto | cor/sabor | tamanho}</strong> está com estoque baixo (restam 2 unidades). Isso significa que o anúncio pode ser pausado no canal de vendas a qualquer momento.</p>
+                                                                                        <p>Seu produto <strong>${variationName}</strong> está com estoque baixo (restam 2 unidades ou menos). Isso significa que o anúncio pode ser pausado no canal de vendas a qualquer momento.</p>
 
                                                                                         <p>Para evitar que isso aconteça, acesse <a href="${FRONT_END_URL}">aqui o Seller Center</a> e reponha o estoque.</p>
                                                                                     </td>

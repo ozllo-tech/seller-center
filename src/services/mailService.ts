@@ -15,6 +15,8 @@ import { orderEmailContent } from "../models/emails/orderEmail"
 import { lowStockEmailContent } from "../models/emails/lowStockEmail"
 import { lateShippingEmailContent } from "../models/emails/lateShippingEmail"
 import { noProductsEmailContent } from "../models/emails/noProductsEmail"
+import { Variation } from "../models/product"
+import { findProductByVariation } from "./productService"
 
 const transporter = nodemailer.createTransport( {
     service: 'gmail',
@@ -117,15 +119,19 @@ export const sendOrderEmailToSeller = async ( shop_id: string ): Promise<any> =>
     return result
 }
 
-export const sendLowStockEmailToSeller = async ( shop_id: string ): Promise<any> => {
+export const sendLowStockEmailToSeller = async ( variation: Variation ): Promise<any> => {
 
-    const user = await findUserByShopId( shop_id )
+    const product = await findProductByVariation( variation._id)
+
+    if (! product ) return null
+
+    const user = await findUserByShopId( product.shop_id )
 
     if (!user) return null
 
-    // TODO: pass product and variation to template.
+    const variationName = `${product.name} | Tamanho ${variation.size} | ${variation.color || variation.flavor}`
 
-    const result = await sendEmail(user.email, 'OZLLO360 | Atenção: seu estoque está quase acabando!', lowStockEmailContent() )
+    const result = await sendEmail(user.email, 'OZLLO360 | Atenção: seu estoque está quase acabando!', lowStockEmailContent(variationName) )
 
     result
         ? log(`Stock low email sent to ${user.email}`, 'EVENT', getFunctionName())
@@ -140,7 +146,7 @@ export const sendLateShippingEmailToSeller = async (shop_id: string): Promise<an
 
     if (!user) return null
 
-    // TODO: pass product and variation to template.
+    // TODO: pass order id to template.
 
     const result = await sendEmail(user.email, 'OZLLO360 | Atenção: um pedido está atrasado para o despacho!', lateShippingEmailContent())
 

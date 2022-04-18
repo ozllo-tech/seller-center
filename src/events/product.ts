@@ -5,6 +5,7 @@
 import events from 'events'
 import { Product, Variation } from '../models/product'
 import { criarProdutoHub2b, deleteProdutoHub2b, parseProdutoToProdutoHub2, updatePriceHub2b, updateProdutoHub2b, updateStockHub2b } from '../services/hub2bService'
+import { sendLowStockEmailToSeller } from '../services/mailService'
 import { log } from '../utils/loggerUtil'
 
 const productEventEmitter = new events.EventEmitter()
@@ -34,10 +35,13 @@ productEventEmitter.on( 'delete', ( productId: any, idTenant: any ) => {
 
 productEventEmitter.on( 'update_stock', ( variation: Variation ) => {
 
+    const stock = Number(variation.stock)
+
+    if (stock < 3) sendLowStockEmailToSeller(variation)
+
+    updateStockHub2b(variation._id, stock)
+
     log( `Updating stock from SKU ${ variation._id } in HUB2B.`, 'EVENT', 'ProductEventEmitter' )
-
-    updateStockHub2b(variation._id, Number(variation.stock))
-
 })
 
 productEventEmitter.on( 'update_price', ( product: Product ) => {
