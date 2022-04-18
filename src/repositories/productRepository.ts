@@ -137,7 +137,7 @@ export const updateVariationById = async ( _id: any, patch: any ): Promise<Produ
 
         const query = { _id: new ObjectID( _id ) }
 
-        const result = await variationCollection.findOneAndUpdate( query, options )
+        const result = await variationCollection.findOneAndUpdate(query, options, {returnOriginal: false})
 
         if ( !result.value ) return null
 
