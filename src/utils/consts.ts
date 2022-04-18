@@ -82,6 +82,8 @@ export const HUB2B_MARKETPLACE = process.env.HUB2B_MARKETPLACE || ''
 
 export const HUB2B_SALES_CHANEL = process.env.HUB2B_SALES_CHANEL || ''
 
+export const HUB2B_AGENCY = process.env.HUB2B_AGENCY || '32'
+
 export const HUB2B_AGENCY_MAIN_USERNAME = process.env.HUB2B_AGENCY_MAIN_USERNAME || ''
 
 export const HUB2B_AGENCY_MAIN_PASSWORD = process.env.HUB2B_AGENCY_MAIN_PASSWORD || ''
