@@ -10,7 +10,7 @@ import { activationEmailContent } from "../models/emails/activationEmail"
 import { User } from "../models/user"
 import { generateAccessToken } from "./tokenService"
 import { resetPasswordContent } from "../models/emails/resetPassword"
-import { findUserByShopId } from "../repositories/userRepository"
+import { findOneUserAndModify, findUserByShopId } from "../repositories/userRepository"
 import { orderEmailContent } from "../models/emails/orderEmail"
 import { lowStockEmailContent } from "../models/emails/lowStockEmail"
 import { lateShippingEmailContent } from "../models/emails/lateShippingEmail"
@@ -157,19 +157,15 @@ export const sendLateShippingEmailToSeller = async (shop_id: string): Promise<an
     return result
 }
 
-export const sendNoProductsEmailToSeller = async (shop_id: string): Promise<any> => {
-
-    const user = await findUserByShopId(shop_id)
-
-    if (!user) return null
-
-    // TODO: pass product and variation to template.
+export const sendNoProductsEmailToSeller = async (user: User): Promise<any> => {
 
     const result = await sendEmail(user.email, 'OZLLO360 | Ainda não cadastrou nenhum produto?', noProductsEmailContent())
 
+    if (result) findOneUserAndModify('_id', user._id, {idleNotifications: 1})
+
     result
         ? log(`No products email sent to ${user.email}`, 'EVENT', getFunctionName())
-        : log(`Could not send no pproducts email to ${user.email}`, 'EVENT', getFunctionName(), 'ERROR')
+        : log(`Could not send no products email to ${user.email}`, 'EVENT', getFunctionName(), 'ERROR')
 
     return result
 }

@@ -1,6 +1,5 @@
 
 import { FRONT_END_URL } from "../../utils/consts"
-import { Product } from "../product"
 
 export const noProductsEmailContent = () => /*html*/`
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -86,18 +85,13 @@ export const noProductsEmailContent = () => /*html*/`
                                                                         <table cellpadding="0" cellspacing="0" width="100%">
                                                                             <tbody>
                                                                                 <tr>
-                                                                                    <td align="center" class="esd-block-text es-p10b">
-                                                                                        <h2>Cadastre seu primeiro produto</h2>
-                                                                                    </td>
-                                                                                </tr>
-                                                                                <tr>
                                                                                     <td align="center" class="esd-block-text es-p10t es-p10b">
                                                                                         <h3>Olá! Tudo bem?</h3>
-                                                                                        <p>Fazem já mais de 2 dias que você se cadastrou no Seller Center, mas ainda não encontramos nenhum produto para enviar aos canais vendas e multiplicar seus resultados!</p>
+                                                                                        <p>Faz mais de uma semana que você se cadastrou no Seller Center, mas ainda não encontramos nenhum produto para enviar aos canais vendas e multiplicar seus resultados!</p>
 
                                                                                         <p>Precisa de ajuda?</p>
 
-                                                                                        <p>Clique <a href="${FRONT_END_URL}">aqui</a> e cadastre seu <strong>primeiro produto</strong> na plataforma. Se encontrar dificuldades, entre em contato com o nosso suporte em <strong>{forma de suporte}</strong> que iremos de ajudar.</p>
+                                                                                        <p>Clique <a href="${FRONT_END_URL}">aqui</a> e cadastre seu <strong>primeiro produto</strong> na plataforma. Se encontrar dificuldades, entre em contato com o nosso suporte em <strong>{forma de suporte}</strong> que iremos te ajudar.</p>
                                                                                     </td>
                                                                                 </tr>
                                                                                 <tr>
