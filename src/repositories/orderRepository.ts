@@ -113,7 +113,7 @@ export const findOneOrderAndModify = async (where: any, by: any, fields: {}) => 
     } catch (error) {
 
         if (error instanceof MongoError || error instanceof Error)
-            log(error.message, 'EVENT', `User Repository - ${getFunctionName()}`, 'ERROR')
+            log(error.message, 'EVENT', `Order Repository - ${getFunctionName()}`, 'ERROR')
 
         return null
     }
