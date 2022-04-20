@@ -233,8 +233,6 @@ export const findUnproductiveUsers = async (): Promise<User[] | null> => {
 
     const targetUsers = users.filter(user => !user.idleNotifications).filter(user => userCreatedMoreThanOneWeekAgo(user))
 
-    // console.log(targetUsers)
-
     const unproductiveUsers = asyncFilter(targetUsers, async ( user: User) => await userHasNoProducts(user))
 
     return unproductiveUsers
@@ -243,8 +241,6 @@ export const findUnproductiveUsers = async (): Promise<User[] | null> => {
 export const alertUnproductiveUsers = async (): Promise<User[] | null> => {
 
     const unproductiveUsers = await findUnproductiveUsers()
-
-    // console.log(unproductiveUsers)
 
     if (!unproductiveUsers) return null
 
