@@ -255,6 +255,8 @@ export const alertUnproductiveUsers = async (): Promise<User[] | null> => {
 
 function userCreatedMoreThanOneWeekAgo(user: User): boolean {
 
+    // TODO: check months amount.
+
     const duration = intervalToDuration({ start: endOfDay(user.created), end: endOfDay(new Date()) }).days || 0
 
     return duration >= 7
