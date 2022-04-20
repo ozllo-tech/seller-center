@@ -4,7 +4,6 @@
 
 import { MongoError } from "mongodb"
 import { Order, OrderIntegration } from "../models/order"
-import { updateOrderMeta } from "../services/orderService"
 import { orderCollection, orderIntegrationCollection } from "../utils/db/collections"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName } from "../utils/util"
@@ -136,4 +135,15 @@ export const findOrderByField = async(field: any, value: any) => {
 
         return null
     }
+}
+
+export const updateOrderMeta = (order: Order): Order => {
+
+    if ('Approved' == order.order.status.status) order.meta = {...order.meta, approved_at: order.order.status.updatedDate}
+
+    if ('Invoiced' == order.order.status.status) order.meta = {...order.meta, invoiced_at: order.order.status.updatedDate}
+
+    if ('Shipped' == order.order.status.status) order.meta = {...order.meta, shipped_at: order.order.status.updatedDate}
+
+    return order
 }

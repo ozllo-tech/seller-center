@@ -187,18 +187,10 @@ export const sendInvoice = async (order: any, data: any) : Promise<HUB2B_Invoice
 
     if (res) {
 
-        const status: HUB2B_Status = {
-            status: 'Invoiced',
-            updatedDate: nowIsoDateHub2b(),
-            active: true,
-            message: ''
-        }
-
-        await findOneOrderAndModify("order.reference.id", order.reference.id, { "order.status": status })
+        await updateStatus(order.reference.id, 'Invoiced')
 
         // Foreach SKU in order, decrease stock by quantity sold.
         order.products.forEach((product:HUB2B_Product_Order) => updateStockByQuantitySold(product.sku, product.quantity))
-
     }
 
     res
@@ -220,18 +212,7 @@ export const sendTracking = async (order_id: string, data: any): Promise<HUB2B_T
 
     const orderTracking = await postTrackingHub2b(order_id, tracking, false)
 
-    if (orderTracking) {
-
-        const status: HUB2B_Status = {
-            status: 'Shipped',
-            updatedDate: nowIsoDateHub2b(),
-            active: true,
-            message: ''
-        }
-
-        await findOneOrderAndModify("order.reference.id", order_id, { "order.status": status })
-
-    }
+    if (orderTracking) await updateStatus(order_id, 'Shipped')
 
     orderTracking
         ? log(`Tracking sent`, 'EVENT', getFunctionName())
@@ -310,7 +291,7 @@ export const updateStatus = async (order_id: string, status: string) => {
     const fields = {
         "order.status.status": status,
         "order.status.updatedDate": nowIsoDateHub2b(),
-        ...('Approved' == status ? {'meta.invoiced_at': nowIsoDateHub2b()} : {}),
+        ...('Approved' == status ? {'meta.approved_at': nowIsoDateHub2b()} : {}),
         ...('Invoiced' == status ? {'meta.invoiced_at': nowIsoDateHub2b()} : {}),
         ...('Shipped'  == status ? {'meta.shipped_at': nowIsoDateHub2b()} : {})
     }
@@ -442,15 +423,4 @@ export const syncIntegrationOrderStatus = async (order: Order, status: string) =
             ? log(`Order ${order_id} is in sync with order ${order.tenant.order} from tenant ${order.tenant.id}.`, 'EVENT', getFunctionName())
             : log(`Couldn't sync order ${order_id} with order ${order.tenant.order} from tenant ${order.tenant.id}.`, 'EVENT', getFunctionName(), 'ERROR')
     }
-}
-
-export const updateOrderMeta = (order: Order): Order => {
-
-    if ('Approved' == order.order.status.status) order.meta = {approved_at: order.order.status.updatedDate}
-
-    if ('Invoiced' == order.order.status.status) order.meta = {invoiced_at: order.order.status.updatedDate}
-
-    if ('Shipped' == order.order.status.status) order.meta = {shipped_at: order.order.status.updatedDate}
-
-    return order
 }
