@@ -8,7 +8,7 @@ import { findLastIntegrationOrder, findOrderByShopId, newIntegrationHub2b, newOr
 import { HUB2B_MARKETPLACE, HUB2B_TENANT, PROJECT_HOST } from "../utils/consts"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName, nowIsoDateHub2b } from "../utils/util"
-import { listAllOrdersHub2b, listOrdersHub2bByTime, postInvoiceHub2b, postTrackingHub2b, getTrackingHub2b, setupIntegrationHub2b, getInvoiceHub2b, getOrderHub2b, postOrderHub2b, updateStatusHub2b } from "./hub2bService"
+import { listAllOrdersHub2b, listOrdersHub2bByTime, postInvoiceHub2b, postTrackingHub2b, getTrackingHub2b, setupIntegrationHub2b, getInvoiceHub2b, getOrderHub2b, postOrderHub2b, updateStatusHub2b, getHub2bIntegration } from "./hub2bService"
 import { findProductByVariation, updateStockByQuantitySold } from "./productService"
 import { getToken } from "../utils/cryptUtil"
 import orderEventEmitter from "../events/orders"
@@ -292,9 +292,13 @@ export const setupWebhookIntegration = async(): Promise<HUB2B_Order_Webhook | nu
         ]
     }
 
-    const setup = await setupIntegrationHub2b(integration, 'POST')
+    const existingSetup = await getHub2bIntegration('ERPOrdersNotification', HUB2B_TENANT)
 
-    if (!setup) return await setupIntegrationHub2b(integration, 'PUT')
+    const method = existingSetup?.length ? 'PUT' : 'POST'
+
+    const setup = await setupIntegrationHub2b(integration, method, HUB2B_TENANT)
+
+    if (!setup) return null
 
     return setup
 }
