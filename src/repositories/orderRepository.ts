@@ -137,3 +137,22 @@ export const findOrderByField = async(field: any, value: any) => {
         return null
     }
 }
+
+export const findOrdersByFields = async(filter: object): Promise<Order[]|null> => {
+
+    try {
+
+        const result = orderCollection.find(filter)
+
+        const orders = await result.toArray()
+
+        return orders
+
+    } catch (error) {
+
+        if (error instanceof MongoError || error instanceof Error)
+            log(error.message, 'EVENT', `User Repository - ${getFunctionName()}`, 'ERROR')
+
+        return null
+    }
+}

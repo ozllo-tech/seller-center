@@ -140,15 +140,13 @@ export const sendLowStockEmailToSeller = async ( variation: Variation ): Promise
     return result
 }
 
-export const sendLateShippingEmailToSeller = async (shop_id: string): Promise<any> => {
+export const sendLateShippingEmailToSeller = async (shop_id: string, orderId: string): Promise<any> => {
 
     const user = await findUserByShopId(shop_id)
 
     if (!user) return null
 
-    // TODO: pass order id to template.
-
-    const result = await sendEmail(user.email, 'OZLLO360 | Atenção: um pedido está atrasado para o despacho!', lateShippingEmailContent())
+    const result = await sendEmail(user.email, 'OZLLO360 | Atenção: um pedido está atrasado para o despacho!', lateShippingEmailContent(orderId))
 
     result
         ? log(`Late shipping email sent to ${user.email}`, 'EVENT', getFunctionName())

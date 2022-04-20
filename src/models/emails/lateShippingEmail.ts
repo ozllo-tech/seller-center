@@ -1,8 +1,7 @@
 
 import { FRONT_END_URL } from "../../utils/consts"
-import { Product } from "../product"
 
-export const lateShippingEmailContent = () => /*html*/`
+export const lateShippingEmailContent = (orderId: string) => /*html*/`
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">
 
@@ -86,14 +85,9 @@ export const lateShippingEmailContent = () => /*html*/`
                                                                         <table cellpadding="0" cellspacing="0" width="100%">
                                                                             <tbody>
                                                                                 <tr>
-                                                                                    <td align="center" class="esd-block-text es-p10b">
-                                                                                        <h2>Um pedido está com o despacho atrasado!</h2>
-                                                                                    </td>
-                                                                                </tr>
-                                                                                <tr>
                                                                                     <td align="center" class="esd-block-text es-p10t es-p10b">
                                                                                         <h3>Olá! Tudo bem?</h3>
-                                                                                        <p>O pedido <strong>{número do pedido}</strong> está aguardando para ser despachado por mais de 2 dias. Este atraso pode prejudicar sua reputação no canal de vendas.</p>
+                                                                                        <p>O pedido <strong>${orderId}</strong> está aguardando para ser despachado por mais de 2 dias. Este atraso pode prejudicar sua reputação no canal de vendas.</p>
 
                                                                                         <p>Para evitar que isso aconteça, acesse <a href="${FRONT_END_URL}">aqui o Seller Center</a> e despache o pedido o quanto antes.</p>
                                                                                     </td>

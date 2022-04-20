@@ -13,7 +13,8 @@ export interface Order {
     meta?: {
         approved_at?: string,
         invoiced_at?: string,
-        shipped_at?: string
+        shipped_at?: string,
+        late_shipping_notifications?: number,
     }
 }
 
