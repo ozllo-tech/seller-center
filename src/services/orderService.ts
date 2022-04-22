@@ -8,7 +8,7 @@ import { findLastIntegrationOrder, findOrderByShopId, newIntegrationHub2b, newOr
 import { HUB2B_MARKETPLACE, HUB2B_TENANT, PROJECT_HOST } from "../utils/consts"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName, nowIsoDateHub2b } from "../utils/util"
-import { listAllOrdersHub2b, listOrdersHub2bByTime, postInvoiceHub2b, postTrackingHub2b, getTrackingHub2b, setupIntegrationHub2b, getInvoiceHub2b, getOrderHub2b, postOrderHub2b, updateStatusHub2b } from "./hub2bService"
+import { listAllOrdersHub2b, listOrdersHub2bByTime, postInvoiceHub2b, postTrackingHub2b, getTrackingHub2b, setupIntegrationHub2b, getInvoiceHub2b, getOrderHub2b, postOrderHub2b, updateStatusHub2b, getHub2bIntegration } from "./hub2bService"
 import { findProductByVariation, updateStockByQuantitySold } from "./productService"
 import { getToken } from "../utils/cryptUtil"
 import orderEventEmitter from "../events/orders"
@@ -189,18 +189,10 @@ export const sendInvoice = async (order: any, data: any) : Promise<HUB2B_Invoice
 
     if (res) {
 
-        const status: HUB2B_Status = {
-            status: 'Invoiced',
-            updatedDate: nowIsoDateHub2b(),
-            active: true,
-            message: ''
-        }
-
-        await findOneOrderAndModify("order.reference.id", order.reference.id, { "order.status": status })
+        await updateStatus(order.reference.id, 'Invoiced')
 
         // Foreach SKU in order, decrease stock by quantity sold.
         order.products.forEach((product:HUB2B_Product_Order) => updateStockByQuantitySold(product.sku, product.quantity))
-
     }
 
     res
@@ -222,18 +214,7 @@ export const sendTracking = async (order_id: string, data: any): Promise<HUB2B_T
 
     const orderTracking = await postTrackingHub2b(order_id, tracking, false)
 
-    if (orderTracking) {
-
-        const status: HUB2B_Status = {
-            status: 'Shipped',
-            updatedDate: nowIsoDateHub2b(),
-            active: true,
-            message: ''
-        }
-
-        await findOneOrderAndModify("order.reference.id", order_id, { "order.status": status })
-
-    }
+    if (orderTracking) await updateStatus(order_id, 'Shipped')
 
     orderTracking
         ? log(`Tracking sent`, 'EVENT', getFunctionName())
@@ -294,9 +275,13 @@ export const setupWebhookIntegration = async(): Promise<HUB2B_Order_Webhook | nu
         ]
     }
 
-    const setup = await setupIntegrationHub2b(integration, 'POST')
+    const existingSetup = await getHub2bIntegration('ERPOrdersNotification', HUB2B_TENANT)
 
-    if (!setup) return await setupIntegrationHub2b(integration, 'PUT')
+    const method = existingSetup?.length ? 'PUT' : 'POST'
+
+    const setup = await setupIntegrationHub2b(integration, method, HUB2B_TENANT)
+
+    if (!setup) return null
 
     return setup
 }
@@ -308,9 +293,10 @@ export const updateStatus = async (order_id: string, status: string) => {
     const fields = {
         "order.status.status": status,
         "order.status.updatedDate": nowIsoDateHub2b(),
-        ...('Approved' == status ? {'meta.invoiced_at': nowIsoDateHub2b()} : {}),
+        ...('Approved' == status ? {'meta.approved_at': nowIsoDateHub2b()} : {}),
         ...('Invoiced' == status ? {'meta.invoiced_at': nowIsoDateHub2b()} : {}),
-        ...('Shipped'  == status ? {'meta.shipped_at': nowIsoDateHub2b()} : {})
+        ...('Shipped'  == status ? {'meta.shipped_at': nowIsoDateHub2b()} : {}),
+        ...('Delivered' == status ? {'meta.delivered_at': nowIsoDateHub2b()} : {})
     }
 
     const update = await findOneOrderAndModify("order.reference.id", order_id, fields) // update.value = Order
@@ -440,17 +426,6 @@ export const syncIntegrationOrderStatus = async (order: Order, status: string) =
             ? log(`Order ${order_id} is in sync with order ${order.tenant.order} from tenant ${order.tenant.id}.`, 'EVENT', getFunctionName())
             : log(`Couldn't sync order ${order_id} with order ${order.tenant.order} from tenant ${order.tenant.id}.`, 'EVENT', getFunctionName(), 'ERROR')
     }
-}
-
-export const updateOrderMeta = (order: Order): Order => {
-
-    if ('Approved' == order.order.status.status) order.meta = {approved_at: order.order.status.updatedDate}
-
-    if ('Invoiced' == order.order.status.status) order.meta = {invoiced_at: order.order.status.updatedDate}
-
-    if ('Shipped' == order.order.status.status) order.meta = {shipped_at: order.order.status.updatedDate}
-
-    return order
 }
 
 export const alertLateOrderShippings = async (): Promise<void> => {

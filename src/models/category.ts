@@ -385,6 +385,11 @@ export const subcategories_home: SubCategory[] = [
     },
     {
         categoryCode: 288,
+        code: 446,
+        value: "Banho"
+    },
+    {
+        categoryCode: 288,
         code: 500,
         value: "Almofadas e Capas"
     },
@@ -437,7 +442,7 @@ export const subcategories_home: SubCategory[] = [
         categoryCode: 288,
         code: 510,
         value: "Papelaria"
-    },
+    }
 ]
 
 export const subcategories_beauty: SubCategory[] = [

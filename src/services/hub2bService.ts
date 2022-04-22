@@ -77,7 +77,7 @@ export const requestHub2B = async (URL: string, type?: Method, body?: any, heade
     }
 }
 
-export const setupIntegrationHub2b = async (integration: HUB2B_Integration, method: Method, idTenant = false) => {
+export const setupIntegrationHub2b = async (integration: HUB2B_Integration, method: Method, idTenant: any = false) => {
 
     idTenant
         ? await renewAccessTokenHub2b(false, idTenant)
@@ -100,7 +100,7 @@ export const setupIntegrationHub2b = async (integration: HUB2B_Integration, meth
     return setup
 }
 
-export const getHub2bIntegration = async (system: string, idTenant = false) => {
+export const getHub2bIntegration = async (system: string, idTenant: any = false) => {
 
     idTenant
         ? await renewAccessTokenHub2b(false, idTenant)
