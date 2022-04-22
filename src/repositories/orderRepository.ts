@@ -145,5 +145,7 @@ export const updateOrderMeta = (order: Order): Order => {
 
     if ('Shipped' == order.order.status.status) order.meta = {...order.meta, shipped_at: order.order.status.updatedDate}
 
+    if ('Delivered' == order.order.status.status) order.meta = {...order.meta, delivered_at: order.order.status.updatedDate}
+
     return order
 }

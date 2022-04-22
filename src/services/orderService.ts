@@ -293,7 +293,8 @@ export const updateStatus = async (order_id: string, status: string) => {
         "order.status.updatedDate": nowIsoDateHub2b(),
         ...('Approved' == status ? {'meta.approved_at': nowIsoDateHub2b()} : {}),
         ...('Invoiced' == status ? {'meta.invoiced_at': nowIsoDateHub2b()} : {}),
-        ...('Shipped'  == status ? {'meta.shipped_at': nowIsoDateHub2b()} : {})
+        ...('Shipped'  == status ? {'meta.shipped_at': nowIsoDateHub2b()} : {}),
+        ...('Delivered' == status ? {'meta.delivered_at': nowIsoDateHub2b()} : {})
     }
 
     const update = await findOneOrderAndModify("order.reference.id", order_id, fields) // update.value = Order
