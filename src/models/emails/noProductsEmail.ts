@@ -1,4 +1,3 @@
-
 import { FRONT_END_URL } from "../../utils/consts"
 
 export const noProductsEmailContent = () => /*html*/`
@@ -87,11 +86,14 @@ export const noProductsEmailContent = () => /*html*/`
                                                                                 <tr>
                                                                                     <td align="center" class="esd-block-text es-p10t es-p10b">
                                                                                         <h3>Olá! Tudo bem?</h3>
+
                                                                                         <p>Faz mais de uma semana que você se cadastrou no Seller Center, mas ainda não encontramos nenhum produto para enviar aos canais vendas e multiplicar seus resultados!</p>
+
+                                                                                        <p> Não se esqueça que após enviarmos os seus produtos para os marketplaces, precisamos aguardar a catalogação em cada canal, por isso é importante que você realize os cadastros o quanto antes.</p>
 
                                                                                         <p>Precisa de ajuda?</p>
 
-                                                                                        <p>Clique <a href="${FRONT_END_URL}">aqui</a> e cadastre seu <strong>primeiro produto</strong> na plataforma. Se encontrar dificuldades, entre em contato com o nosso suporte em <strong>{forma de suporte}</strong> que iremos te ajudar.</p>
+                                                                                        <p>Clique <a href="${FRONT_END_URL}">aqui</a> e cadastre seu <strong>primeiro produto</strong> na plataforma. Se encontrar dificuldades, entre em contato com o nosso suporte por meio do e-mail <a href="mailto:360@ozllo.com.br">360@ozllo.com.br</a> que iremos te ajudar.</p>
                                                                                     </td>
                                                                                 </tr>
                                                                                 <tr>

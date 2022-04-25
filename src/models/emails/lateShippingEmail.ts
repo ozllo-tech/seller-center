@@ -1,4 +1,3 @@
-
 import { FRONT_END_URL } from "../../utils/consts"
 
 export const lateShippingEmailContent = (orderId: string) => /*html*/`
@@ -87,9 +86,10 @@ export const lateShippingEmailContent = (orderId: string) => /*html*/`
                                                                                 <tr>
                                                                                     <td align="center" class="esd-block-text es-p10t es-p10b">
                                                                                         <h3>Olá! Tudo bem?</h3>
-                                                                                        <p>O pedido <strong>${orderId}</strong> está aguardando para ser despachado por mais de 2 dias. Este atraso pode prejudicar sua reputação no canal de vendas.</p>
 
-                                                                                        <p>Para evitar que isso aconteça, acesse <a href="${FRONT_END_URL}">aqui o Seller Center</a> e despache o pedido o quanto antes.</p>
+                                                                                        <p>O pedido <strong>${orderId}</strong> passou o prazo limite de despacho de 2 dias. Este atraso pode prejudicar sua reputação no canal de vendas.</p>
+
+                                                                                        <p>Para evitar que isso aconteça, acesse <a href="${FRONT_END_URL}">aqui o Seller Center</a> e despache o pedido com urgência.</p>
                                                                                     </td>
                                                                                 </tr>
                                                                                 <tr>
