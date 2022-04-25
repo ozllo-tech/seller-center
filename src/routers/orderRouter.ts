@@ -3,7 +3,7 @@
 //
 
 import { Router, Request, Response, NextFunction } from 'express'
-import { findOrdersByShop, sendInvoice, retrieveInvoice, sendTracking, retrieveTracking } from '../services/orderService'
+import { findOrdersByShop, sendInvoice, retrieveInvoice, sendTracking, retrieveTracking, getOrderAverageShippingTime } from '../services/orderService'
 import { createHttpStatus, internalServerError, ok } from '../utils/httpStatus'
 import { isOrderInvoiceable } from "../utils/middlewares"
 const router = Router()
@@ -83,21 +83,16 @@ router.post('/:id/tracking', async (req: Request, res: Response, next: NextFunct
 
 router.get('/insigths', async (req: Request, res: Response, next: NextFunction) => {
 
-    const meta = [{
-        average_shipping_time: {
-            last_week: 4, // days
-            last_month: 2, // days
-        }
-    }]
+    const result = await getOrderAverageShippingTime(req.shop?._id)
 
-    if (!meta)
+    if (!result)
         return res
             .status(internalServerError.status)
             .send(createHttpStatus(internalServerError))
 
     return res
         .status(ok.status)
-        .send(meta)
+        .send(result)
 })
 
 export { router as orderRouter }

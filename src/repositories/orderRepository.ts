@@ -76,13 +76,14 @@ export const newOrderHub2b = async (orderIntegration: Order): Promise<Order | nu
 /**
  * Find orders by shop_id
  *
- * @param _id
+ * @param shop_id
+ * @param filter optional filter fields.
  */
-export const findOrderByShopId = async (shop_id: string): Promise<Order[] | null> => {
+export const findOrderByShopId = async (shop_id: string, filter = {}): Promise<Order[] | null> => {
 
     try {
 
-        const result = await orderCollection.find({ shop_id: shop_id })
+        const result = orderCollection.find({ shop_id: shop_id, ...filter })
 
         const orders = await result.toArray()
 
