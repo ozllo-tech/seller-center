@@ -143,10 +143,6 @@ export const parseProdutoToProdutoHub2 = (produto: Product): HUB2B_Product[] => 
             attributes.push({ name: key, value: value, type: 2 })
         }
 
-        const attributeReference = variation.color || variation.flavor
-
-        const name = produto.name + " " + attributeReference + " " + produto.brand
-
         const productHub2: HUB2B_Product = {
             sku: variation._id.toString(),
             parentSKU: produto._id.toString(),
@@ -158,7 +154,7 @@ export const parseProdutoToProdutoHub2 = (produto: Product): HUB2B_Product[] => 
             url: `${PROJECT_HOST}/product/${variation._id.toString()}`,
             sourceId: variation._id.toString(),
             categoryCode: `${produto.subcategory}`,
-            name: name,
+            name: produto.name,
             sourceDescription: produto.description,
             description: produto.description,
             brand: produto.brand,
