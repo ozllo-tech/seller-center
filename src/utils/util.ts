@@ -280,3 +280,19 @@ export const equalArray = (array1: any, array2: any) => {
 export const waitforme = (ms: number) => {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+/**
+ * Filter an array asynchronously
+ *
+ * @param array
+ * @param predicate
+ * @url https://advancedweb.hu/how-to-use-async-functions-with-array-filter-in-javascript/
+ *
+ * @returns {Promise<any>}
+ */
+export const asyncFilter = async (array: any[], predicate: any): Promise<any[]> => {
+
+    const results = await Promise.all(array.map(predicate))
+
+    return array.filter((_v, index) => results[index])
+}

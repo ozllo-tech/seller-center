@@ -14,7 +14,8 @@ export interface Order {
         approved_at?: string,
         invoiced_at?: string,
         shipped_at?: string,
-        delivered_at?: string
+        delivered_at?: string,
+        late_shipping_notifications?: number
     }
 }
 

@@ -10,5 +10,7 @@ export interface User {
     email: string,
     password?: string,
     role: Role,
-    isActive: boolean
+    isActive: boolean,
+    idleNotifications: number,
+    created: Date
 }

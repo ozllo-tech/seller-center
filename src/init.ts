@@ -1,9 +1,10 @@
 import { recoverLateCredential } from "./services/hub2bAuhService"
 import { getTenantAuths } from "./services/hub2bTenantService"
-import { integrateHub2bOrders, INTEGRATION_INTERVAL } from "./services/orderService"
+import { alertLateOrderShippings, integrateHub2bOrders, INTEGRATION_INTERVAL } from "./services/orderService"
 import { updateIntegrationInvoices, updateIntegrationProducts, updateIntegrationStock, updateIntegrationTrackingCodes } from "./services/tenant2HubService"
 import { nowIsoDateHub2b } from "./utils/util"
 import { setIntervalAsync } from "set-interval-async/dynamic"
+import { alertUnproductiveUsers } from "./services/userService"
 
 /**
  * This function is called when the application starts
@@ -111,6 +112,18 @@ export const init = async () => {
         await updateIntegrationTrackingCodes()
 
     }, 500 * 60 * 60) // 30min
+
+    await alertUnproductiveUsers()
+
+    await alertLateOrderShippings()
+
+    setIntervalAsync(async () => {
+
+        await alertUnproductiveUsers()
+
+        await alertLateOrderShippings()
+
+    } , 24 * 60 * 60 * 1000) // 1 day
 
     // TODO: Implement routine (once a day) to sync orders from main account to subaccounts (syncIntegrationOrderStatus()).
 }

@@ -137,13 +137,18 @@ export const updateVariationById = async ( _id: any, patch: any ): Promise<Produ
 
         const query = { _id: new ObjectID( _id ) }
 
-        const result = await variationCollection.findOneAndUpdate(query, options, {returnOriginal: false})
+        const result = await variationCollection.findOneAndUpdate(query, options)
 
         if ( !result.value ) return null
 
-        const product = await findProductById(result.value.product_id)
+        if (patch.stock) {
 
-        productEventEmitter.emit('update_stock', result.value )
+            result.value.stock = patch.stock
+
+            productEventEmitter.emit('update_stock', result.value)
+        }
+
+        const product = await findProductById(result.value.product_id)
 
         const idTenant = patch.idTenant | Number(HUB2B_TENANT) // TODO: review this patch.idTenant
 

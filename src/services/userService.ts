@@ -2,17 +2,21 @@
 //      User Service
 //
 
+import endOfDay from "date-fns/endOfDay"
+import intervalToDuration from "date-fns/intervalToDuration"
 import { Role, User } from "../models/user"
-import { createNewUser, deleteUserByID, enableUser, findAllUsers, findOneUser, findUserById, updatePassword } from "../repositories/userRepository"
+import { findShopInfoByUserID } from "../repositories/accountRepository"
+import { createNewUser, deleteUserByID, enableUser, findAllSellerUsers, findOneUser, findUserById, findUsersByField, updatePassword } from "../repositories/userRepository"
 import { hashPassword } from "../utils/cryptUtil"
 import { log } from "../utils/loggerUtil"
-import { getFunctionName } from "../utils/util"
-import { sendEmailToActiveAccount } from "./mailService"
+import { asyncFilter, getFunctionName } from "../utils/util"
+import { sendEmailToActiveAccount, sendNoProductsEmailToSeller } from "./mailService"
+import { findProductsByShop } from "./productService"
 import { removeAccessToken, isTokenValid } from "./tokenService"
 
 /**
  * Save a new user and creates account
- * 
+ *
  * @param email
  * @param password
  */
@@ -32,6 +36,8 @@ export const createUser = async (email: string, password: string, role?: Role | 
         password,
         isActive: false,
         role: _role,
+        created: new Date(),
+        idleNotifications: 0
     }
 
     const newUser = await createNewUser(user)
@@ -50,7 +56,7 @@ export const createUser = async (email: string, password: string, role?: Role | 
 
 /**
  * Find an user by email or username
- * 
+ *
  * @param email - email
  * @param username - username
  */
@@ -71,12 +77,12 @@ export const findUser = async (email?: string, username?: string): Promise<User 
 
 /**
  * Find All Users
- * 
+ *
  */
 export const findUsers = async (): Promise<User[] | null> => {
 
 
-    let result = await findAllUsers()
+    let result = await findAllSellerUsers()
 
     return result
 }
@@ -84,7 +90,7 @@ export const findUsers = async (): Promise<User[] | null> => {
 
 /**
  * Check if user has admin role
- * 
+ *
  *  @param email - user email
  */
 export const isUserAdmin = async (email: string): Promise<boolean | null> => {
@@ -144,7 +150,7 @@ export const findById = async (_id: string): Promise<User | null> => {
 
 /**
  * Creates new password for user
- * 
+ *
  * @param _id           - user id
  * @param newPassword   - new password
  */
@@ -162,8 +168,8 @@ export const newPassword = async (_id: any, newPassword: string): Promise<User |
 
 /**
  * Activates an User from their e-mail
- * 
- * @param token 
+ *
+ * @param token
  * @returns User activated
  */
 export const activateUser = async (token: string): Promise<User | null> => {
@@ -185,7 +191,7 @@ export const activateUser = async (token: string): Promise<User | null> => {
 
 /**
  * Delete user
- * 
+ *
  * @param user_id
  */
 export const deleteUser = async (user_id: string): Promise<User | null> => {
@@ -201,7 +207,7 @@ export const deleteUser = async (user_id: string): Promise<User | null> => {
 
 /**
  * Delete inactive user
- * 
+ *
  * @param user_id
  */
 export const deleteInactiveUser = async (user_id: string): Promise<User | null> => {
@@ -217,4 +223,50 @@ export const deleteInactiveUser = async (user_id: string): Promise<User | null> 
         : log(`Could not delete user.`, 'EVENT', getFunctionName(), 'ERROR')
 
     return deleted
+}
+
+export const findUnproductiveUsers = async (): Promise<User[] | null> => {
+
+    const users = await findUsersByField("idleNotifications", 0)
+
+    if (!users) return null
+
+    const targetUsers = users.filter(user => !user.idleNotifications).filter(user => userCreatedMoreThanOneWeekAgo(user))
+
+    const unproductiveUsers = asyncFilter(targetUsers, async ( user: User) => await userHasNoProducts(user))
+
+    return unproductiveUsers
+}
+
+export const alertUnproductiveUsers = async (): Promise<User[] | null> => {
+
+    const unproductiveUsers = await findUnproductiveUsers()
+
+    if (!unproductiveUsers) return null
+
+    unproductiveUsers.forEach(user => sendNoProductsEmailToSeller(user))
+
+    return unproductiveUsers
+}
+
+function userCreatedMoreThanOneWeekAgo(user: User): boolean {
+
+    // TODO: check months amount.
+
+    const duration = intervalToDuration({ start: endOfDay(user.created), end: endOfDay(new Date()) }).days || 0
+
+    return duration >= 7
+}
+
+async function userHasNoProducts(user: User): Promise<boolean> {
+
+    const shop = await findShopInfoByUserID(user._id)
+
+    if (!shop) return true
+
+    const products = await findProductsByShop(shop._id)
+
+    if (!products) return true
+
+    return !products.length
 }

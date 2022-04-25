@@ -4,7 +4,7 @@
 
 import { HUB2B_Order, HUB2B_Invoice, HUB2B_Tracking, HUB2B_Integration, HUB2B_Order_Webhook, HUB2B_Status, HUB2B_Product_Order } from "../models/hub2b"
 import { Order, OrderIntegration } from "../models/order"
-import { findLastIntegrationOrder, findOrderByShopId, newIntegrationHub2b, newOrderHub2b, findOneOrderAndModify } from "../repositories/orderRepository"
+import { findLastIntegrationOrder, findOrderByShopId, newIntegrationHub2b, newOrderHub2b, findOneOrderAndModify, findOrdersByFields } from "../repositories/orderRepository"
 import { HUB2B_MARKETPLACE, HUB2B_TENANT, PROJECT_HOST } from "../utils/consts"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName, nowIsoDateHub2b } from "../utils/util"
@@ -17,6 +17,8 @@ import { renewAccessTokenHub2b } from "./hub2bAuhService"
 import { ObjectID } from "mongodb"
 import { findIntegrationOrder } from "./integrationService"
 import { updateTiny2HubOrderStatus } from "./tiny2HubService"
+import intervalToDuration from "date-fns/intervalToDuration"
+import { sendLateShippingEmailToSeller } from "./mailService"
 
 export const INTEGRATION_INTERVAL = 1000 * 60 * 60 // 1 hour
 
@@ -487,4 +489,25 @@ async function getLastestOrdersShippingAverageTime (shopId: ObjectID, days: numb
     // console.log({lastestOrdersShippingAverageTime})
 
     return Math.round(lastestOrdersShippingAverageTime)
+}
+
+export const alertLateOrderShippings = async (): Promise<void> => {
+
+    const orders = await findOrdersByFields({ "order.status.status": 'Approved', "meta.late_shipping_notifications": {$exists: false} })
+
+    if (!orders) return
+
+    for await (const order of orders) {
+
+        const approvedAt = new Date(order.order.status.updatedDate) // TODO: deal with timezones: https://bobbyhadz.com/blog/javascript-initialize-date-with-timezone
+
+        const duration = intervalToDuration({start: approvedAt, end: new Date()})
+
+        if (duration.months && duration.months > 0 || duration.days && duration.days >= 2) {
+
+            const sentEmail = await sendLateShippingEmailToSeller(order.shop_id, order.order.reference.id!.toString())
+
+            if (sentEmail) findOneOrderAndModify('order.reference.id', order.order.reference.id, {meta:{...order.meta, late_shipping_notifications: 1}})
+        }
+    }
 }

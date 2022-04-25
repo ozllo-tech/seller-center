@@ -106,14 +106,14 @@ export const findOneOrderAndModify = async (where: any, by: any, fields: {}) => 
 
         const result = await orderCollection.findOneAndUpdate(filter, { $set: fields }, { returnOriginal: false })
 
-        if (result.value) log(`Order status updated`, 'EVENT', `Order Repository - ${getFunctionName()}`, 'INFO')
+        if (result.value) log(`Order field updated`, 'EVENT', `Order Repository - ${getFunctionName()}`, 'INFO')
 
         return result
 
     } catch (error) {
 
         if (error instanceof MongoError || error instanceof Error)
-            log(error.message, 'EVENT', `User Repository - ${getFunctionName()}`, 'ERROR')
+            log(error.message, 'EVENT', `Order Repository - ${getFunctionName()}`, 'ERROR')
 
         return null
     }
@@ -128,6 +128,25 @@ export const findOrderByField = async(field: any, value: any) => {
         const result = await orderCollection.findOne(filter)
 
         return result
+
+    } catch (error) {
+
+        if (error instanceof MongoError || error instanceof Error)
+            log(error.message, 'EVENT', `User Repository - ${getFunctionName()}`, 'ERROR')
+
+        return null
+    }
+}
+
+export const findOrdersByFields = async(filter: object): Promise<Order[]|null> => {
+
+    try {
+
+        const result = orderCollection.find(filter)
+
+        const orders = await result.toArray()
+
+        return orders
 
     } catch (error) {
 
