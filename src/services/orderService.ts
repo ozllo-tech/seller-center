@@ -434,7 +434,7 @@ export const getOrderAverageShippingTime = async (shopId: ObjectID): Promise<Obj
 
     const lastMonth = await getLastestOrdersShippingAverageTime(shopId, 30)
 
-    if (!lastMonth) return []
+    // if (!lastMonth) return []
 
     return [
         {
