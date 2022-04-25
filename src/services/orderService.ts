@@ -448,15 +448,11 @@ export const getOrderAverageShippingTime = async (shopId: ObjectID): Promise<Obj
 
 async function getLastestOrdersShippingAverageTime (shopId: ObjectID, days: number): Promise<number|null> {
 
-    const validOrders = await findOrderByShopId(shopId.toString(), { 'order.status.status': { $nin: ["Pending", "Canceled"] } })
-
-    if (!validOrders) return null
+    const validOrders = await findOrderByShopId(shopId.toString(), { 'order.status.status': { $nin: ["Pending", "Canceled"] } }) || []
 
     const shippableOrders = validOrders.filter(order => order.meta?.approved_at || order.order.status.status === 'Approved')
 
     // console.log(JSON.stringify(shippableOrders?.map(order=> order.order), null, 2))
-
-    if (!shippableOrders) return null
 
     const lastestOrders = shippableOrders.filter(order => {
 
