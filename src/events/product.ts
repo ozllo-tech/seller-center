@@ -37,7 +37,7 @@ productEventEmitter.on( 'update_stock', ( variation: Variation ) => {
 
     const stock = Number(variation.stock)
 
-    if (stock < 3) sendLowStockEmailToSeller(variation)
+    // if (stock < 3) sendLowStockEmailToSeller(variation)
 
     updateStockHub2b(variation._id, stock)
 
