@@ -478,11 +478,11 @@ async function getLastestOrdersShippingAverageTime (shopId: ObjectID, days: numb
         return Math.abs(shipped.getTime() - approved.getTime()) / (1000 * 60 * 60 * 24)
     })
 
-    // console.log(lastestOrdersShippingTime)
+    console.log(lastestOrdersShippingTime)
 
     const lastestOrdersShippingAverageTime = lastestOrdersShippingTime.reduce((a, b) => a + b) / lastestOrdersCount
 
-    // console.log({lastestOrdersShippingAverageTime})
+    console.log({lastestOrdersShippingAverageTime})
 
     return Math.round(lastestOrdersShippingAverageTime) || 1
 }
