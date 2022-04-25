@@ -117,5 +117,13 @@ export const init = async () => {
 
     await alertLateOrderShippings()
 
+    setIntervalAsync(async () => {
+
+        await alertUnproductiveUsers()
+
+        await alertLateOrderShippings()
+
+    } , 24 * 60 * 60 * 1000) // 1 day
+
     // TODO: Implement routine (once a day) to sync orders from main account to subaccounts (syncIntegrationOrderStatus()).
 }
