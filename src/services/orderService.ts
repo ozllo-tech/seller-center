@@ -434,7 +434,7 @@ export const getOrderAverageShippingTime = async (shopId: ObjectID): Promise<Obj
 
     const lastMonth = await getLastestOrdersShippingAverageTime(shopId, 30)
 
-    if (!lastWeek || !lastMonth) return []
+    if (!lastMonth) return []
 
     return [
         {
@@ -484,7 +484,7 @@ async function getLastestOrdersShippingAverageTime (shopId: ObjectID, days: numb
 
     // console.log({lastestOrdersShippingAverageTime})
 
-    return Math.round(lastestOrdersShippingAverageTime)
+    return Math.round(lastestOrdersShippingAverageTime) || 1
 }
 
 export const alertLateOrderShippings = async (): Promise<void> => {
