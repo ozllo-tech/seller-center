@@ -450,20 +450,22 @@ async function getLastestOrdersShippingAverageTime (shopId: ObjectID, days: numb
 
     const validOrders = await findOrderByShopId(shopId.toString(), { 'order.status.status': { $nin: ["Pending", "Canceled"] } }) || []
 
-    const shippableOrders = validOrders.filter(order => order.meta?.approved_at || order.order.status.status === 'Approved')
+    const shippableOrders = validOrders.filter(order => !!order.meta?.approved_at || order.order.status.status === 'Approved')
 
     // console.log(JSON.stringify(shippableOrders?.map(order=> order.order), null, 2))
 
     const lastestOrders = shippableOrders.filter(order => {
 
-        const created = new Date(order.order.shipping.shippingDate)
+        const created = new Date(order.order.payment.purchaseDate) // paymentDate
 
-        const lastWeek = new Date(created.getTime() + (days * 24 * 60 * 60 * 1000))
+        // console.log(created, order.order.reference.id, order.order.payment.purchaseDate)
 
-        return lastWeek > new Date()
+        const latest = new Date(created.getTime() + (days * 24 * 60 * 60 * 1000))
+
+        return latest > new Date()
     })
 
-    // console.log(lastestOrders.map(order => order.meta))
+    //console.log(lastestOrders.map(order => order.meta))
 
     const lastestOrdersCount = lastestOrders.length
 
@@ -471,18 +473,18 @@ async function getLastestOrdersShippingAverageTime (shopId: ObjectID, days: numb
 
     const lastestOrdersShippingTime = lastestOrders.map(order => {
 
-        const approved = new Date(order.meta?.approved_at || order.order.shipping.shippingDate)
+        const approved_at = new Date(order.order.payment.approvedDate || order.order.payment.paymentDate)
 
         const shipped = order?.meta?.shipped_at?.length ? new Date(order.meta.shipped_at) : new Date()
 
-        return Math.abs(shipped.getTime() - approved.getTime()) / (1000 * 60 * 60 * 24)
+        return Math.abs(shipped.getTime() - approved_at.getTime()) / (1000 * 60 * 60 * 24)
     })
 
-    console.log(lastestOrdersShippingTime)
+    // console.log(lastestOrdersShippingTime)
 
     const lastestOrdersShippingAverageTime = lastestOrdersShippingTime.reduce((a, b) => a + b) / lastestOrdersCount
 
-    console.log({lastestOrdersShippingAverageTime})
+    // console.log({lastestOrdersShippingAverageTime})
 
     return Math.round(lastestOrdersShippingAverageTime) || 1
 }
