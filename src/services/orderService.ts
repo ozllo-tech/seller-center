@@ -4,11 +4,11 @@
 
 import { HUB2B_Order, HUB2B_Invoice, HUB2B_Tracking, HUB2B_Integration, HUB2B_Order_Webhook, HUB2B_Status, HUB2B_Product_Order } from "../models/hub2b"
 import { Order, OrderIntegration } from "../models/order"
-import { findLastIntegrationOrder, findOrderByShopId, newIntegrationHub2b, newOrderHub2b, findOneOrderAndModify, findOrdersByFields } from "../repositories/orderRepository"
+import { findLastIntegrationOrder, findOrderByShopId, newIntegrationHub2b, newOrderHub2b, findOneOrderAndModify, findOrdersByFields, findOrderByField } from "../repositories/orderRepository"
 import { HUB2B_MARKETPLACE, HUB2B_TENANT, PROJECT_HOST } from "../utils/consts"
 import { log } from "../utils/loggerUtil"
-import { getFunctionName, nowIsoDateHub2b } from "../utils/util"
-import { listAllOrdersHub2b, listOrdersHub2bByTime, postInvoiceHub2b, postTrackingHub2b, getTrackingHub2b, setupIntegrationHub2b, getInvoiceHub2b, getOrderHub2b, postOrderHub2b, updateStatusHub2b, getHub2bIntegration } from "./hub2bService"
+import { flatString, getFunctionName, nowIsoDateHub2b } from "../utils/util"
+import { listAllOrdersHub2b, listOrdersHub2bByTime, postInvoiceHub2b, postTrackingHub2b, getTrackingHub2b, setupIntegrationHub2b, getInvoiceHub2b, getOrderHub2b, postOrderHub2b, updateStatusHub2b, getHub2bIntegration, getShippingLabel } from "./hub2bService"
 import { findProductByVariation, updateStockByQuantitySold } from "./productService"
 import { getToken } from "../utils/cryptUtil"
 import orderEventEmitter from "../events/orders"
@@ -19,6 +19,7 @@ import { findIntegrationOrder } from "./integrationService"
 import { updateTiny2HubOrderStatus } from "./tiny2HubService"
 import intervalToDuration from "date-fns/intervalToDuration"
 import { sendLateShippingEmailToSeller } from "./mailService"
+import { SALES_CHANNEL_HUB2B } from "../models/salesChannelHub2b"
 
 export const INTEGRATION_INTERVAL = 1000 * 60 * 60 // 1 hour
 
@@ -508,4 +509,23 @@ export const alertLateOrderShippings = async (): Promise<void> => {
             if (sentEmail) findOneOrderAndModify('order.reference.id', order.order.reference.id, {meta:{...order.meta, late_shipping_notifications: 1}})
         }
     }
+}
+
+export const retrieveOrderShippingLabel = async (orderId: string): Promise<any> => {
+
+    const order = await findOrderByField('order.reference.id', Number(orderId))
+
+    if (!order) return null
+
+    const channelPrefix = SALES_CHANNEL_HUB2B.find(channel => flatString(channel.name) === flatString(order.order.reference.system.source))?.ticker
+
+    if (!channelPrefix) return null
+
+    const orderChannelId = `${channelPrefix}-${order.order.reference.source}`
+
+    const shippingLabel = await getShippingLabel(orderChannelId)
+
+    if (!shippingLabel) return null
+
+    return shippingLabel
 }

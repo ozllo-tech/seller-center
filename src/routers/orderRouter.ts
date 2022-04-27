@@ -3,8 +3,8 @@
 //
 
 import { Router, Request, Response, NextFunction } from 'express'
-import { findOrdersByShop, sendInvoice, retrieveInvoice, sendTracking, retrieveTracking, getOrderAverageShippingTime } from '../services/orderService'
-import { createHttpStatus, internalServerError, ok } from '../utils/httpStatus'
+import { findOrdersByShop, sendInvoice, retrieveInvoice, sendTracking, retrieveTracking, getOrderAverageShippingTime, retrieveOrderShippingLabel } from '../services/orderService'
+import { badRequest, createHttpStatus, internalServerError, noContent, ok } from '../utils/httpStatus'
 import { isOrderInvoiceable } from "../utils/middlewares"
 const router = Router()
 
@@ -93,6 +93,18 @@ router.get('/insigths', async (req: Request, res: Response, next: NextFunction) 
     return res
         .status(ok.status)
         .send(result)
+})
+
+router.get('/:id/shippingLabel', async (req: Request, res: Response, next: NextFunction) => {
+
+    const result = await retrieveOrderShippingLabel(req.params.id)
+
+    if (!result) return res.status(internalServerError.status).send(createHttpStatus(internalServerError))
+
+    if ('url not available yet' === result?.error) return res.status(noContent.status).send(result)
+
+    return res.status(ok.status).send(result)
+
 })
 
 export { router as orderRouter }

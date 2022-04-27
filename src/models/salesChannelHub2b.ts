@@ -43,7 +43,7 @@ export const SALES_CHANNEL_HUB2B = [
     {
         code: 71,
         ticker: "css",
-        name: "Cissa Magazine"
+        name: "CissaMagazine"
     },
     {
         code: 73,
@@ -63,7 +63,7 @@ export const SALES_CHANNEL_HUB2B = [
     {
         code: 76,
         ticker: "mag",
-        name: "Magazine Luiza"
+        name: "MagazineLuiza"
     },
     {
         code: 77,
@@ -272,7 +272,7 @@ export const USED_CHANNELS = [
     {
         code: 76,
         ticker: "mag",
-        name: "Magazine Luiza"
+        name: "MagazineLuiza"
     },
     {
         code: 82,

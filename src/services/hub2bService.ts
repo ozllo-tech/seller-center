@@ -117,7 +117,6 @@ export const getHub2bIntegration = async (system: string, idTenant: any = false)
     return response.data
 }
 
-
 export const parseProdutoToProdutoHub2 = (produto: Product): HUB2B_Product[] => {
 
     const produtosHub2b: HUB2B_Product[] = []
@@ -641,6 +640,23 @@ export const mapskuHub2b = async (data: any, idTenant: any) : Promise<any|null> 
     const response = await requestHub2B(CATALOG_URL, 'POST', JSON.stringify(data), { "Content-type": "application/json" })
 
     if (!response) return null
+
+    return response.data
+}
+
+export const getShippingLabel = async (orderChannelId: string) => {
+
+    await renewAccessTokenHub2b(false, false)
+
+    const URL_SHIPPING_LABEL = `${HUB2B_URL_V1}/shippinglabel/${HUB2B_TENANT}?order=${orderChannelId}`
+
+    const response = await requestHub2B(URL_SHIPPING_LABEL, 'GET', null, HUB2B_HEADERS_V1)
+
+    if (!response) return null
+
+    response.data
+        ? log("Get shipping label success", "EVENT", getFunctionName())
+        : log("Get shipping label error", "EVENT", getFunctionName(), "WARN")
 
     return response.data
 }

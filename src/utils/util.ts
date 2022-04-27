@@ -296,3 +296,9 @@ export const asyncFilter = async (array: any[], predicate: any): Promise<any[]> 
 
     return array.filter((_v, index) => results[index])
 }
+
+export const flatString = (string: string) => {
+
+    return string.toLowerCase().replaceAll(' ', '').trim()
+
+}
