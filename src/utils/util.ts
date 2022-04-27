@@ -299,6 +299,7 @@ export const asyncFilter = async (array: any[], predicate: any): Promise<any[]> 
 
 export const flatString = (string: string) => {
 
-    return string.toLowerCase().replaceAll(' ', '').trim()
+    return string.toLowerCase().replace(/\s/gm, '').trim()
 
 }
+
