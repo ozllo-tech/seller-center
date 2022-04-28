@@ -466,7 +466,7 @@ async function getLastestOrdersShippingAverageTime (shopId: ObjectID, days: numb
         return latest > new Date()
     })
 
-    //console.log(lastestOrders.map(order => order.meta))
+    // console.log(lastestOrders.map(order => order?.meta))
 
     const lastestOrdersCount = lastestOrders.length
 
@@ -474,7 +474,13 @@ async function getLastestOrdersShippingAverageTime (shopId: ObjectID, days: numb
 
     const lastestOrdersShippingTime = lastestOrders.map(order => {
 
-        const approved_at = new Date(order.order.payment.approvedDate || order.order.payment.paymentDate)
+        const paymentDate = order.order.payment.paymentDate !== '0001-01-01T00:00:00'
+        ? order.order.payment.paymentDate
+        : order.order.payment.purchaseDate
+
+        // TODO: maybe get updated order approvedDate in hub before pass paymentDate ahead.
+
+        const approved_at = new Date(order.order.payment.approvedDate || paymentDate)
 
         const shipped = order?.meta?.shipped_at?.length ? new Date(order.meta.shipped_at) : new Date()
 
