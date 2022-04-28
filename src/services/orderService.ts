@@ -419,7 +419,7 @@ export const syncIntegrationOrderStatus = async (order: Order, status: string) =
 
     if (status !== orderHub2b.status.status && !order.tiny_order_id) {
 
-        const updated = await updateStatusHub2b(order.tenant.order, order.order.status)
+        const updated = await updateStatusHub2b(order.tenant.order, order.order.status, order.tenant.id)
 
         if (updated) orderEventEmitter.emit('updated', order, status)
 
