@@ -9,6 +9,7 @@ import { createNewProduct, createVariation, deleteVariation, findProductById, fi
 import productEventEmitter from "../events/product"
 import { ObjectID } from "mongodb"
 import { HUB2B_TENANT } from "../utils/consts"
+import { getImageKitUrl } from "./uploadService"
 
 /**
  * Save a new product
@@ -163,7 +164,7 @@ export const updateProduct = async (_id: any, patch: any): Promise<Product | nul
  */
 export const updateProductImages = async (_id: any, patch: any): Promise<Product | null> => {
 
-    patch.images = patch.images.filter(Boolean)
+    patch.images = patch.images.filter(Boolean).map((image: string) => getImageKitUrl(image.split('/').pop()?.split('?').shift()||''))
 
     const { images } = patch
 

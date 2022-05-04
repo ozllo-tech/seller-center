@@ -151,7 +151,7 @@ export const sendExternalFileToS3 = async ( url: string ): Promise<string|null> 
         if (!image) return null
 
         // https://stackoverflow.com/questions/44400227/how-to-get-the-url-of-a-file-on-aws-s3-using-aws-sdk
-        return image.httpRequest.path
+        return key
 
     } catch (error: any) {
 
@@ -161,9 +161,11 @@ export const sendExternalFileToS3 = async ( url: string ): Promise<string|null> 
     }
 }
 
-export const getImageKitUrl = ( path : string ): string => {
+export const getImageKitUrl = ( s3ImageKey : string ): string => {
 
-    return `https://ik.imagekit.io/3m391sequ${path}?tr=w-1000,h-1000,fo-auto`
+    // TODO if empty string, insert placeholder image.
+
+    return `https://ik.imagekit.io/3m391sequ/${s3ImageKey}?tr=w-1000,h-1000,f-jpg,fo-auto`
 }
 
 /**
@@ -199,7 +201,7 @@ export const applyImageTransformations = async ( shopId: string): Promise<any> =
 
             if (!s3Image) continue
 
-            product.images[index] = getImageKitUrl(s3Image)
+            product.images[index] = s3Image
         }
 
         waitforme(1000)
@@ -214,5 +216,4 @@ export const applyImageTransformations = async ( shopId: string): Promise<any> =
     }
 
     return console.log(`Finish applying image transformations for ${shopId}`)
-
 }
