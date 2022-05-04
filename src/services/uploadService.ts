@@ -113,7 +113,7 @@ export const sendExternalFileToS3 = async ( url: string ): Promise<string|null> 
 
     if (!extension) return null
 
-    if (!['jpg', 'jpeg', 'png'].includes(extension)) {
+    if (!['jpg', 'jpeg', 'png'].includes(extension.toLowerCase())) {
 
         log(`Invalid file type (${extension}), only JPG, JPEG and PNG is allowed.`, 'EVENT', getFunctionName())
 
@@ -122,9 +122,11 @@ export const sendExternalFileToS3 = async ( url: string ): Promise<string|null> 
 
     const key = url.split('/').pop()?.split('?').shift()
 
+
     if (!key) return null
 
     try {
+
         const response = await axios.get(encodeURI(url), {
             responseType: 'arraybuffer',
         })
@@ -150,6 +152,9 @@ export const sendExternalFileToS3 = async ( url: string ): Promise<string|null> 
 
         if (!image) return null
 
+        // console.log(encodeURI(image.httpRequest.path))
+        // console.log(encodeURI(key))
+
         // https://stackoverflow.com/questions/44400227/how-to-get-the-url-of-a-file-on-aws-s3-using-aws-sdk
         return key
 
@@ -165,7 +170,9 @@ export const getImageKitUrl = ( s3ImageKey : string ): string => {
 
     // TODO if empty string, insert placeholder image.
 
-    return `https://ik.imagekit.io/3m391sequ/${s3ImageKey}?tr=w-1000,h-1000,f-jpg,fo-auto`
+    const imageKey = encodeURI(s3ImageKey)
+
+    return `https://ik.imagekit.io/3m391sequ/${imageKey}?tr=w-1000,h-1000,f-jpg,fo-auto`
 }
 
 /**
@@ -191,7 +198,9 @@ export const applyImageTransformations = async ( shopId: string): Promise<any> =
 
     for await (const product of products) {
 
-        for ( const [index, url] of product.images.entries()) {
+        for await ( const [index, url] of product.images.entries()) {
+
+            if (!url) continue
 
             const s3Image = await sendExternalFileToS3(url)
 
@@ -204,7 +213,7 @@ export const applyImageTransformations = async ( shopId: string): Promise<any> =
             product.images[index] = s3Image
         }
 
-        waitforme(1000)
+        await waitforme(1000)
 
         const updatedProduct = await updateProductImages(product._id, product)
 
