@@ -18,6 +18,8 @@ import { getImageKitUrl } from "./uploadService"
  */
 export const createProduct = async (body: any): Promise<Product | null> => {
 
+    body.images = body.images.map((url: string) => getImageKitUrl(url.split('/').pop()?.split('?').shift() || ''))
+
     const {
         images,
         category,
