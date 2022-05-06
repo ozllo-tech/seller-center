@@ -12,7 +12,7 @@ import multerS3 from 'multer-s3'
 import { AWS_ACCESS_KEY, AWS_ACCESS_SECRET, AWS_REGION, IMPORT_FOLDER } from '../utils/consts'
 import { HttpStatusResponse } from '../utils/httpStatus'
 import { log } from '../utils/loggerUtil'
-import { getFunctionName, getUrlExtension, waitforme } from '../utils/util'
+import { getFunctionName, getUrlExtension, makeNiceURL, waitforme } from '../utils/util'
 import { findProductsByShop, updateProductImages } from './productService'
 
 const s3 = new aws.S3()
@@ -66,7 +66,8 @@ export const uploadProductPicture = multer( {
             cb( null, { fieldName: file.fieldname } )
         },
         key: function ( req, file, cb ) {
-            cb( null, Date.now().toString() + '_' + req.shop?._id + '_' + file.originalname )
+            // TODO: remove special characters from file name.
+            cb( null, Date.now().toString() + '_' + req.shop?._id + '_' + makeNiceURL(file.originalname) )
         },
     } )
 } )
@@ -170,9 +171,7 @@ export const getImageKitUrl = ( s3ImageKey : string ): string => {
 
     // TODO if empty string, insert placeholder image.
 
-    const imageKey = encodeURI(s3ImageKey)
-
-    return `https://ik.imagekit.io/3m391sequ/${imageKey}?tr=w-1000,h-1000,f-jpg,fo-auto`
+    return `https://ik.imagekit.io/3m391sequ/${s3ImageKey}?tr=w-1000,h-1000,f-jpg,fo-auto`
 }
 
 /**

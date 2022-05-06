@@ -307,3 +307,9 @@ export const getUrlExtension = (url: string) =>  {
 
     return url.split(/[#?]/)[0].split('.')?.pop()?.trim()
 }
+
+export const makeNiceURL = (url: string) => {
+
+    return url.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replaceAll(' ', '-').toLowerCase()
+
+}
