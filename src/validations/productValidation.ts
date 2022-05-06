@@ -2,6 +2,7 @@
 //     Product Validation
 //
 
+import { CATEGORIES, SUBCATEGORIES } from "../models/category"
 import { COLORS } from "../models/color"
 import { FLAVORS } from "../models/flavors"
 import { AppError, invalidCategory, invalidEAN, invalidImageReference, invalidNationality, invalidProductBrand, invalidProductDescription, invalidProductGender, invalidProductName, invalidProductVariations, invalidSKU, invalidSubCategory, invalidVariationColor, invalidVariationFlavor, invalidVariationHeight, invalidVariationLength, invalidVariationPrice, invalidVariationPriceDiscounted, invalidVariationSize, invalidVariationStock, invalidVariationVoltage, invalidVariationWeight, invalidVariationWidth } from "../utils/errors/errors"
@@ -69,6 +70,10 @@ export const isNewProductValid = async (body: any): Promise<AppError[]> => {
 export const isProductPatchValid = async (body: any): Promise<AppError[]> => {
 
     const errors: AppError[] = []
+
+    if (body.category != CATEGORIES.filter(category => category.code == body.category)[0]?.code) errors.push(invalidCategory)
+
+    if (body.subcategory != SUBCATEGORIES.filter(subcategory => subcategory.code == body.subcategory)[0]?.code) errors.push(invalidSubCategory)
 
     return errors
 }
@@ -181,4 +186,10 @@ export const isVoltageValid = (voltage: string): boolean => {
     if (voltage === 'bivolt') return true
 
     return false
+}
+
+export const isProductCategoryValid = (category: any): boolean => {
+
+    return true
+
 }
