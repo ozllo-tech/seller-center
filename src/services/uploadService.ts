@@ -66,7 +66,6 @@ export const uploadProductPicture = multer( {
             cb( null, { fieldName: file.fieldname } )
         },
         key: function ( req, file, cb ) {
-            // TODO: remove special characters from file name.
             cb( null, Date.now().toString() + '_' + req.shop?._id + '_' + makeNiceURL(file.originalname) )
         },
     } )
@@ -104,31 +103,21 @@ export const deleteFile = ( filePath: string ) => {
     fs.unlinkSync( filePath )
 }
 
-export const sendExternalFileToS3 = async ( url: string ): Promise<string|null> => {
+export const sendExternalFileToS3 = async ( url: string, productId: string, index: number ): Promise<string|null> => {
 
     // https://stackoverflow.com/questions/22186979/download-file-from-url-and-upload-it-to-aws-s3-without-saving-node-js
     // https://stackoverflow.com/questions/61605078/axios-get-a-file-from-url-and-upload-to-s3
     // https://dev.to/vikasgarghb/streaming-files-to-s3-using-axios-h32
 
-    const extension = getUrlExtension(url)
-
-    if (!extension) return null
-
-    if (!['jpg', 'jpeg', 'png'].includes(extension.toLowerCase())) {
-
-        log(`Invalid file type (${extension}), only JPG, JPEG and PNG is allowed.`, 'EVENT', getFunctionName())
-
-        return null
-    }
+    if (url.startsWith('https://ik.imagekit.io/3m391sequ/')) return null
 
     const key = url.split('/').pop()?.split('?').shift()
-
 
     if (!key) return null
 
     try {
 
-        const response = await axios.get(encodeURI(url), {
+        const response = await axios.get(url, {
             responseType: 'arraybuffer',
         })
 
@@ -138,7 +127,7 @@ export const sendExternalFileToS3 = async ( url: string ): Promise<string|null> 
             'ACL': 'public-read',
             'Body': response.data,
             'Bucket': 'ozllo-seller-center-photos',
-            'Key': key,
+            'Key': `${key.substring(0, 38)}_${productId}_${index}.${getUrlExtension(url)}`,
         }, function (error: AWSError, data) {
 
             if (error) {
@@ -153,13 +142,15 @@ export const sendExternalFileToS3 = async ( url: string ): Promise<string|null> 
 
         if (!image) return null
 
-        // console.log(encodeURI(image.httpRequest.path))
-        // console.log(encodeURI(key))
-
         // https://stackoverflow.com/questions/44400227/how-to-get-the-url-of-a-file-on-aws-s3-using-aws-sdk
-        return key
+        return image.httpRequest.path
 
     } catch (error: any) {
+
+        // console.log({ key })
+        // console.log({ encode: encodeURI(key) })
+        // console.log({ decode: decodeURI(key) })
+        // console.log(error)
 
         log(`Could not send image ${url} to S3`, 'EVENT', getFunctionName(), "ERROR")
 
@@ -169,9 +160,9 @@ export const sendExternalFileToS3 = async ( url: string ): Promise<string|null> 
 
 export const getImageKitUrl = ( s3ImageKey : string ): string => {
 
-    // TODO if empty string, insert placeholder image.
+    // TODO/*  */ if empty string, insert placeholder image.
 
-    return `https://ik.imagekit.io/3m391sequ/${s3ImageKey}?tr=w-1000,h-1000,f-jpg,fo-auto`
+    return `https://ik.imagekit.io/3m391sequ/${s3ImageKey.replace(/\+/g, '%20')}?tr=w-1000,h-1000,f-jpg,fo-auto`
 }
 
 /**
@@ -201,7 +192,7 @@ export const applyImageTransformations = async ( shopId: string): Promise<any> =
 
             if (!url) continue
 
-            const s3Image = await sendExternalFileToS3(url)
+            const s3Image = await sendExternalFileToS3(url, product._id.toString(), index)
 
             s3Image
                 ? console.log(`Image ${index + 1} of ${product.images.length} for ${product._id}`)
