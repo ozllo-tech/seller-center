@@ -14,6 +14,7 @@ import { getFunctionName, waitforme } from "../utils/util"
 import { getCatalogHub2b, getHub2bIntegration, getInvoiceHub2b, getOrderHub2b, getStockHub2b, getTrackingHub2b, mapskuHub2b, postInvoiceHub2b, postTrackingHub2b, setupIntegrationHub2b } from "./hub2bService"
 import { findOrdersByShop, updateStatus } from "./orderService"
 import { findProductsByShop, updateProductImages, updateProductVariationStock } from "./productService"
+import { getImageKitUrl, sendExternalFileToS3 } from "./uploadService"
 
 // TODO: find out a way to reset the offset to 0 when idTenant or shop_id changes.
 let OFFSET = 0
@@ -62,7 +63,16 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
 
             const images: string[] = []
 
-            productHub2b.images.forEach((imageHub2b) => images.push(imageHub2b.url))
+            productHub2b.images.forEach(async (imageHub2b, index) => {
+
+                const s3File = await sendExternalFileToS3(imageHub2b.url, productHub2b.groupers.parentSKU || productHub2b.skus.source, index)
+
+                if (!s3File) return images.push(imageHub2b.url)
+
+                const imageKitUrl = getImageKitUrl(s3File.replace('/', ''))
+
+                if (imageKitUrl) return images.push(imageKitUrl)
+            })
 
             const product: Product = {
                 shop_id: new ObjectID(shop_id),

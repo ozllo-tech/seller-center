@@ -1,4 +1,3 @@
-
 //
 //      Upload Service
 //
@@ -111,9 +110,9 @@ export const sendExternalFileToS3 = async ( url: string, productId: string, inde
 
     if (url.startsWith('https://ik.imagekit.io/3m391sequ/')) return null
 
-    const key = url.split('/').pop()?.split('?').shift()
+    const fileName = url.split('/').pop()?.split('?').shift()
 
-    if (!key) return null
+    if (!fileName) return null
 
     try {
 
@@ -123,11 +122,15 @@ export const sendExternalFileToS3 = async ( url: string, productId: string, inde
 
         if (!response.data.length) return null
 
+        const key = fileName.length > 38
+            ? `${fileName.substring(0, 38)}_${productId}_${index}.${getUrlExtension(url)}`
+            : `${productId}_${fileName}`
+
         const image = s3.putObject({
             'ACL': 'public-read',
             'Body': response.data,
             'Bucket': 'ozllo-seller-center-photos',
-            'Key': `${key.substring(0, 38)}_${productId}_${index}.${getUrlExtension(url)}`,
+            'Key': key,
         }, function (error: AWSError, data) {
 
             if (error) {
@@ -147,11 +150,6 @@ export const sendExternalFileToS3 = async ( url: string, productId: string, inde
 
     } catch (error: any) {
 
-        // console.log({ key })
-        // console.log({ encode: encodeURI(key) })
-        // console.log({ decode: decodeURI(key) })
-        // console.log(error)
-
         log(`Could not send image ${url} to S3`, 'EVENT', getFunctionName(), "ERROR")
 
         return null
@@ -160,7 +158,7 @@ export const sendExternalFileToS3 = async ( url: string, productId: string, inde
 
 export const getImageKitUrl = ( s3ImageKey : string ): string => {
 
-    // TODO/*  */ if empty string, insert placeholder image.
+    // TODO: if empty string, insert placeholder image.
 
     return `https://ik.imagekit.io/3m391sequ/${s3ImageKey.replace(/\+/g, '%20')}?tr=w-1000,h-1000,f-jpg,fo-auto`
 }
