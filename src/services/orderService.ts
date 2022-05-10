@@ -178,7 +178,7 @@ export const sendInvoice = async (order: any, data: any) : Promise<HUB2B_Invoice
     const invoice: HUB2B_Invoice = {
         issueDate: data.issueDate || nowIsoDateHub2b(),
         key: data.key,
-        number: data.number,
+        number: data.number.replace(/[^a-z0-9]+/g, ''),
         cfop: data.cfop,
         series: data.series,
         totalAmount: order.payment.totalAmount,
