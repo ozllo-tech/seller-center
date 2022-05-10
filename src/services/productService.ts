@@ -4,7 +4,7 @@
 
 import { Product, Variation } from "../models/product"
 import { log } from "../utils/loggerUtil"
-import { getFunctionName } from "../utils/util"
+import { getFunctionName, removeAllTagsExceptBr } from "../utils/util"
 import { createNewProduct, createVariation, deleteVariation, findProductById, findProductsByShopId, findVariationById, updateProductById, updateVariationById, findVariationsByProductId, deleteProductById } from "../repositories/productRepository"
 import productEventEmitter from "../events/product"
 import { ObjectID } from "mongodb"
@@ -19,6 +19,8 @@ import { getImageKitUrl } from "./uploadService"
 export const createProduct = async (body: any): Promise<Product | null> => {
 
     body.images = body.images.map((url: string) => getImageKitUrl(url.split('/').pop()?.split('?').shift() || ''))
+
+    body.description = removeAllTagsExceptBr(body.description)
 
     const {
         images,
@@ -149,6 +151,8 @@ export const updateProduct = async (_id: any, patch: any): Promise<Product | nul
     if (patch.images) delete patch.images
 
     delete patch._id
+
+    if (patch.description) patch.description = removeAllTagsExceptBr(patch.description)
 
     const product = await updateProductById(_id, patch)
 

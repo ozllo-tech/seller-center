@@ -10,7 +10,7 @@ import { createNewProduct, createVariation, findProductByShopIdAndSku, updateVar
 import { PROJECT_HOST } from "../utils/consts"
 import { getToken } from "../utils/cryptUtil"
 import { log } from "../utils/loggerUtil"
-import { getFunctionName, waitforme } from "../utils/util"
+import { getFunctionName, removeAllTagsExceptBr, waitforme } from "../utils/util"
 import { getCatalogHub2b, getHub2bIntegration, getInvoiceHub2b, getOrderHub2b, getStockHub2b, getTrackingHub2b, mapskuHub2b, postInvoiceHub2b, postTrackingHub2b, setupIntegrationHub2b } from "./hub2bService"
 import { findOrdersByShop, updateStatus } from "./orderService"
 import { findProductsByShop, updateProductImages, updateProductVariationStock } from "./productService"
@@ -81,7 +81,7 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
                 subcategory: subcategory,
                 nationality: 0,
                 name: productHub2b.name,
-                description: productHub2b.description.sourceDescription,
+                description: removeAllTagsExceptBr(productHub2b.description.sourceDescription),
                 brand: productHub2b.brand,
                 more_info: '',
                 ean: productHub2b.ean,
