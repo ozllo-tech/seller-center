@@ -13,7 +13,6 @@ import { findProductByVariation, updateStockByQuantitySold } from "./productServ
 import { getToken } from "../utils/cryptUtil"
 import orderEventEmitter from "../events/orders"
 import { findTenantfromShopID } from "./hub2bTenantService"
-import { renewAccessTokenHub2b } from "./hub2bAuhService"
 import { ObjectID } from "mongodb"
 import { findIntegrationOrder } from "./integrationService"
 import { updateTiny2HubOrderStatus } from "./tiny2HubService"
@@ -333,8 +332,6 @@ export const updateStatus = async (order_id: string, status: string) => {
 
 export const sendOrderToTenant = async (order: HUB2B_Order, tenantID: any): Promise<HUB2B_Order | null> => {
 
-    await renewAccessTokenHub2b(false, tenantID)
-
     order.reference.system.source = HUB2B_MARKETPLACE
 
     order.reference.idTenant = tenantID
@@ -350,7 +347,7 @@ export const sendOrderToTenant = async (order: HUB2B_Order, tenantID: any): Prom
 
     delete order.reference.id
 
-    const orderHub2b = await postOrderHub2b(order)
+    const orderHub2b = await postOrderHub2b(order, tenantID)
 
     if (orderHub2b) {
 

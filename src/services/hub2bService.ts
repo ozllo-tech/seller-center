@@ -376,7 +376,9 @@ export const updatePriceHub2b = async (variation_id: any, price: number, price_d
     return response.data
 }
 
-export const postOrderHub2b = async (order: HUB2B_Order) => {
+export const postOrderHub2b = async (order: HUB2B_Order, idTenant: number|string) => {
+
+    await renewAccessTokenHub2b(false, idTenant)
 
     const URL_ORDERS = HUB2B_URL_V2 + "/Orders" + "?access_token=" + TENANT_CREDENTIALS.access_token
 
