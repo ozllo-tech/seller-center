@@ -70,7 +70,9 @@ export const createProduct = async (body: any): Promise<Product | null> => {
     const product = await createNewProduct(ref_product, variations)
 
     if (!product) {
-        log(`Product ${product} has been created.`, 'EVENT', getFunctionName())
+
+        log(`Could not create product ${ref_product.name}`, 'EVENT', getFunctionName())
+
         return null
     }
 
@@ -92,9 +94,7 @@ export const findProduct = async (product_id: any): Promise<Product | null> => {
 
     let product = await findProductById(product_id)
 
-    product
-        ? log(`Product ${product.name} has been found.`, 'EVENT', getFunctionName())
-        : log(`Product ${product_id} does not exist.`, 'EVENT', getFunctionName())
+    if (!product) log(`Product ${product_id} does not exist.`, 'EVENT', getFunctionName())
 
     return product
 }
@@ -136,7 +136,7 @@ export const findProductsByShop = async (shop_id: any): Promise<Product[] | null
 
     products
         ? log(`Found ${products.length} products for shop ${shop_id}`, 'EVENT', getFunctionName())
-        : log(`Could not find any products`, 'EVENT', getFunctionName())
+        : log(`Could not find any products for shop ${shop_id}`, 'EVENT', getFunctionName())
 
     return products
 }
@@ -196,9 +196,7 @@ export const updateProductPrice = async (_id: any, patch: any): Promise<Product 
 
     const product = await updateProductById(_id, { price, price_discounted })
 
-    product
-        ? log(`Update product ${_id} price`, 'EVENT', getFunctionName())
-        : log(`Could not update product ${_id} price`, 'EVENT', getFunctionName())
+    if (!product) log(`Could not update product ${_id} price`, 'EVENT', getFunctionName())
 
     productEventEmitter.emit('update_price', product)
 
@@ -216,9 +214,7 @@ export const updateProductVariationStock = async (_id: any, patch: any): Promise
 
     const product = await updateVariationById(_id, patch)
 
-    product
-        ? log(`Stock from variation ${_id} has been updated.`, 'EVENT', getFunctionName())
-        : log(`Could not update stock from variation ${_id}.`, 'EVENT', getFunctionName(), 'WARN')
+    if (!product) log(`Could not update stock from variation ${_id}.`, 'EVENT', getFunctionName(), 'WARN')
 
     return product
 }
@@ -232,9 +228,7 @@ export const updateProductVariation = async (_id: any, patch: any): Promise<Prod
 
     const product = await updateVariationById(_id, patch)
 
-    product
-        ? log( `Update product variation ${ _id }`, 'EVENT', getFunctionName() )
-        : log( `Could not update product`, 'EVENT', getFunctionName() )
+    if (!product) log( `Could not update product ${_id}`, 'EVENT', getFunctionName(), 'WARN' )
 
     return product
 }
@@ -246,12 +240,9 @@ export const updateProductVariation = async (_id: any, patch: any): Promise<Prod
  */
 export const findVariation = async (variation_id: any): Promise<Variation | null> => {
 
-
     let variation = await findVariationById(variation_id)
 
-    variation
-        ? log(`Variation ${variation._id} has been found.`, 'EVENT', getFunctionName())
-        : log(`Variation ${variation_id} does not exist.`, 'EVENT', getFunctionName())
+    if (!variation) log(`Variation ${variation_id} does not exist.`, 'EVENT', getFunctionName())
 
     return variation
 }
