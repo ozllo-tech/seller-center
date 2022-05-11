@@ -19,6 +19,7 @@ import { updateTiny2HubOrderStatus } from "./tiny2HubService"
 import intervalToDuration from "date-fns/intervalToDuration"
 import { sendLateShippingEmailToSeller } from "./mailService"
 import { SALES_CHANNEL_HUB2B } from "../models/salesChannelHub2b"
+import { findVariationById } from "../repositories/productRepository"
 
 export const INTEGRATION_INTERVAL = 1000 * 60 * 60 // 1 hour
 
@@ -153,6 +154,17 @@ export const savNewOrder = async (shop_id: string, order: HUB2B_Order) => {
     }
 
     if (shop_orders.filter(_order => _order.order.reference.id == order.reference.id).length) return
+
+    for await (const [index, product] of order.products.entries()) {
+
+        const variation = await findVariationById(product.sku)
+
+        if (!variation || !variation.size) continue
+
+        const attr = variation?.color || variation?.flavor
+
+        order.products[index].name = `${product.name} | ${attr} | ${variation.size}`
+    }
 
     const newOrder = await newOrderHub2b({ order, shop_id })
 
