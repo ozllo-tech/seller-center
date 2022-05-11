@@ -336,13 +336,6 @@ export const sendOrderToTenant = async (order: HUB2B_Order, tenantID: any): Prom
 
     order.reference.idTenant = tenantID
 
-    for await (const [index, item] of order.products.entries()) {
-
-        const product = await findProductByVariation(item.sku)
-
-        order.products[index].sku = product?._id?.toString()
-    }
-
     const orderID = order.reference.id
 
     delete order.reference.id
