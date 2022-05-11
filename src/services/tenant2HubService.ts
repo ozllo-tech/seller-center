@@ -100,49 +100,7 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
             products.push(product)
         }
 
-        if (productExists) {
-
-            existingHubProducts.push(productHub2b)
-
-            // Update base price and sales price.
-
-            // if (productExists.price !== productHub2b.destinationPrices.priceBase || productExists.price_discounted !== productHub2b.destinationPrices.priceSale) {
-
-            //     await updateProductById(productExists._id, {
-            //         price: productHub2b.destinationPrices.priceBase,
-            //         price_discounted: productHub2b.destinationPrices.priceSale
-            //     })
-            // }
-
-            // Update description.
-
-            // if (productExists.description !== productHub2b.description.sourceDescription) {
-
-            //     await updateProductById(productExists._id, {
-            //         description: productHub2b.description.sourceDescription
-            //     })
-            // }
-
-            // Update stock.
-
-            // if (Array.isArray(productExists.variations)) {
-            //     productExists.variations.forEach(async (variation) => {
-            //         if (variation.stock !== productHub2b.stocks.sourceStock) {
-            //             await updateVariationById(variation._id, { stock: productHub2b.stocks.sourceStock })
-            //         }
-            //     })
-            // }
-
-            // Update category.
-
-            // if (productExists.subcategory !== Number(productHub2b?.categorization?.source?.code)) {
-
-            //     await updateProductById(productExists._id, {
-            //         category: findMatchingCategory(productHub2b),
-            //         subcategory: findMatchingSubcategory(productHub2b)
-            //     })
-            // }
-        }
+        if (productExists) existingHubProducts.push(productHub2b)
     }
 
     const uniqueNewProducts = Array.from(new Set(products.map(a => a.sku))).map(sku => {
