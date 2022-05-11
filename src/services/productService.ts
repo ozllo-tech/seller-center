@@ -315,7 +315,7 @@ export const deleteProduct = async (productId: any) => {
 
     if (!variations) return null
 
-    for (const variation of variations) await deleteVariation(variation._id)
+    for await (const variation of variations) await deleteVariation(variation._id)
 
     result
         ? log(`Product ${productId} has been deleted.`, "EVENT", getFunctionName())
