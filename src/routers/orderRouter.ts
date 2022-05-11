@@ -4,7 +4,7 @@
 
 import { Router, Request, Response, NextFunction } from 'express'
 import { findOrdersByShop, sendInvoice, retrieveInvoice, sendTracking, retrieveTracking, getOrderAverageShippingTime, retrieveOrderShippingLabel } from '../services/orderService'
-import { badRequest, createHttpStatus, internalServerError, noContent, ok } from '../utils/httpStatus'
+import { createHttpStatus, internalServerError, noContent, ok } from '../utils/httpStatus'
 import { isOrderInvoiceable } from "../utils/middlewares"
 const router = Router()
 
