@@ -492,8 +492,8 @@ export const postInvoiceHub2b = async (order_id: string, _invoice: any, idTenant
     const invoice = response.data
 
     invoice
-        ? log("POST Invoice success", "EVENT", getFunctionName())
-        : log("POST Invoice error", "EVENT", getFunctionName(), "WARN")
+        ? log(`Invoice from order ${order_id} has been sent`, "EVENT", getFunctionName())
+        : log(`Could not send invoice from order ${order_id} to hub.`, "EVENT", getFunctionName(), "WARN")
 
     return invoice
 }
