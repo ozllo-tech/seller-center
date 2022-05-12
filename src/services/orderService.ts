@@ -193,6 +193,7 @@ export const sendInvoice = async (order: any, data: any) : Promise<HUB2B_Invoice
         cfop: data.cfop,
         series: data.series,
         totalAmount: order.payment.totalAmount,
+        ...(data.xml ? { xml: data.xml } : {}),
     }
 
     // TODO: maybe check if product has available stock before send invoice.
