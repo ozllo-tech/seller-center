@@ -221,9 +221,7 @@ export const getProductsInHub2b = async (idTenant: any, status = '2', offset = 0
 
     const productsHub2b = await getCatalogHub2b(status, offset, idTenant)
 
-    productsHub2b
-        ? log("GET Products in hub2b success", "EVENT", getFunctionName())
-        : log("GET Products in hub2b error", "EVENT", getFunctionName(), "WARN")
+    if (!productsHub2b) log(`Could not get orders from tenant ${idTenant}`, "EVENT", getFunctionName(), "WARN")
 
     if (!productsHub2b) return null
 

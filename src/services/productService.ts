@@ -110,17 +110,13 @@ export const findProductByVariation = async (variation_id: any): Promise<Product
 
     const variation = await findVariationById(variation_id)
 
-    variation
-        ? log(`Variation ${variation._id} has been found.`, 'EVENT', getFunctionName())
-        : log(`Variation ${variation_id} could not be found.`, 'EVENT', getFunctionName())
+    if (!variation) log(`Variation ${variation_id} could not be found.`, 'EVENT', getFunctionName())
 
     if (!variation) return null
 
     const product = await findProductById(variation.product_id)
 
-    product
-        ? log(`Product ${product._id} has been found.`, 'EVENT', getFunctionName())
-        : log(`Product ${variation.product_id} could not be found.`, 'EVENT', getFunctionName())
+    if (!product) log(`Product from variation ${variation.product_id} could not be found.`, 'EVENT', getFunctionName())
 
     return product
 }
