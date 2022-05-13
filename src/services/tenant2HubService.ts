@@ -81,7 +81,7 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
                 subcategory: subcategory,
                 nationality: 0,
                 name: productHub2b.name,
-                description: removeAllTagsExceptBr(productHub2b.description.sourceDescription),
+                description: removeAllTagsExceptBr(productHub2b.description.sourceDescription || ''),
                 brand: productHub2b.brand,
                 more_info: '',
                 ean: productHub2b.ean,
