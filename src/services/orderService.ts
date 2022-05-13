@@ -198,19 +198,21 @@ export const sendInvoice = async (order: any, data: any) : Promise<HUB2B_Invoice
 
     // TODO: maybe check if product has available stock before send invoice.
 
-    const res = await postInvoiceHub2b(order.reference.id, invoice, false)
+    if (!order.reference.id) return null
+
+    const res = await postInvoiceHub2b(order.reference.id.toString(), invoice, false)
 
     if (res) {
 
-        await updateStatus(order.reference.id, 'Invoiced')
+        await updateStatus(order.reference.id.toString(), 'Invoiced')
 
         // Foreach SKU in order, decrease stock by quantity sold.
         order.products.forEach((product:HUB2B_Product_Order) => updateStockByQuantitySold(product.sku, product.quantity))
     }
 
     res
-        ? log(`Invoice sent`, 'EVENT', getFunctionName())
-        : log(`Could not send invoice.`, 'EVENT', getFunctionName(), 'ERROR')
+        ? log(`Invoice from order ${order.reference.id}  has been sent.`, 'EVENT', getFunctionName())
+        : log(`Could not send invoice from order ${order.reference.id}.`, 'EVENT', getFunctionName(), 'ERROR')
 
     return res
 }
