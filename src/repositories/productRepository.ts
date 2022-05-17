@@ -226,7 +226,8 @@ export const findProductsByShopId = async ( shop_id: string ): Promise<Product[]
                 }
             },
             { $match: query },
-            { $sort: { _id: -1 } }
+            { $sort: { _id: -1 } },
+            { $limit: 300 }
         ] )
 
         if ( !productsCursor ) throw new MongoError( "Could not retrieve products." )
