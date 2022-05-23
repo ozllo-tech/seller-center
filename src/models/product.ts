@@ -20,7 +20,15 @@ export interface Product {
     sku: string,
     sourceSKU?: string,
     variations?: Variation[] | null,
-    is_active: boolean
+    is_active: boolean,
+    validation?: {
+        errors: Validation_Errors[]
+    }
+}
+
+export interface Validation_Errors {
+    field: string
+    conditions: string[],
 }
 
 export interface Variation {

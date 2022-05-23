@@ -17,6 +17,8 @@ export const isNewProductValid = async (body: any): Promise<AppError[]> => {
 
     const errors: AppError[] = []
 
+    // TODO: remove required validation.
+
     if (body.images && !Array.isArray(body.images)) errors.push(invalidImageReference)
 
     if (!body.category) errors.push(invalidCategory)
@@ -25,25 +27,25 @@ export const isNewProductValid = async (body: any): Promise<AppError[]> => {
 
     if (!body.nationality) errors.push(invalidNationality)
 
-    if (!body.name || body.name.length < 2) errors.push(invalidProductName)
+    // if (!body.name || body.name.length < 2) errors.push(invalidProductName)
 
-    if (!body.description || body.description.length < 2) errors.push(invalidProductDescription)
+    // if (!body.description || body.description.length < 2) errors.push(invalidProductDescription)
 
-    if (!body.brand || body.brand.length < 2) errors.push(invalidProductBrand)
+    // if (!body.brand || body.brand.length < 2) errors.push(invalidProductBrand)
 
-    if (body.ean && body.ean.length < 2) errors.push(invalidEAN)
+    // if (body.ean && body.ean.length < 2) errors.push(invalidEAN)
 
-    if (!body.sku || body.sku.length < 2) errors.push(invalidSKU)
+    // if (!body.sku || body.sku.length < 2) errors.push(invalidSKU)
 
     if (!body.gender || (body.gender !== 'M' && body.gender !== 'F' && body.gender !== 'U')) errors.push(invalidProductGender)
 
-    if (!body.height || isNotNumber(body.height) || isNegativeNumber(body.height)) errors.push(invalidVariationHeight)
+    // if (!body.height || isNotNumber(body.height) || isNegativeNumber(body.height)) errors.push(invalidVariationHeight)
 
-    if (!body.width || isNotNumber(body.width) || isNegativeNumber(body.width)) errors.push(invalidVariationWidth)
+    // if (!body.width || isNotNumber(body.width) || isNegativeNumber(body.width)) errors.push(invalidVariationWidth)
 
-    if (!body.length || isNotNumber(body.length) || isNegativeNumber(body.length)) errors.push(invalidVariationLength)
+    // if (!body.length || isNotNumber(body.length) || isNegativeNumber(body.length)) errors.push(invalidVariationLength)
 
-    if (!body.weight || isNotNumber(body.weight) || isNegativeNumber(body.weight)) errors.push(invalidVariationWeight)
+    // if (!body.weight || isNotNumber(body.weight) || isNegativeNumber(body.weight)) errors.push(invalidVariationWeight)
 
     if (body.price) body.price = parsePotentiallyGroupedFloat(body.price)
 

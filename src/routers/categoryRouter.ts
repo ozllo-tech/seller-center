@@ -8,7 +8,7 @@ import { badRequest, createHttpStatus, ok } from '../utils/httpStatus'
 const router = Router()
 
 /**
- * GET -> lista de categorias 
+ * GET -> lista de categorias
  */
 router.get( '/all', async ( req: Request, res: Response, next: NextFunction ) => {
 
@@ -49,7 +49,7 @@ router.get( '/:category_code/subcategories', async ( req: Request, res: Response
 
     else return res
         .status( ok.status )
-        .send( await getCategoryAttributes( category_code ) )
+        .send( getCategoryAttributes( category_code ) )
 
 } )
 

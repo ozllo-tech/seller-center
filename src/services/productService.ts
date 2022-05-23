@@ -2,13 +2,14 @@
 //      Product Service
 //
 
-import { Product, Variation } from "../models/product"
+import { Product, Validation_Errors, Variation } from "../models/product"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName } from "../utils/util"
 import { createNewProduct, createVariation, deleteVariation, findProductById, findProductsByShopId, findVariationById, updateProductById, updateVariationById, findVariationsByProductId, deleteProductById } from "../repositories/productRepository"
 import productEventEmitter from "../events/product"
 import { ObjectID } from "mongodb"
 import { HUB2B_TENANT } from "../utils/consts"
+import { getCategoryAttributes } from "./categoryService"
 
 /**
  * Save a new product
@@ -62,7 +63,9 @@ export const createProduct = async (body: any): Promise<Product | null> => {
         is_active: true
     }
 
-    const product = await createNewProduct(ref_product, variations)
+    const validatedProduct = await validateProduct(ref_product)
+
+    const product = await createNewProduct(validatedProduct, variations)
 
     if (!product) {
         log(`Product ${product} has been created.`, 'EVENT', getFunctionName())
@@ -149,11 +152,15 @@ export const updateProduct = async (_id: any, patch: any): Promise<Product | nul
 
     const product = await updateProductById(_id, patch)
 
-    product
-    ? log(`Update product ${_id}`, 'EVENT', getFunctionName())
-    : log(`Could not update product`, 'EVENT', getFunctionName())
+    if (!product) return null
 
-    return product
+    const validatedProduct = await validateProduct(product)
+
+    validatedProduct
+        ? log(`Update product ${_id}`, 'EVENT', getFunctionName())
+        : log(`Could not update product`, 'EVENT', getFunctionName())
+
+    return validatedProduct
 }
 
 /**
@@ -324,4 +331,168 @@ export const deleteProduct = async (productId: any) => {
         : log(`Could not delete product ${productId}.`, "EVENT", getFunctionName(), "WARN")
 
     return result
+}
+
+export const validateProduct = async (product: Product): Promise<Product> => {
+
+    const validatedProduct = validateProductFields(product)
+
+    if (!validatedProduct) return product
+
+    // console.log(JSON.stringify(validatedProduct, null, 2))
+
+    const updatedProduct =  await updateProductById(product._id, { validation: validatedProduct.validation })
+
+    if (!updatedProduct) return product
+
+    return updatedProduct
+}
+
+export const validateProductFields = (product: Product): Product => {
+
+    type ObjectKey = keyof typeof product // https://bobbyhadz.com/blog/typescript-access-object-property-dynamically
+
+    const fields = ['category', 'images', 'name', 'description', 'brand', 'sku', 'gender', 'height', 'width', 'length', 'weight', 'price', 'price_discounted', 'variations'] as ObjectKey[]
+
+    for (const field of fields) {
+
+        let errorIndex = product?.validation?.errors.findIndex(error => error.field === field ) ?? -1
+
+        let conditionIndex = product?.validation?.errors[errorIndex]?.conditions.findIndex(condition => condition === 'required') ?? -1
+
+        let condition = product.validation?.errors[errorIndex]?.conditions[conditionIndex] || ''
+
+        if (!product[field] || Array.isArray(product[field]) && !product[field].length) { // Validate required product fields.
+
+            // If field validation error conditions exists, add condition to it.
+
+            if (product.validation && product.validation.errors[errorIndex]?.conditions && condition !== 'required') {
+
+                product.validation.errors[errorIndex].conditions = [...product.validation.errors[errorIndex].conditions, 'required']
+
+            }
+
+            // If field validation does not exist, create it.
+
+            if (errorIndex === -1) {
+
+                product.validation
+                    ? product.validation.errors = [...product.validation.errors, { field: field, conditions: ['required'] }]
+                    : product.validation = { errors: [{ field: field, conditions: ['required'] }] }
+            }
+
+        } else {
+
+            if (product?.validation?.errors) {
+
+                // Remove condition if exists
+                product.validation.errors[errorIndex]?.conditions.splice(conditionIndex, 1)
+
+                // If there are no conditions, remove error
+                if (product.validation.errors[errorIndex]?.conditions.length === 0) product.validation.errors.splice(errorIndex, 1)
+            }
+
+            // It'll aways have one variation. So,validate it.
+
+            if ('variations' === field && product.variations) {
+
+                console.log({variations: product.variations})
+
+                for (const variationField of product.variations) {
+
+                    errorIndex = product?.validation?.errors.findIndex(error => error.field ===`variation.${variationField._id}.attr` ) ?? -1
+
+                    conditionIndex = product?.validation?.errors[errorIndex]?.conditions.findIndex(condition => condition === 'required') ?? -1
+
+                    condition = product.validation?.errors[errorIndex]?.conditions[conditionIndex] || ''
+
+                    // Validate required product variation color fields.
+
+                    const colorAttr = getCategoryAttributes(Number(product.category))[0]?.attributes.find(attr => attr.name === 'color')
+
+                    if (colorAttr && !variationField.color) {
+
+                        console.log({condition: 'empty', color: variationField.color})
+
+                        // If field validation error conditions exists, add condition to it.
+
+                        if (product.validation && product.validation.errors[errorIndex]?.conditions && condition !== 'required') {
+
+                            product.validation.errors[errorIndex].conditions = [...product.validation.errors[errorIndex].conditions, 'required']
+
+                        }
+
+                        // If field validation does not exist, create it.
+
+                        if (errorIndex === -1) {
+
+                            product.validation
+                                ? product.validation.errors = [...product.validation.errors, { field:`variation.${variationField._id}.attr`, conditions: ['required'] }]
+                                : product.validation = { errors: [{ field:`variation.${variationField._id}.attr`, conditions: ['required'] }] }
+                        }
+
+                    }
+
+                    if (colorAttr && !!variationField.color) {
+
+                        console.log({condition: 'filled', color: variationField.color})
+
+                        if (product?.validation?.errors) {
+
+                            // Remove condition if exists
+                            product.validation.errors[errorIndex]?.conditions.splice(conditionIndex, 1)
+
+                            // If there are no conditions, remove error
+                            if (product.validation.errors[errorIndex]?.conditions.length === 0) product.validation.errors.splice(errorIndex, 1)
+                        }
+                    }
+
+                    // Validate required product variation flavor fields.
+
+                    const flavorAttr = getCategoryAttributes(Number(product.category))[0]?.attributes.find(attr => attr.name === 'flavor')
+
+                    if (flavorAttr && !variationField.flavor) {
+
+                        console.log({condition: 'empty', flavor: variationField.flavor})
+
+                        // If field validation error conditions exists, add condition to it.
+
+                        if (product.validation && product.validation.errors[errorIndex]?.conditions && condition !== 'required') {
+
+                            product.validation.errors[errorIndex].conditions = [...product.validation.errors[errorIndex].conditions, 'required']
+
+                        }
+
+                        // If field validation does not exist, create it.
+
+                        if (errorIndex === -1) {
+
+                            product.validation
+                                ? product.validation.errors = [...product.validation.errors, { field:`variation.${variationField._id}.attr`, conditions: ['required'] }]
+                                : product.validation = { errors: [{ field:`variation.${variationField._id}.attr`, conditions: ['required'] }] }
+                        }
+
+                    }
+
+                    if (flavorAttr && !!variationField.flavor) {
+
+                        console.log({condition: 'filled', flavor: variationField.flavor})
+
+                        if (product?.validation?.errors) {
+
+                            // Remove condition if exists
+                            product.validation.errors[errorIndex]?.conditions.splice(conditionIndex, 1)
+
+                            // If there are no conditions, remove error
+                            if (product.validation.errors[errorIndex]?.conditions.length === 0) product.validation.errors.splice(errorIndex, 1)
+                        }
+                    }
+
+                    // TODO: validate variation stock fields.
+                }
+            }
+        }
+    }
+
+    return product
 }

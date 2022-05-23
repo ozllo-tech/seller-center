@@ -9,7 +9,7 @@ import { ATTRIBUTES, Category_Attribute } from "../models/attribute"
 
 /**
  * List category
- * 
+ *
  */
 export const getAllCategories = async (): Promise<Category[]> => {
 
@@ -24,7 +24,7 @@ export const getAllCategories = async (): Promise<Category[]> => {
 
 /**
  * List subcategories from category
- * 
+ *
  * @param category_code  `category_code`
  */
 export const getAllSubCategories = async ( category_code: number ): Promise<SubCategory[]> => {
@@ -40,7 +40,7 @@ export const getAllSubCategories = async ( category_code: number ): Promise<SubC
 
 /**
  * Retrieve a category that has the same code
- * 
+ *
  * @param code  `code`
  */
 export const getCategory = async ( code: number ): Promise<Category[]> => {
@@ -57,7 +57,7 @@ export const getCategory = async ( code: number ): Promise<Category[]> => {
 
 /**
  * Retrieve a subcategory that has the same code
- * 
+ *
  * @param code  `code`
  */
 export const getSubCategory = async ( code: number ): Promise<SubCategory[]> => {
@@ -74,10 +74,10 @@ export const getSubCategory = async ( code: number ): Promise<SubCategory[]> => 
 
 /**
  * Retrieve a category attributes that has the same code
- * 
+ *
  * @param code  `code`
  */
-export const getCategoryAttributes = async ( code: number ): Promise<Category_Attribute[]> => {
+export const getCategoryAttributes = ( code: number ): Category_Attribute[] => {
 
     const attributes = ATTRIBUTES.filter( attributes => attributes.category === code )
 
