@@ -2,7 +2,7 @@
 //      Product Service
 //
 
-import { Product, Validation_Errors, Variation } from "../models/product"
+import { Product, Variation } from "../models/product"
 import { log } from "../utils/loggerUtil"
 import { getFunctionName, removeAllTagsExceptBr } from "../utils/util"
 import { createNewProduct, createVariation, deleteVariation, findProductById, findProductsByShopId, findVariationById, updateProductById, updateVariationById, findVariationsByProductId, deleteProductById } from "../repositories/productRepository"
@@ -329,7 +329,7 @@ export const deleteProduct = async (productId: any) => {
 
 export const validateProduct = async (product: Product): Promise<Product> => {
 
-    const validatedProduct = validateProductFields(product)
+    const validatedProduct = await validateProductFields(product)
 
     if (!validatedProduct) return product
 
@@ -342,13 +342,13 @@ export const validateProduct = async (product: Product): Promise<Product> => {
     return updatedProduct
 }
 
-export const validateProductFields = (product: Product): Product => {
+export const validateProductFields = async (product: Product): Promise<Product> => {
 
     type ObjectKey = keyof typeof product // https://bobbyhadz.com/blog/typescript-access-object-property-dynamically
 
     const fields = ['category', 'images', 'name', 'description', 'brand', 'sku', 'gender', 'height', 'width', 'length', 'weight', 'price', 'price_discounted', 'variations'] as ObjectKey[]
 
-    for (const field of fields) {
+    for await (const field of fields) {
 
         let errorIndex = product?.validation?.errors.findIndex(error => error.field === field ) ?? -1
 
@@ -388,11 +388,15 @@ export const validateProductFields = (product: Product): Product => {
 
             // It'll aways have one variation. So,validate it.
 
-            if ('variations' === field && product.variations) {
+            if (product.variations?.length && 'variations' === field) {
 
-                console.log({variations: product.variations})
+                const updatedVariations = await findVariationsByProductId(product._id)
 
-                for (const variationField of product.variations) {
+                if (!updatedVariations) return product
+
+                console.log({updatedVariations})
+
+                for await (const variationField of updatedVariations) {
 
                     errorIndex = product?.validation?.errors.findIndex(error => error.field ===`variation.${variationField._id}.attr` ) ?? -1
 
@@ -404,9 +408,9 @@ export const validateProductFields = (product: Product): Product => {
 
                     const colorAttr = getCategoryAttributes(Number(product.category))[0]?.attributes.find(attr => attr.name === 'color')
 
-                    if (colorAttr && !variationField.color) {
+                    if (colorAttr && !variationField.color?.length) {
 
-                        console.log({condition: 'empty', color: variationField.color})
+                        console.log({condition: 'empty', color: variationField.color, attr: variationField.color})
 
                         // If field validation error conditions exists, add condition to it.
 
@@ -427,7 +431,7 @@ export const validateProductFields = (product: Product): Product => {
 
                     }
 
-                    if (colorAttr && !!variationField.color) {
+                    if (colorAttr && !!variationField.color?.length) {
 
                         console.log({condition: 'filled', color: variationField.color})
 
