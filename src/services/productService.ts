@@ -474,7 +474,7 @@ export const validateProductFields = async (product: Product): Promise<Product> 
 
                     if (flavorAttr && !!variationField.flavor) {
 
-                        console.log({condition: 'filled', flavor: variationField.flavor})
+                        // console.log({condition: 'filled', flavor: variationField.flavor})
 
                         if (product?.validation?.errors) {
 
@@ -486,7 +486,7 @@ export const validateProductFields = async (product: Product): Promise<Product> 
                         }
                     }
 
-                    // Validate required product variation stock fields.
+                    // Validate required product variation stock field.
 
                     errorIndex = product?.validation?.errors.findIndex(error => error.field ===`variation.${variationField._id}.stock` ) ?? -1
 
@@ -496,7 +496,7 @@ export const validateProductFields = async (product: Product): Promise<Product> 
 
                     if (!variationField.stock) {
 
-                        console.log({condition: 'empty', stock: variationField.stock})
+                        // console.log({condition: 'empty', stock: variationField.stock})
 
                         // If field validation error conditions exists, add condition to it.
 
@@ -519,6 +519,50 @@ export const validateProductFields = async (product: Product): Promise<Product> 
                     if (variationField.stock) {
 
                         // console.log({condition: 'filled', stock: variationField.stock})
+
+                        if (product?.validation?.errors) {
+
+                            // Remove condition if exists
+                            product.validation.errors[errorIndex]?.conditions.splice(conditionIndex, 1)
+
+                            // If there are no conditions, remove error
+                            if (product.validation.errors[errorIndex]?.conditions.length === 0) product.validation.errors.splice(errorIndex, 1)
+                        }
+                    }
+
+                    // Validate required product variation size field.
+
+                    errorIndex = product?.validation?.errors.findIndex(error => error.field ===`variation.${variationField._id}.size` ) ?? -1
+
+                    conditionIndex = product?.validation?.errors[errorIndex]?.conditions.findIndex(condition => condition === 'required') ?? -1
+
+                    condition = product.validation?.errors[errorIndex]?.conditions[conditionIndex] || ''
+
+                    if (!variationField.size) {
+
+                        // console.log({condition: 'empty', stock: variationField.size})
+
+                        // If field validation error conditions exists, add condition to it.
+
+                        if (product.validation && product.validation.errors[errorIndex]?.conditions && condition !== 'required') {
+
+                            product.validation.errors[errorIndex].conditions = [...product.validation.errors[errorIndex].conditions, 'required']
+
+                        }
+
+                        // If field validation does not exist, create it.
+
+                        if (errorIndex === -1) {
+
+                            product.validation
+                                ? product.validation.errors = [...product.validation.errors, { field:`variation.${variationField._id}.size`, conditions: ['required'] }]
+                                : product.validation = { errors: [{ field:`variation.${variationField._id}.size`, conditions: ['required'] }] }
+                        }
+                    }
+
+                    if (variationField.size) {
+
+                        // console.log({condition: 'filled', stock: variationField.size})
 
                         if (product?.validation?.errors) {
 
