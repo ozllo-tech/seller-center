@@ -158,7 +158,7 @@ export const isNewVariationValid = (body: any): AppError[] => {
 
     const errors: AppError[] = []
 
-    if (!body.stock || isNotNumber(body.stock) || isNegativeNumber(body.stock)) errors.push(invalidVariationStock)
+    if (body.stock && (isNotNumber(body.stock) || isNegativeNumber(body.stock))) errors.push(invalidVariationStock)
 
     if (body.size && body.size.length < 1) errors.push(invalidVariationSize)
 
