@@ -83,7 +83,7 @@ export const findOrderByShopId = async (shop_id: string, filter = {}): Promise<O
 
     try {
 
-        const result = orderCollection.find({ shop_id: shop_id, ...filter })
+        const result = orderCollection.find({ shop_id: shop_id, ...filter }).sort('_id', -1).limit(300)
 
         const orders = await result.toArray()
 

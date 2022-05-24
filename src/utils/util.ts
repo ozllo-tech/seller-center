@@ -300,6 +300,19 @@ export const asyncFilter = async (array: any[], predicate: any): Promise<any[]> 
 export const flatString = (string: string) => {
 
     return string.toLowerCase().replace(/\s/gm, '').trim()
-
 }
 
+export const getUrlExtension = (url: string) =>  {
+
+    return url.split(/[#?]/)[0].split('.')?.pop()?.trim()
+}
+
+export const makeNiceURL = (url: string) => {
+
+    return url.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9.]+/g, '-').replace(/\s/g, '').toLowerCase()
+}
+
+export const removeAllTagsExceptBr = (string: string) => {
+
+    return string.replace(/<((?!\/?br\s?\/?>)\s*)[^>]+>|/g, '')
+}

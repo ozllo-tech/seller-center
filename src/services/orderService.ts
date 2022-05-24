@@ -13,13 +13,13 @@ import { findProductByVariation, updateStockByQuantitySold } from "./productServ
 import { getToken } from "../utils/cryptUtil"
 import orderEventEmitter from "../events/orders"
 import { findTenantfromShopID } from "./hub2bTenantService"
-import { renewAccessTokenHub2b } from "./hub2bAuhService"
 import { ObjectID } from "mongodb"
 import { findIntegrationOrder } from "./integrationService"
 import { updateTiny2HubOrderStatus } from "./tiny2HubService"
 import intervalToDuration from "date-fns/intervalToDuration"
 import { sendLateShippingEmailToSeller } from "./mailService"
 import { SALES_CHANNEL_HUB2B } from "../models/salesChannelHub2b"
+import { findVariationById } from "../repositories/productRepository"
 
 export const INTEGRATION_INTERVAL = 1000 * 60 * 60 // 1 hour
 
@@ -155,6 +155,17 @@ export const savNewOrder = async (shop_id: string, order: HUB2B_Order) => {
 
     if (shop_orders.filter(_order => _order.order.reference.id == order.reference.id).length) return
 
+    for await (const [index, product] of order.products.entries()) {
+
+        const variation = await findVariationById(product.sku)
+
+        if (!variation || !variation.size) continue
+
+        const attr = variation?.color || variation?.flavor
+
+        order.products[index].name = `${product.name} | ${attr} | ${variation.size}`
+    }
+
     const newOrder = await newOrderHub2b({ order, shop_id })
 
     newOrder
@@ -178,27 +189,30 @@ export const sendInvoice = async (order: any, data: any) : Promise<HUB2B_Invoice
     const invoice: HUB2B_Invoice = {
         issueDate: data.issueDate || nowIsoDateHub2b(),
         key: data.key,
-        number: data.number,
+        number: data.number.replace(/[^a-z0-9]+/g, ''),
         cfop: data.cfop,
         series: data.series,
         totalAmount: order.payment.totalAmount,
+        ...(data.xml ? { xml: data.xml } : {}),
     }
 
     // TODO: maybe check if product has available stock before send invoice.
 
-    const res = await postInvoiceHub2b(order.reference.id, invoice, false)
+    if (!order.reference.id) return null
+
+    const res = await postInvoiceHub2b(order.reference.id.toString(), invoice, false)
 
     if (res) {
 
-        await updateStatus(order.reference.id, 'Invoiced')
+        await updateStatus(order.reference.id.toString(), 'Invoiced')
 
         // Foreach SKU in order, decrease stock by quantity sold.
         order.products.forEach((product:HUB2B_Product_Order) => updateStockByQuantitySold(product.sku, product.quantity))
     }
 
     res
-        ? log(`Invoice sent`, 'EVENT', getFunctionName())
-        : log(`Could not send invoice.`, 'EVENT', getFunctionName(), 'ERROR')
+        ? log(`Invoice from order ${order.reference.id}  has been sent.`, 'EVENT', getFunctionName())
+        : log(`Could not send invoice from order ${order.reference.id}.`, 'EVENT', getFunctionName(), 'ERROR')
 
     return res
 }
@@ -333,24 +347,15 @@ export const updateStatus = async (order_id: string, status: string) => {
 
 export const sendOrderToTenant = async (order: HUB2B_Order, tenantID: any): Promise<HUB2B_Order | null> => {
 
-    await renewAccessTokenHub2b(false, tenantID)
-
     order.reference.system.source = HUB2B_MARKETPLACE
 
     order.reference.idTenant = tenantID
-
-    for (const [index, item] of order.products.entries()) {
-
-        const product = await findProductByVariation(item.sku)
-
-        order.products[index].sku = product?._id?.toString()
-    }
 
     const orderID = order.reference.id
 
     delete order.reference.id
 
-    const orderHub2b = await postOrderHub2b(order)
+    const orderHub2b = await postOrderHub2b(order, tenantID)
 
     if (orderHub2b) {
 
@@ -419,7 +424,7 @@ export const syncIntegrationOrderStatus = async (order: Order, status: string) =
 
     if (status !== orderHub2b.status.status && !order.tiny_order_id) {
 
-        const updated = await updateStatusHub2b(order.tenant.order, order.order.status)
+        const updated = await updateStatusHub2b(order.tenant.order, order.order.status, order.tenant.id)
 
         if (updated) orderEventEmitter.emit('updated', order, status)
 
@@ -466,7 +471,7 @@ async function getLastestOrdersShippingAverageTime (shopId: ObjectID, days: numb
         return latest > new Date()
     })
 
-    //console.log(lastestOrders.map(order => order.meta))
+    // console.log(lastestOrders.map(order => order?.meta))
 
     const lastestOrdersCount = lastestOrders.length
 
@@ -474,7 +479,13 @@ async function getLastestOrdersShippingAverageTime (shopId: ObjectID, days: numb
 
     const lastestOrdersShippingTime = lastestOrders.map(order => {
 
-        const approved_at = new Date(order.order.payment.approvedDate || order.order.payment.paymentDate)
+        const paymentDate = order.order.payment.paymentDate !== '0001-01-01T00:00:00'
+        ? order.order.payment.paymentDate
+        : order.order.payment.purchaseDate
+
+        // TODO: maybe get updated order approvedDate in hub before pass paymentDate ahead.
+
+        const approved_at = new Date(order.order.payment.approvedDate || paymentDate)
 
         const shipped = order?.meta?.shipped_at?.length ? new Date(order.meta.shipped_at) : new Date()
 

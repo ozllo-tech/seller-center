@@ -10,10 +10,11 @@ import { createNewProduct, createVariation, findProductByShopIdAndSku, updateVar
 import { PROJECT_HOST } from "../utils/consts"
 import { getToken } from "../utils/cryptUtil"
 import { log } from "../utils/loggerUtil"
-import { getFunctionName, waitforme } from "../utils/util"
+import { getFunctionName, removeAllTagsExceptBr, waitforme } from "../utils/util"
 import { getCatalogHub2b, getHub2bIntegration, getInvoiceHub2b, getOrderHub2b, getStockHub2b, getTrackingHub2b, mapskuHub2b, postInvoiceHub2b, postTrackingHub2b, setupIntegrationHub2b } from "./hub2bService"
 import { findOrdersByShop, updateStatus } from "./orderService"
 import { findProductsByShop, updateProductImages, updateProductVariationStock } from "./productService"
+import { getImageKitUrl, sendExternalFileToS3 } from "./uploadService"
 
 // TODO: find out a way to reset the offset to 0 when idTenant or shop_id changes.
 let OFFSET = 0
@@ -62,7 +63,16 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
 
             const images: string[] = []
 
-            productHub2b.images.forEach((imageHub2b) => images.push(imageHub2b.url))
+            productHub2b.images.forEach(async (imageHub2b, index) => {
+
+                const s3File = await sendExternalFileToS3(imageHub2b.url, productHub2b.groupers.parentSKU || productHub2b.skus.source, index)
+
+                if (!s3File) return images.push(imageHub2b.url)
+
+                const imageKitUrl = getImageKitUrl(s3File.replace('/', ''))
+
+                if (imageKitUrl) return images.push(imageKitUrl)
+            })
 
             const product: Product = {
                 shop_id: new ObjectID(shop_id),
@@ -71,7 +81,7 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
                 subcategory: subcategory,
                 nationality: 0,
                 name: productHub2b.name,
-                description: productHub2b.description.sourceDescription,
+                description: removeAllTagsExceptBr(productHub2b.description.sourceDescription || ''),
                 brand: productHub2b.brand,
                 more_info: '',
                 ean: productHub2b.ean,
@@ -90,49 +100,7 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
             products.push(product)
         }
 
-        if (productExists) {
-
-            existingHubProducts.push(productHub2b)
-
-            // Update base price and sales price.
-
-            // if (productExists.price !== productHub2b.destinationPrices.priceBase || productExists.price_discounted !== productHub2b.destinationPrices.priceSale) {
-
-            //     await updateProductById(productExists._id, {
-            //         price: productHub2b.destinationPrices.priceBase,
-            //         price_discounted: productHub2b.destinationPrices.priceSale
-            //     })
-            // }
-
-            // Update description.
-
-            // if (productExists.description !== productHub2b.description.sourceDescription) {
-
-            //     await updateProductById(productExists._id, {
-            //         description: productHub2b.description.sourceDescription
-            //     })
-            // }
-
-            // Update stock.
-
-            // if (Array.isArray(productExists.variations)) {
-            //     productExists.variations.forEach(async (variation) => {
-            //         if (variation.stock !== productHub2b.stocks.sourceStock) {
-            //             await updateVariationById(variation._id, { stock: productHub2b.stocks.sourceStock })
-            //         }
-            //     })
-            // }
-
-            // Update category.
-
-            // if (productExists.subcategory !== Number(productHub2b?.categorization?.source?.code)) {
-
-            //     await updateProductById(productExists._id, {
-            //         category: findMatchingCategory(productHub2b),
-            //         subcategory: findMatchingSubcategory(productHub2b)
-            //     })
-            // }
-        }
+        if (productExists) existingHubProducts.push(productHub2b)
     }
 
     const uniqueNewProducts = Array.from(new Set(products.map(a => a.sku))).map(sku => {
@@ -253,9 +221,7 @@ export const getProductsInHub2b = async (idTenant: any, status = '2', offset = 0
 
     const productsHub2b = await getCatalogHub2b(status, offset, idTenant)
 
-    productsHub2b
-        ? log("GET Products in hub2b success", "EVENT", getFunctionName())
-        : log("GET Products in hub2b error", "EVENT", getFunctionName(), "WARN")
+    if (!productsHub2b) log(`Could not get orders from tenant ${idTenant}`, "EVENT", getFunctionName(), "WARN")
 
     if (!productsHub2b) return null
 

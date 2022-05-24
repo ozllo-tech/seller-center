@@ -4,12 +4,13 @@
 
 import { Product, Validation_Errors, Variation } from "../models/product"
 import { log } from "../utils/loggerUtil"
-import { getFunctionName } from "../utils/util"
+import { getFunctionName, removeAllTagsExceptBr } from "../utils/util"
 import { createNewProduct, createVariation, deleteVariation, findProductById, findProductsByShopId, findVariationById, updateProductById, updateVariationById, findVariationsByProductId, deleteProductById } from "../repositories/productRepository"
 import productEventEmitter from "../events/product"
 import { ObjectID } from "mongodb"
 import { HUB2B_TENANT } from "../utils/consts"
 import { getCategoryAttributes } from "./categoryService"
+import { getImageKitUrl } from "./uploadService"
 
 /**
  * Save a new product
@@ -17,6 +18,10 @@ import { getCategoryAttributes } from "./categoryService"
  * @param body - valid product
  */
 export const createProduct = async (body: any): Promise<Product | null> => {
+
+    body.images = body.images.map((url: string) => getImageKitUrl(url.split('/').pop()?.split('?').shift() || ''))
+
+    body.description = removeAllTagsExceptBr(body.description)
 
     const {
         images,
@@ -68,7 +73,9 @@ export const createProduct = async (body: any): Promise<Product | null> => {
     const product = await createNewProduct(validatedProduct, variations)
 
     if (!product) {
-        log(`Product ${product} has been created.`, 'EVENT', getFunctionName())
+
+        log(`Could not create product ${ref_product.name}`, 'EVENT', getFunctionName())
+
         return null
     }
 
@@ -90,9 +97,7 @@ export const findProduct = async (product_id: any): Promise<Product | null> => {
 
     let product = await findProductById(product_id)
 
-    product
-        ? log(`Product ${product.name} has been found.`, 'EVENT', getFunctionName())
-        : log(`Product ${product_id} does not exist.`, 'EVENT', getFunctionName())
+    if (!product) log(`Product ${product_id} does not exist.`, 'EVENT', getFunctionName())
 
     return product
 }
@@ -108,17 +113,13 @@ export const findProductByVariation = async (variation_id: any): Promise<Product
 
     const variation = await findVariationById(variation_id)
 
-    variation
-        ? log(`Variation ${variation._id} has been found.`, 'EVENT', getFunctionName())
-        : log(`Variation ${variation_id} could not be found.`, 'EVENT', getFunctionName())
+    if (!variation) log(`Variation ${variation_id} could not be found.`, 'EVENT', getFunctionName())
 
     if (!variation) return null
 
     const product = await findProductById(variation.product_id)
 
-    product
-        ? log(`Product ${product._id} has been found.`, 'EVENT', getFunctionName())
-        : log(`Product ${variation.product_id} could not be found.`, 'EVENT', getFunctionName())
+    if (!product) log(`Product from variation ${variation.product_id} could not be found.`, 'EVENT', getFunctionName())
 
     return product
 }
@@ -134,7 +135,7 @@ export const findProductsByShop = async (shop_id: any): Promise<Product[] | null
 
     products
         ? log(`Found ${products.length} products for shop ${shop_id}`, 'EVENT', getFunctionName())
-        : log(`Could not find any products`, 'EVENT', getFunctionName())
+        : log(`Could not find any products for shop ${shop_id}`, 'EVENT', getFunctionName())
 
     return products
 }
@@ -149,6 +150,8 @@ export const updateProduct = async (_id: any, patch: any): Promise<Product | nul
     if (patch.images) delete patch.images
 
     delete patch._id
+
+    if (patch.description) patch.description = removeAllTagsExceptBr(patch.description)
 
     const product = await updateProductById(_id, patch)
 
@@ -170,7 +173,7 @@ export const updateProduct = async (_id: any, patch: any): Promise<Product | nul
  */
 export const updateProductImages = async (_id: any, patch: any): Promise<Product | null> => {
 
-    patch.images = patch.images.filter(Boolean)
+    patch.images = patch.images.filter(Boolean).map((image: string) => getImageKitUrl(image.split('/').pop()?.split('?').shift()||''))
 
     const { images } = patch
 
@@ -196,9 +199,7 @@ export const updateProductPrice = async (_id: any, patch: any): Promise<Product 
 
     const product = await updateProductById(_id, { price, price_discounted })
 
-    product
-        ? log(`Update product ${_id} price`, 'EVENT', getFunctionName())
-        : log(`Could not update product ${_id} price`, 'EVENT', getFunctionName())
+    if (!product) log(`Could not update product ${_id} price`, 'EVENT', getFunctionName())
 
     productEventEmitter.emit('update_price', product)
 
@@ -216,9 +217,7 @@ export const updateProductVariationStock = async (_id: any, patch: any): Promise
 
     const product = await updateVariationById(_id, patch)
 
-    product
-        ? log(`Stock from variation ${_id} has been updated.`, 'EVENT', getFunctionName())
-        : log(`Could not update stock from variation ${_id}.`, 'EVENT', getFunctionName(), 'WARN')
+    if (!product) log(`Could not update stock from variation ${_id}.`, 'EVENT', getFunctionName(), 'WARN')
 
     return product
 }
@@ -232,9 +231,7 @@ export const updateProductVariation = async (_id: any, patch: any): Promise<Prod
 
     const product = await updateVariationById(_id, patch)
 
-    product
-        ? log( `Update product variation ${ _id }`, 'EVENT', getFunctionName() )
-        : log( `Could not update product`, 'EVENT', getFunctionName() )
+    if (!product) log( `Could not update product ${_id}`, 'EVENT', getFunctionName(), 'WARN' )
 
     return product
 }
@@ -246,12 +243,9 @@ export const updateProductVariation = async (_id: any, patch: any): Promise<Prod
  */
 export const findVariation = async (variation_id: any): Promise<Variation | null> => {
 
-
     let variation = await findVariationById(variation_id)
 
-    variation
-        ? log(`Variation ${variation._id} has been found.`, 'EVENT', getFunctionName())
-        : log(`Variation ${variation_id} does not exist.`, 'EVENT', getFunctionName())
+    if (!variation) log(`Variation ${variation_id} does not exist.`, 'EVENT', getFunctionName())
 
     return variation
 }
@@ -324,7 +318,7 @@ export const deleteProduct = async (productId: any) => {
 
     if (!variations) return null
 
-    for (const variation of variations) await deleteVariation(variation._id)
+    for await (const variation of variations) await deleteVariation(variation._id)
 
     result
         ? log(`Product ${productId} has been deleted.`, "EVENT", getFunctionName())

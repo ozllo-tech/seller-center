@@ -323,9 +323,7 @@ export const getStockHub2b = async (sku: any, idTenant: any) => {
 
     const stock = response.data
 
-    stock
-        ? log(`Get stock from SKU ${sku} success`, "EVENT", getFunctionName())
-        : log(`Get stock from SKU ${sku} error`, "EVENT", getFunctionName(), "WARN")
+    if (!stock) log(`Get stock from SKU ${sku} error`, "EVENT", getFunctionName(), "WARN")
 
     return stock[0]
 }
@@ -347,9 +345,7 @@ export const updateStockHub2b = async (variation_id: any, stock: number) => {
 
     const update_stock = response.data
 
-    update_stock
-        ? log(`SKU ${variation_id} stock update success`, "EVENT", getFunctionName())
-        : log(`SKU ${variation_id} stock update fail`, "EVENT", getFunctionName(), "WARN")
+    if (!update_stock) log(`SKU ${variation_id} stock update fail`, "EVENT", getFunctionName(), "WARN")
 
     return update_stock
 }
@@ -369,14 +365,14 @@ export const updatePriceHub2b = async (variation_id: any, price: number, price_d
 
     if (!response) return null
 
-    response.data
-        ? log(`SKU ${variation_id} price has been updated`, "EVENT", getFunctionName())
-        : log(`Could not update price from SKU ${variation_id}`, "EVENT", getFunctionName(), "WARN")
+    if (!response.data) log(`Could not update price from SKU ${variation_id}`, "EVENT", getFunctionName(), "WARN")
 
     return response.data
 }
 
-export const postOrderHub2b = async (order: HUB2B_Order) => {
+export const postOrderHub2b = async (order: HUB2B_Order, idTenant: number|string) => {
+
+    await renewAccessTokenHub2b(false, idTenant)
 
     const URL_ORDERS = HUB2B_URL_V2 + "/Orders" + "?access_token=" + TENANT_CREDENTIALS.access_token
 
@@ -411,9 +407,7 @@ export const getOrderHub2b = async (order_id: string, idTenant = false) => {
 
     const order = response.data
 
-    order
-        ? log("GET Orders success", "EVENT", getFunctionName())
-        : log("GET Orders error", "EVENT", getFunctionName(), "WARN")
+    if (!order) log(`Order ${order_id} could not be found.`, "EVENT", getFunctionName(), "WARN")
 
     return order
 }
@@ -457,9 +451,7 @@ export const listOrdersHub2bByTime = async (purchaseFrom: string, purchaseTo: st
 
     const orders = response.data.response
 
-    orders
-        ? log("Get List Orders success", "EVENT", getFunctionName())
-        : log("Get List Orders error", "EVENT", getFunctionName(), "WARN")
+    if (!orders) log(`Could not get orders from ${purchaseFrom} to ${purchaseTo}`, "EVENT", getFunctionName(), "WARN")
 
     return orders
 }
@@ -476,9 +468,7 @@ export const listAllOrdersHub2b = async (): Promise<HUB2B_Order[] | null> => {
 
     const orders = response.data.response
 
-    orders
-        ? log("Get List Orders success", "EVENT", getFunctionName())
-        : log("Get List Orders error", "EVENT", getFunctionName(), "WARN")
+    if (!orders) log("Get List Orders error", "EVENT", getFunctionName(), "WARN")
 
     return orders
 }
@@ -502,8 +492,8 @@ export const postInvoiceHub2b = async (order_id: string, _invoice: any, idTenant
     const invoice = response.data
 
     invoice
-        ? log("POST Invoice success", "EVENT", getFunctionName())
-        : log("POST Invoice error", "EVENT", getFunctionName(), "WARN")
+        ? log(`Invoice from order ${order_id} has been sent`, "EVENT", getFunctionName())
+        : log(`Could not send invoice from order ${order_id} to hub.`, "EVENT", getFunctionName(), "WARN")
 
     return invoice
 }
