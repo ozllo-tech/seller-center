@@ -5,7 +5,6 @@
 import events from 'events'
 import { Product, Variation } from '../models/product'
 import { criarProdutoHub2b, deleteProdutoHub2b, parseProdutoToProdutoHub2, updatePriceHub2b, updateProdutoHub2b, updateStockHub2b } from '../services/hub2bService'
-import { sendLowStockEmailToSeller } from '../services/mailService'
 import { log } from '../utils/loggerUtil'
 
 const productEventEmitter = new events.EventEmitter()
@@ -25,11 +24,11 @@ productEventEmitter.on( 'update', ( product: Product, idTenant: any ) => {
 
 })
 
-productEventEmitter.on( 'delete', ( productId: any, idTenant: any ) => {
+productEventEmitter.on( 'delete', ( variationId: any, idTenant: any ) => {
 
-    log( `Deletando produto ${ productId } na hub2b.`, 'EVENT', 'ProductEventEmitter' )
+    log( `Deletando sku ${ variationId } na hub2b.`, 'EVENT', 'ProductEventEmitter' )
 
-    deleteProdutoHub2b(productId, idTenant)
+    deleteProdutoHub2b(variationId, idTenant)
 
 })
 
