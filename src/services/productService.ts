@@ -285,8 +285,11 @@ export const createNewVariation = async (body: any): Promise<Variation | null> =
     return variation
 }
 
-// TODO: review or remove this function.
-export const deleteVariationById = async ( variation_id: string, patch: any ): Promise<boolean> => {
+export const deleteVariationById = async ( variation_id: string ): Promise<boolean> => {
+
+    const product = await findProductByVariation( variation_id )
+
+    if (product) await deleteVariationValidationFromProduct(product)
 
     let result = await deleteVariation(variation_id)
 
@@ -294,9 +297,7 @@ export const deleteVariationById = async ( variation_id: string, patch: any ): P
         ? log(`Variation has been deleted.`, 'EVENT', getFunctionName())
         : log(`Variation could not be deleted.`, 'EVENT', getFunctionName())
 
-    const idTenant = patch.idTenant | Number(HUB2B_TENANT)
-
-    productEventEmitter.emit( 'update', await findProductByVariation( variation_id ), idTenant )
+    productEventEmitter.emit( 'update', product, Number(HUB2B_TENANT) )
 
     return result
 }
@@ -579,4 +580,28 @@ export const validateProductFields = async (product: Product): Promise<Product> 
     }
 
     return product
+}
+
+export const deleteVariationValidationFromProduct = async (product: Product): Promise<Product|null> => {
+
+    if (!product?.variations || !product?.validation?.errors) return product
+
+    for await (const variationField of product.variations) {
+
+        const validations = ['attr', 'stock', 'size']
+
+        for await (const validation of validations) {
+
+            const errorIndex = product?.validation?.errors.findIndex(error => error.field ===`variation.${variationField._id}.${validation}` ) ?? -1
+
+            if (errorIndex !== -1) {
+
+                product.validation.errors.splice(errorIndex, 1)
+            }
+        }
+    }
+
+    const updatedProduct = await updateProductById(product._id, product)
+
+    return updatedProduct
 }

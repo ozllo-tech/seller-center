@@ -3,8 +3,7 @@
 //
 
 import { Router, Request, Response, NextFunction } from 'express'
-import { deleteVariation } from '../repositories/productRepository'
-import { createNewVariation, createProduct, findProductsByShop, updateProduct, updateProductImages, updateProductPrice, updateProductVariation, updateProductVariationStock, deleteProduct } from '../services/productService'
+import { createNewVariation, createProduct, findProductsByShop, updateProduct, updateProductImages, updateProductPrice, updateProductVariation, updateProductVariationStock, deleteProduct, deleteVariationById } from '../services/productService'
 import { importProduct } from '../services/tenant2HubService'
 import { uploadProductPicture } from '../services/uploadService'
 import { badRequest, createHttpStatus, internalServerError, noContent, ok } from '../utils/httpStatus'
@@ -292,7 +291,7 @@ router.delete('/:product_id/variation/:variation_id', isProductFromShop, isVaria
             .status(internalServerError.status)
             .send(createHttpStatus(internalServerError))
 
-    const result = await deleteVariation(req.variation._id)
+    const result = await deleteVariationById(req.variation._id)
 
     if (!result)
         return res
