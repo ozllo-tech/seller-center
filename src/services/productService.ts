@@ -336,7 +336,9 @@ export const validateProduct = async (product: Product): Promise<Product> => {
 
     // console.log(JSON.stringify(validatedProduct, null, 2))
 
-    const updatedProduct =  await updateProductById(product._id, { validation: validatedProduct.validation })
+    const patch = validatedProduct.validation ? {validation: validatedProduct.validation} : {validation: {errors: []}}
+
+    const updatedProduct =  await updateProductById(product._id, patch)
 
     if (!updatedProduct) return product
 
