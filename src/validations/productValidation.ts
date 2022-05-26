@@ -18,15 +18,15 @@ export const isNewProductValid = async (body: any): Promise<AppError[]> => {
 
     const errors: AppError[] = []
 
-    // TODO: remove required validation.
+    // TODO: review required validation. (validate only if not empty)
 
     if (body.images && !Array.isArray(body.images)) errors.push(invalidImageReference)
 
-    if (!body.category) errors.push(invalidCategory)
+    // if (!body.category) errors.push(invalidCategory)
 
-    if (!body.subcategory) errors.push(invalidSubCategory)
+    // if (!body.subcategory) errors.push(invalidSubCategory)
 
-    if (!body.nationality) errors.push(invalidNationality)
+    // if (!body.nationality) errors.push(invalidNationality)
 
     // if (!body.name || body.name.length < 2) errors.push(invalidProductName)
 
@@ -56,9 +56,9 @@ export const isNewProductValid = async (body: any): Promise<AppError[]> => {
 
     if (!body.price_discounted || isNotNumber(body.price_discounted) || isNegativeNumber(body.price_discounted)) errors.push(invalidVariationPriceDiscounted)
 
-    if (!body.variations || !Array.isArray(body.variations)) errors.push(invalidProductVariations)
+    // if (!body.variations || !Array.isArray(body.variations)) errors.push(invalidProductVariations)
 
-    else body.variations.forEach((variation: any) => errors.concat(isNewVariationValid(variation)))
+    // else body.variations.forEach((variation: any) => errors.concat(isNewVariationValid(variation)))
 
     return errors
 }
@@ -73,9 +73,9 @@ export const isProductPatchValid = async (body: any): Promise<AppError[]> => {
 
     const errors: AppError[] = []
 
-    if (body.category != CATEGORIES.filter(category => category.code == body.category)[0]?.code) errors.push(invalidCategory)
+    if (body.category && body.category != CATEGORIES.filter(category => category.code == body.category)[0]?.code) errors.push(invalidCategory)
 
-    if (body.subcategory != SUBCATEGORIES.filter(subcategory => subcategory.code == body.subcategory)[0]?.code) errors.push(invalidSubCategory)
+    if (body.category && body.subcategory != SUBCATEGORIES.filter(subcategory => subcategory.code == body.subcategory)[0]?.code) errors.push(invalidSubCategory)
 
     return errors
 }
