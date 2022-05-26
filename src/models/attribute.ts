@@ -1,3 +1,4 @@
+import { CATEGORIES } from "./category"
 import { COLORS } from "./color"
 import { FLAVORS } from "./flavors"
 import { SIZES_ALIMENTOS_BEBIDAS, SIZES_BEACHWEAR, SIZES_BEAUTY, SIZES_CALCADOS, SIZES_DEFAULT, SIZES_FITNESS, SIZES_HOME, SIZES_PET } from "./size"
@@ -10,6 +11,7 @@ export interface Attribute {
 
 export interface Category_Attribute {
     category: number,
+    value: string,
     attributes: Attribute[]
 }
 
@@ -50,6 +52,7 @@ export const ATTRIBUTE_VOLTAGE: Attribute = {
 
 export const ATTRIBUTES_ACCESSORY: Category_Attribute = {
     category: 281,
+    value: CATEGORIES.find( category => category.code === 281 )!.value,
     attributes: [
         {
             ...ATTRIBUTE_SIZE,
@@ -61,6 +64,7 @@ export const ATTRIBUTES_ACCESSORY: Category_Attribute = {
 
 export const ATTRIBUTES_BEACHWEAR: Category_Attribute = {
     category: 282,
+    value: CATEGORIES.find( category => category.code === 282 )!.value,
     attributes: [
         {
             ...ATTRIBUTE_SIZE,
@@ -72,6 +76,7 @@ export const ATTRIBUTES_BEACHWEAR: Category_Attribute = {
 
 export const ATTRIBUTES_CALCADOS: Category_Attribute = {
     category: 283,
+    value: CATEGORIES.find( category => category.code === 283 )!.value,
     attributes: [
         {
             ...ATTRIBUTE_SIZE,
@@ -83,6 +88,7 @@ export const ATTRIBUTES_CALCADOS: Category_Attribute = {
 
 export const ATTRIBUTES_UNDERWEAR: Category_Attribute = {
     category: 284,
+    value: CATEGORIES.find( category => category.code === 284 )!.value,
     attributes: [
         {
             ...ATTRIBUTE_SIZE,
@@ -94,6 +100,7 @@ export const ATTRIBUTES_UNDERWEAR: Category_Attribute = {
 
 export const ATTRIBUTES_FITNESS: Category_Attribute = {
     category: 285,
+    value: CATEGORIES.find( category => category.code === 285 )!.value,
     attributes: [
         {
             ...ATTRIBUTE_SIZE,
@@ -105,6 +112,7 @@ export const ATTRIBUTES_FITNESS: Category_Attribute = {
 
 export const ATTRIBUTES_ROUPAS: Category_Attribute = {
     category: 286,
+    value: CATEGORIES.find( category => category.code === 286 )!.value,
     attributes: [
         {
             ...ATTRIBUTE_SIZE,
@@ -116,6 +124,7 @@ export const ATTRIBUTES_ROUPAS: Category_Attribute = {
 
 export const ATTRIBUTES_HOME: Category_Attribute = {
     category: 288,
+    value: CATEGORIES.find( category => category.code === 288 )!.value,
     attributes: [
         {
             ...ATTRIBUTE_SIZE,
@@ -127,6 +136,7 @@ export const ATTRIBUTES_HOME: Category_Attribute = {
 
 export const ATTRIBUTES_BEAUTY: Category_Attribute = {
     category: 289,
+    value: CATEGORIES.find( category => category.code === 289 )!.value,
     attributes: [
         {
             ...ATTRIBUTE_SIZE,
@@ -138,6 +148,7 @@ export const ATTRIBUTES_BEAUTY: Category_Attribute = {
 
 export const ATTRIBUTES_KIDS_TEEN: Category_Attribute = {
     category: 407,
+    value: CATEGORIES.find( category => category.code === 407 )!.value,
     attributes: [
         {
             ...ATTRIBUTE_SIZE,
@@ -149,6 +160,7 @@ export const ATTRIBUTES_KIDS_TEEN: Category_Attribute = {
 
 export const ATTRIBUTES_JOIAS: Category_Attribute = {
     category: 426,
+    value: CATEGORIES.find( category => category.code === 426 )!.value,
     attributes: [
         {
             ...ATTRIBUTE_SIZE,
@@ -160,6 +172,7 @@ export const ATTRIBUTES_JOIAS: Category_Attribute = {
 
 export const ATTRIBUTES_PET: Category_Attribute = {
     category: 449,
+    value: CATEGORIES.find( category => category.code === 449 )!.value,
     attributes: [
         {
             ...ATTRIBUTE_SIZE,
@@ -171,6 +184,7 @@ export const ATTRIBUTES_PET: Category_Attribute = {
 
 export const ATTRIBUTES_ALIMENTOS_BEBIDAS: Category_Attribute = {
     category: 450,
+    value: CATEGORIES.find( category => category.code === 450 )!.value,
     attributes: [
         {
             ...ATTRIBUTE_SIZE,
