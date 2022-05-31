@@ -170,6 +170,18 @@ export const ATTRIBUTES_JOIAS: Category_Attribute = {
     ]
 }
 
+export const ATTRIBUTES_BIJOUX: Category_Attribute = {
+    category: 435,
+    value: CATEGORIES.find( category => category.code === 435 )!.value,
+    attributes: [
+        {
+            ...ATTRIBUTE_SIZE,
+            values: SIZES_DEFAULT
+        },
+        ATTRIBUTE_COLOR
+    ]
+}
+
 export const ATTRIBUTES_PET: Category_Attribute = {
     category: 449,
     value: CATEGORIES.find( category => category.code === 449 )!.value,
@@ -207,6 +219,7 @@ export const ATTRIBUTES = [
     ATTRIBUTES_FITNESS,
     ATTRIBUTES_HOME,
     ATTRIBUTES_JOIAS,
+    ATTRIBUTES_BIJOUX,
     ATTRIBUTES_KIDS_TEEN,
     ATTRIBUTES_PET
 ]

@@ -1,5 +1,3 @@
-
-
 export interface Category {
     _id?: any,
     code: number,
@@ -55,6 +53,10 @@ export const CATEGORIES: Category[] = [
         value: "Joias",
     },
     {
+        code: 435,
+        value: "Bijoux"
+    },
+    {
         code: 449,
         value: "Moda Pet",
     },
@@ -69,11 +71,6 @@ export const subcategories_accessory: SubCategory[] = [
         categoryCode: 281,
         code: 290,
         value: "Acessórios de Cabelo"
-    },
-    {
-        categoryCode: 281,
-        code: 435,
-        value: "Bijoux"
     },
     {
         categoryCode: 281,
@@ -589,6 +586,34 @@ export const subcategories_joias: SubCategory[] = [
     },
 ]
 
+export const subcategories_bijoux: SubCategory[] = [
+    {
+        categoryCode: 435,
+        code: 558,
+        value: "Anéis"
+    },
+    {
+        categoryCode: 435,
+        code: 559,
+        value: "Brincos"
+    },
+    {
+        categoryCode: 435,
+        code: 560,
+        value: "Colares"
+    },
+    {
+        categoryCode: 435,
+        code: 561,
+        value: "Pingentes"
+    },
+    {
+        categoryCode: 435,
+        code: 562,
+        value: "Pulseiras"
+    },
+]
+
 export const subcategories_moda_pet: SubCategory[] = [
     {
         categoryCode: 449,
@@ -761,6 +786,7 @@ export const SUBCATEGORIES: SubCategory[] = [
     ...subcategories_beauty,
     ...subcategories_kids_teen,
     ...subcategories_joias,
+    ...subcategories_bijoux,
     ...subcategories_moda_pet,
     ...subcategories_alimentos_bebidas,
 ]
