@@ -11,6 +11,7 @@ import { ObjectID } from "mongodb"
 import { HUB2B_TENANT } from "../utils/consts"
 import { getCategoryAttributes } from "./categoryService"
 import { getImageKitUrl } from "./uploadService"
+import { CATEGORIES, Category, SUBCATEGORIES, SubCategory } from "../models/category"
 
 /**
  * Save a new product
@@ -152,6 +153,15 @@ export const updateProduct = async (_id: any, patch: any): Promise<Product | nul
     delete patch._id
 
     if (patch.description) patch.description = removeAllTagsExceptBr(patch.description)
+
+    if (patch.category && !Number(patch.category)) patch.category = CATEGORIES.find((category: Category) => category.value == patch.category)?.code || ''
+
+    if (patch.subcategory && !Number(patch.subcategory)) patch.subcategory = SUBCATEGORIES.find((subcategory: SubCategory) => subcategory.value == patch.subcategory)?.code || ''
+
+    if (patch.nationality && !Number(patch.nationality) || patch.nationality == 0) {
+
+        patch.nationality = patch.nationality === 'Nacional' ? 1 : patch.nationality === 'Internacional' ? 2 : 1
+    }
 
     const product = await updateProductById(_id, patch)
 
@@ -397,7 +407,7 @@ export const validateProductFields = async (product: Product): Promise<Product> 
 
                 if (!updatedVariations) return product
 
-                console.log({updatedVariations})
+                // console.log({updatedVariations})
 
                 for await (const variationField of updatedVariations) {
 

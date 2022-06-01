@@ -73,10 +73,6 @@ export const isProductPatchValid = async (body: any): Promise<AppError[]> => {
 
     const errors: AppError[] = []
 
-    if (body.category && body.category != CATEGORIES.filter(category => category.code == body.category)[0]?.code) errors.push(invalidCategory)
-
-    if (body.category && body.subcategory != SUBCATEGORIES.filter(subcategory => subcategory.code == body.subcategory)[0]?.code) errors.push(invalidSubCategory)
-
     return errors
 }
 
