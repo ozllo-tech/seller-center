@@ -114,7 +114,7 @@ function parseTinyProduct(tinyProduct: Tiny_Product, shop_id: ObjectID): Product
         images: tinyProduct.dados.anexos.map(anexo => anexo.url),
         category: findMarchingCategory(tinyProduct),
         subcategory: findMatchingSubcategory(tinyProduct),
-        nationality: parseInt(tinyProduct.dados.origem) || 0,
+        nationality: [0,3,4,5].includes(parseInt(tinyProduct.dados.origem)) ? 1 : 2,
         name: tinyProduct.dados.nome,
         brand: tinyProduct.dados.marca,
         gender: 'U',
