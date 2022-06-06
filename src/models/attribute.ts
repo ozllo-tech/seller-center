@@ -56,7 +56,7 @@ export const ATTRIBUTES_ACCESSORY: Category_Attribute = {
     attributes: [
         {
             ...ATTRIBUTE_SIZE,
-            values: SIZES_CALCADOS
+            values: SIZES_DEFAULT
         },
         ATTRIBUTE_COLOR
     ]
