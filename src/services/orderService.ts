@@ -20,6 +20,7 @@ import intervalToDuration from "date-fns/intervalToDuration"
 import { sendLateShippingEmailToSeller } from "./mailService"
 import { SALES_CHANNEL_HUB2B } from "../models/salesChannelHub2b"
 import { findVariationById } from "../repositories/productRepository"
+import differenceInBusinessDays from "date-fns/differenceInBusinessDays"
 
 export const INTEGRATION_INTERVAL = 1000 * 60 * 60 // 1 hour
 
@@ -489,10 +490,11 @@ async function getLastestOrdersShippingAverageTime (shopId: ObjectID, days: numb
 
         const shipped = order?.meta?.shipped_at?.length ? new Date(order.meta.shipped_at) : new Date()
 
-        return Math.abs(shipped.getTime() - approved_at.getTime()) / (1000 * 60 * 60 * 24)
-    })
+        // Get difference in business days
 
     // console.log(lastestOrdersShippingTime)
+        return Math.abs(differenceInBusinessDays(shipped, approved_at))
+    })
 
     const lastestOrdersShippingAverageTime = lastestOrdersShippingTime.reduce((a, b) => a + b) / lastestOrdersCount
 
