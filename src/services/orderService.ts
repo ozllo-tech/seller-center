@@ -441,8 +441,6 @@ export const getOrderAverageShippingTime = async (shopId: ObjectID): Promise<Obj
 
     const lastMonth = await getLastestOrdersShippingAverageTime(shopId, 30)
 
-    // if (!lastMonth) return []
-
     return [
         {
             average_shipping_time: {
@@ -459,20 +457,14 @@ async function getLastestOrdersShippingAverageTime (shopId: ObjectID, days: numb
 
     const shippableOrders = validOrders.filter(order => !!order.meta?.approved_at || order.order.status.status === 'Approved')
 
-    // console.log(JSON.stringify(shippableOrders?.map(order=> order.order), null, 2))
-
     const lastestOrders = shippableOrders.filter(order => {
 
         const created = new Date(order.order.payment.purchaseDate) // paymentDate
-
-        // console.log(created, order.order.reference.id, order.order.payment.purchaseDate)
 
         const latest = new Date(created.getTime() + (days * 24 * 60 * 60 * 1000))
 
         return latest > new Date()
     })
-
-    // console.log(lastestOrders.map(order => order?.meta))
 
     const lastestOrdersCount = lastestOrders.length
 
@@ -481,8 +473,8 @@ async function getLastestOrdersShippingAverageTime (shopId: ObjectID, days: numb
     const lastestOrdersShippingTime = lastestOrders.map(order => {
 
         const paymentDate = order.order.payment.paymentDate !== '0001-01-01T00:00:00'
-        ? order.order.payment.paymentDate
-        : order.order.payment.purchaseDate
+            ? order.order.payment.paymentDate
+            : order.order.payment.purchaseDate
 
         // TODO: maybe get updated order approvedDate in hub before pass paymentDate ahead.
 
@@ -492,13 +484,10 @@ async function getLastestOrdersShippingAverageTime (shopId: ObjectID, days: numb
 
         // Get difference in business days
 
-    // console.log(lastestOrdersShippingTime)
         return Math.abs(differenceInBusinessDays(shipped, approved_at))
     })
 
     const lastestOrdersShippingAverageTime = lastestOrdersShippingTime.reduce((a, b) => a + b) / lastestOrdersCount
-
-    // console.log({lastestOrdersShippingAverageTime})
 
     return Math.round(lastestOrdersShippingAverageTime) || 1
 }
