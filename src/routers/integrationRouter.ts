@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express'
-import { badRequest, createHttpStatus, internalServerError, ok } from '../utils/httpStatus'
+import { badRequest, createHttpStatus, internalServerError, noContent, ok } from '../utils/httpStatus'
 import { setupWebhookIntegration } from "../services/orderService";
 import { updateStatus } from '../services/orderService';
 import { authMiddleware, isTinyOrderInvoiceable, isTinyOrderTrackable, userCanAccessShop, validateSystemPayload } from '../utils/middlewares';
@@ -43,7 +43,7 @@ router.get('/system', [authMiddleware, userCanAccessShop], async (req: Request, 
 
     const result = await findSystemByShopID(req.shop?._id)
 
-    if (!result) return res.status(internalServerError.status).send(createHttpStatus(internalServerError))
+    if (!result) return res.status(noContent.status).send(createHttpStatus(noContent))
 
     return res.status(ok.status).send(result)
 })
