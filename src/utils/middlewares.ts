@@ -249,7 +249,7 @@ export const isOrderInvoiceable = async (req: Request, res: Response, next: Next
 
 export const validateSystemPayload = () => {
 
-    const names = ['bseller', 'idealeware', 'ihub', 'infracommerce' , 'loja_integrada' , 'magento' , 'magento_2' , 'opencart' , 'tray' , 'vtex' , 'bling' , 'eccosys' , 'linx_emillenium' , 'linx_commerce' , 'linx_oms' , 'softvar' , 'tiny']
+    const names = ['bseller', 'idealeware', 'ihub', 'infracommerce' , 'loja_integrada' , 'magento' , 'magento_2' , 'opencart' , 'tray' , 'vtex' , 'bling' , 'eccosys' , 'linx_emillenium' , 'linx_commerce' , 'linx_oms' , 'softvar' , 'tiny', 'woocommerce']
 
     // https://stackoverflow.com/questions/59861503/joi-validator-conditional-schema
 

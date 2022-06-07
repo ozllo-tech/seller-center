@@ -100,11 +100,17 @@ export interface TINY {
     ecommerce_id: string,
 }
 
-export type SystemName = 'bseller' | 'idealeware' | 'ihub' | 'infracommerce' | 'loja_integrada' | 'magento' | 'magento_2' | 'opencart' | 'tray' | 'vtex' | 'bling' | 'eccosys' | 'linx_emillenium' | 'linx_commerce' | 'linx_oms' | 'softvar' | 'tiny'
+export interface WOOCOMMERCE {
+    store_url: string,
+    key: string,
+    secret: string,
+}
+
+export type SystemName = 'bseller' | 'idealeware' | 'ihub' | 'infracommerce' | 'loja_integrada' | 'magento' | 'magento_2' | 'opencart' | 'tray' | 'vtex' | 'bling' | 'eccosys' | 'linx_emillenium' | 'linx_commerce' | 'linx_oms' | 'softvar' | 'tiny' | 'woocommerce'
 
 export interface System_Integration {
     shop_id: string,
     name: SystemName,
-    data: BSELLER | IDEALEWARE | IHUB | INFRACOMMERCE | LOJA_INTEGRADA | MAGENTO | MAGENTO_2 | OPENCART | TRAY | VTEX | BLING | ECCOSYS | LINX_EMILLENIUM | LINX_COMMERCE | LINX_OMS | SOFTVAR | TINY,
+    data: BSELLER | IDEALEWARE | IHUB | INFRACOMMERCE | LOJA_INTEGRADA | MAGENTO | MAGENTO_2 | OPENCART | TRAY | VTEX | BLING | ECCOSYS | LINX_EMILLENIUM | LINX_COMMERCE | LINX_OMS | SOFTVAR | TINY | WOOCOMMERCE,
     active: boolean,
 }
