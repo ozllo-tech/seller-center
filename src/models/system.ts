@@ -102,8 +102,8 @@ export interface TINY {
 
 export interface WOOCOMMERCE {
     store_url: string,
-    key: string,
-    secret: string,
+    api_key: string,
+    secret_key: string,
 }
 
 export type SystemName = 'bseller' | 'idealeware' | 'ihub' | 'infracommerce' | 'loja_integrada' | 'magento' | 'magento_2' | 'opencart' | 'tray' | 'vtex' | 'bling' | 'eccosys' | 'linx_emillenium' | 'linx_commerce' | 'linx_oms' | 'softvar' | 'tiny' | 'woocommerce'
