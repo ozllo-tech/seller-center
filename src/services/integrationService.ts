@@ -2,6 +2,7 @@ import { ObjectID } from "mongodb"
 import { Order } from "../models/order"
 import { System_Integration } from "../models/system"
 import { updateSystemIntegrationData, findOneSystemIntegrationData } from "../repositories/systemRepository"
+import { sendIntegrationEmailToOperator } from "./mailService"
 import { getTinyInfo } from "./tiny2HubService"
 
 export const saveSystemIntegrationData = async (shopID: string, system: any) => {
@@ -13,6 +14,8 @@ export const saveSystemIntegrationData = async (shopID: string, system: any) => 
     if (!newSystemData) return null
 
     const result = await findOneSystemIntegrationData('shop_id', shopID)
+
+    sendIntegrationEmailToOperator(result)
 
     return result
 }

@@ -167,3 +167,27 @@ export const sendNoProductsEmailToSeller = async (user: User): Promise<any> => {
 
     return result
 }
+
+export const sendIntegrationEmailToOperator = async (integration: any): Promise<any> => {
+
+    const email = process.env.INTEGRATION_EMAIL
+
+    if ( !email) return
+
+    const user = await findUserByShopId(integration.shop_id)
+
+    if (!user) return null
+
+    const content = `
+        email: ${user.email}<br>
+        sistema: ${integration.name}<br><br>
+        ${Object.entries(integration.data).map(([key, value]) => `${key}: ${value}`).join('<br>')}
+    `
+    const result = await sendEmail(email, `OZLLO360 | Nova integração ${integration.name} para ${user.email}`, content)
+
+    result
+        ? log(`Integration email sent to ${email}`, 'EVENT', getFunctionName())
+        : log(`Could not send integration email to ${email}`, 'EVENT', getFunctionName(), 'ERROR')
+
+    return result
+}
