@@ -46,3 +46,10 @@ export interface Variation {
     parentSKU?: string,
     sourceSKU?: string
 }
+
+export interface PaginatedResults {
+    products?: Product[]
+    total: number
+    next?: any
+    previous?: any
+}

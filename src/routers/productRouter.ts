@@ -3,7 +3,8 @@
 //
 
 import { Router, Request, Response, NextFunction } from 'express'
-import { createNewVariation, createProduct, findProductsByShop, updateProduct, updateProductImages, updateProductPrice, updateProductVariation, updateProductVariationStock, deleteProduct, deleteVariationById } from '../services/productService'
+import { findPaginatedProductsByShopId } from '../repositories/productRepository'
+import { createNewVariation, createProduct, updateProduct, updateProductImages, updateProductPrice, updateProductVariation, updateProductVariationStock, deleteProduct, deleteVariationById } from '../services/productService'
 import { importProduct } from '../services/tenant2HubService'
 import { uploadProductPicture } from '../services/uploadService'
 import { badRequest, createHttpStatus, internalServerError, noContent, ok } from '../utils/httpStatus'
@@ -308,7 +309,11 @@ router.delete('/:product_id/variation/:variation_id', isProductFromShop, isVaria
  */
 router.get('/', async (req: Request, res: Response, next: NextFunction) => {
 
-    const products = await findProductsByShop(req.shop?._id)
+    const page = Number(req.query.page) || 1
+
+    const limit = Number(req.query.limit) || 300
+
+    const products = await findPaginatedProductsByShopId(req.shop?._id, page, limit)
 
     if (!products)
         return res
@@ -316,7 +321,7 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
             .send(createHttpStatus(internalServerError))
 
     return res
-        .status(products.length > 0 ? ok.status : noContent.status)
+        .status(products.total > 0 ? ok.status : noContent.status)
         .send(products)
 })
 

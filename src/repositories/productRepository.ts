@@ -4,7 +4,7 @@
 
 import { MongoError, ObjectID, TransactionOptions } from "mongodb"
 import productEventEmitter from "../events/product"
-import { Product, Variation } from "../models/product"
+import { Product, Variation, PaginatedResults } from "../models/product"
 import { HUB2B_TENANT } from "../utils/consts"
 import { productCollection, variationCollection, VARIATION_COLLECTION } from "../utils/db/collections"
 import { getMongoSession } from "../utils/db/mongoConnector"
@@ -207,15 +207,15 @@ export const findProductById = async ( productId: string ): Promise<Product | nu
 /**
  * Find shop products
  *
- * @param shopId
+ * @param shop_id
  */
-export const findProductsByShopId = async ( shop_id: string ): Promise<Product[] | null> => {
+export const findProductsByShopId = async ( shop_id: string  ): Promise<Product[] | null> => {
 
     try {
 
         const query = { shop_id }
 
-        const productsCursor = await productCollection.aggregate( [
+        const productsCursor = productCollection.aggregate( [
             {
                 $lookup:
                 {
@@ -232,9 +232,68 @@ export const findProductsByShopId = async ( shop_id: string ): Promise<Product[]
 
         if ( !productsCursor ) throw new MongoError( "Could not retrieve products." )
 
-        const products = await productsCursor.toArray()
+        const results = await productsCursor.toArray()
 
-        return products
+        return results
+
+    } catch ( error ) {
+
+        if ( error instanceof MongoError || error instanceof Error )
+            log( error.message, 'EVENT', `Product Repository - ${ getFunctionName() }`, 'ERROR' )
+
+        return null
+    }
+}
+
+export const findPaginatedProductsByShopId = async ( shop_id: string, page = 1, limit = 300  ): Promise<PaginatedResults | null> => {
+
+    try {
+
+        const query = { shop_id }
+
+        const total = await productCollection.countDocuments(query)
+
+        const startIndex = (page - 1) * limit
+
+        const endIndex = page * limit
+
+        const results: PaginatedResults = {total}
+
+        if (endIndex < total) {
+            results.next = {
+                page: page + 1,
+                limit: limit
+            }
+        }
+
+        if (startIndex > 0) {
+            results.previous = {
+                page: page - 1,
+                limit: limit
+            }
+        }
+
+        const productsCursor = productCollection.aggregate( [
+            {
+                $lookup:
+                {
+                    from: VARIATION_COLLECTION,
+                    localField: "_id",
+                    foreignField: "product_id",
+                    as: "variations"
+                }
+            },
+            { $match: query },
+            { $sort: { _id: -1 } },
+            { $skip: startIndex },
+            { $limit: limit }
+        ] )
+
+        if ( !productsCursor ) throw new MongoError( "Could not retrieve products." )
+
+        results.products = await productsCursor.toArray()
+
+        return results
 
     } catch ( error ) {
 
