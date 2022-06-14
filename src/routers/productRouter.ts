@@ -313,7 +313,9 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
 
     const limit = Number(req.query.limit) || 300
 
-    const products = await findPaginatedProductsByShopId(req.shop?._id, page, limit)
+    const search = req.query.search || ''
+
+    const products = await findPaginatedProductsByShopId(req.shop?._id, page, limit, search)
 
     if (!products)
         return res
