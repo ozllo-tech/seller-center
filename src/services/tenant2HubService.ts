@@ -168,12 +168,9 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
 
         const productUpdated = await updateVariationById(hubProduct.skus.destination, patch)
 
-        if (productUpdated) {
-
-            log(`Product ${hubProduct.name} stock and price has been updated.`, 'EVENT', getFunctionName())
-
-            existingProductsUpdated.push(productUpdated)
-        }
+        !productUpdated
+            ? log(`Could not update stock and price for product ${hubProduct.id}.`, 'EVENT', getFunctionName())
+            : existingProductsUpdated.push(productUpdated)
     }
 
     return products.length ? products : existingProductsUpdated.length ? existingProductsUpdated : []
