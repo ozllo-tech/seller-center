@@ -1,7 +1,8 @@
 export interface Category {
     _id?: any,
     code: number,
-    value: string
+    value: string,
+    subCategories: SubCategory[]
 }
 
 export interface SubCategory {
@@ -10,61 +11,6 @@ export interface SubCategory {
     code: number,
     value: string,
 }
-
-export const CATEGORIES: Category[] = [
-    {
-        code: 281,
-        value: "Acessórios",
-    },
-    {
-        code: 282,
-        value: "Beachwear",
-    },
-    {
-        code: 283,
-        value: "Calçados",
-    },
-    {
-        code: 284,
-        value: "Underwear",
-    },
-    {
-        code: 285,
-        value: "Fitness",
-    },
-    {
-        code: 286,
-        value: "Roupas",
-    },
-    {
-        code: 288,
-        value: "Home",
-    },
-    {
-        code: 289,
-        value: "Beauty",
-    },
-    {
-        code: 407,
-        value: "Kids/Teen",
-    },
-    {
-        code: 426,
-        value: "Joias",
-    },
-    {
-        code: 435,
-        value: "Bijoux"
-    },
-    {
-        code: 449,
-        value: "Moda Pet",
-    },
-    {
-        code: 450,
-        value: "Alimentos e Bebidas",
-    }
-]
 
 export const subcategories_accessory: SubCategory[] = [
     {
@@ -773,6 +719,74 @@ export const subcategories_alimentos_bebidas: SubCategory[] = [
         code: 557,
         value: "Superfood"
     },
+]
+
+export const CATEGORIES: Category[] = [
+    {
+        code: 281,
+        value: "Acessórios",
+        subCategories: subcategories_accessory
+    },
+    {
+        code: 282,
+        value: "Beachwear",
+        subCategories: subcategories_beachwear
+    },
+    {
+        code: 283,
+        value: "Calçados",
+        subCategories: subcategories_calcados
+    },
+    {
+        code: 284,
+        value: "Underwear",
+        subCategories: subcategories_underwear
+    },
+    {
+        code: 285,
+        value: "Fitness",
+        subCategories: subcategories_fitness
+    },
+    {
+        code: 286,
+        value: "Roupas",
+        subCategories: subcategories_roupas
+    },
+    {
+        code: 288,
+        value: "Home",
+        subCategories: subcategories_home
+    },
+    {
+        code: 289,
+        value: "Beauty",
+        subCategories: subcategories_beauty
+    },
+    {
+        code: 407,
+        value: "Kids/Teen",
+        subCategories: subcategories_kids_teen
+    },
+    {
+        code: 426,
+        value: "Joias",
+        subCategories: subcategories_bijoux
+    },
+    {
+        code: 435,
+        value: "Bijoux",
+        subCategories: subcategories_bijoux
+    },
+    {
+        code: 449,
+        value: "Moda Pet",
+        subCategories: subcategories_moda_pet
+    },
+    {
+        code: 450,
+        value: "Alimentos e Bebidas",
+        subCategories: subcategories_alimentos_bebidas
+    }
 ]
 
 export const SUBCATEGORIES: SubCategory[] = [
