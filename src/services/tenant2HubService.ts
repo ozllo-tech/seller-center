@@ -61,20 +61,19 @@ export const importProduct = async (idTenant: any, shop_id: any, status = '2', o
 
         if (!productExists) {
 
+            const id = new ObjectID()
+
             const images: string[] = []
 
-            productHub2b.images.forEach(async (imageHub2b, index) => {
+            for await ( const[index, imageHub2b] of productHub2b.images.entries()) {
 
-                const s3File = await sendExternalFileToS3(imageHub2b.url, productHub2b.groupers.parentSKU || productHub2b.skus.source, index)
+                const s3File = await sendExternalFileToS3(imageHub2b.url, id.toString(), index)
 
-                if (!s3File) return images.push(imageHub2b.url)
-
-                const imageKitUrl = getImageKitUrl(s3File.replace('/', ''))
-
-                if (imageKitUrl) return images.push(imageKitUrl)
-            })
+                if (s3File) images.push(getImageKitUrl(s3File.replace('/', '')))
+            }
 
             const product: Product = {
+                _id: id,
                 shop_id: new ObjectID(shop_id),
                 images,
                 category: category,

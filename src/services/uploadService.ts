@@ -110,10 +110,6 @@ export const sendExternalFileToS3 = async ( url: string, productId: string, inde
 
     if (url.startsWith('https://ik.imagekit.io/3m391sequ/')) return null
 
-    const fileName = url.split('/').pop()?.split('?').shift()
-
-    if (!fileName) return null
-
     try {
 
         const response = await axios.get(url, {
@@ -122,15 +118,11 @@ export const sendExternalFileToS3 = async ( url: string, productId: string, inde
 
         if (!response.data.length) return null
 
-        const key = fileName.length > 38
-            ? `${fileName.substring(0, 38)}_${productId}_${index}.${getUrlExtension(url)}`
-            : `${productId}_${fileName}`
-
         const image = s3.putObject({
             'ACL': 'public-read',
             'Body': response.data,
             'Bucket': 'ozllo-seller-center-photos',
-            'Key': key,
+            'Key': `${productId}_${index}`,
         }, function (error: AWSError, data) {
 
             if (error) {

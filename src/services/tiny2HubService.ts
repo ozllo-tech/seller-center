@@ -19,6 +19,7 @@ import { findOneOrderAndModify } from "../repositories/orderRepository"
 import format from "date-fns/format"
 import { HUB2B_Invoice, HUB2B_Status, HUB2B_Tracking } from "../models/hub2b"
 import { postInvoiceHub2b, postTrackingHub2b, updateStatusHub2b } from "./hub2bService"
+import { getImageKitUrl, sendExternalFileToS3 } from "./uploadService"
 
 export const requestTiny = async (url: string, method: Method, token: string, params?: any): Promise<any> => {
 
@@ -104,14 +105,26 @@ export const findTinyDataByEcommerceID = async (ecommerceID: string) => {
     return system
 }
 
-function parseTinyProduct(tinyProduct: Tiny_Product, shop_id: ObjectID): Product {
+async function parseTinyProduct(tinyProduct: Tiny_Product, shop_id: ObjectID): Promise<Product> {
 
     // WARN: "brand" field can't be empty. Hub2b will not accept without it.
     // TODO: get brand from shopInfo.
 
+    const id = new ObjectID()
+
+    const images = []
+
+    for await ( const [index, image] of tinyProduct.dados.anexos.entries() ) {
+
+        const s3File = await sendExternalFileToS3(image.url, id.toString(), index)
+
+        if (s3File) images.push(getImageKitUrl(s3File.replace('/', '')))
+    }
+
     const product: Product = {
+        _id: id,
         shop_id: shop_id,
-        images: tinyProduct.dados.anexos.map(anexo => anexo.url),
+        images: images,
         category: findMarchingCategory(tinyProduct),
         subcategory: findMatchingSubcategory(tinyProduct),
         nationality: [0,3,4,5].includes(parseInt(tinyProduct.dados.origem)) ? 1 : 2,
@@ -251,7 +264,7 @@ function mapTinyProduct(product: Product, tinyProduct: Tiny_Product): Tiny_Produ
 
 async function updateExistingProduct(tinyProduct: Tiny_Product, existingProduct: Product, shopID: ObjectID) {
 
-    const product = parseTinyProduct(tinyProduct, shopID)
+    const product = await parseTinyProduct(tinyProduct, shopID)
 
     delete product.variations
 
