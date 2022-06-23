@@ -175,6 +175,8 @@ export const savNewOrder = async ( shop_id: string, order: HUB2B_Order ) => {
 
     if ( newOrder ) {
 
+        if ( newOrder.order.status.status === 'Approved' ) orderEventEmitter.emit( 'approved', newOrder )
+
         const tenant = await findTenantfromShopID( newOrder.shop_id )
 
         if ( tenant ) return orderEventEmitter.emit( 'new_from_tenant', newOrder, tenant.idTenant )
