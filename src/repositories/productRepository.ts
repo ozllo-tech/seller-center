@@ -2,14 +2,14 @@
 //      Activation Token Repository
 //
 
-import { MongoError, ObjectID, TransactionOptions } from "mongodb"
-import productEventEmitter from "../events/product"
-import { Product, Variation, PaginatedResults } from "../models/product"
-import { HUB2B_TENANT } from "../utils/consts"
-import { productCollection, variationCollection, VARIATION_COLLECTION } from "../utils/db/collections"
-import { getMongoSession } from "../utils/db/mongoConnector"
-import { log } from "../utils/loggerUtil"
-import { equalArray, getFunctionName, isSubset } from "../utils/util"
+import { MongoError, ObjectID, TransactionOptions } from 'mongodb'
+import productEventEmitter from '../events/product'
+import { Product, Variation, PaginatedResults } from '../models/product'
+import { HUB2B_TENANT } from '../utils/consts'
+import { productCollection, variationCollection, VARIATION_COLLECTION } from '../utils/db/collections'
+import { getMongoSession } from '../utils/db/mongoConnector'
+import { log } from '../utils/loggerUtil'
+import { equalArray, getFunctionName, isSubset } from '../utils/util'
 
 const transactionOptions: TransactionOptions = {
     readPreference: 'primary',
@@ -23,7 +23,7 @@ const transactionOptions: TransactionOptions = {
  *
  * @param product - the product to be saved
  */
-export const createNewProduct = async ( product: Product, variations: Variation[] ): Promise<Product | null> => {
+export const createNewProduct = async ( product: Product, variations: Variation[]): Promise<Product | null> => {
 
     const session = getMongoSession()
 
@@ -33,15 +33,15 @@ export const createNewProduct = async ( product: Product, variations: Variation[
 
         const transactionResults = await session.withTransaction( async () => {
 
-            const productResults = await productCollection.insertOne( product, { session } )
+            const productResults = await productCollection.insertOne( product, { session })
 
             productResult = productResults.ops[0] ? productResults.ops[0] : null
 
-            if ( !productResult ) throw new MongoError( "Could not save product." )
+            if ( !productResult ) throw new MongoError( 'Could not save product.' )
 
             variations.forEach( variation => variation.product_id = productResults.insertedId )
 
-            const variationResults = await variationCollection.insertMany( variations, { session } )
+            const variationResults = await variationCollection.insertMany( variations, { session })
 
             productResult.variations = variationResults.ops ? variationResults.ops : null
 
@@ -67,7 +67,7 @@ export const createNewProduct = async ( product: Product, variations: Variation[
  *
  * @param products
  */
- export const createManyProducts = async ( products: Product[] ): Promise<boolean> => {
+export const createManyProducts = async ( products: Product[]): Promise<boolean> => {
 
     try {
         const result = await productCollection.insertMany( products )
@@ -100,15 +100,15 @@ export const updateProductById = async ( _id: any, patch: any ): Promise<Product
 
         if ( !result.value ) return null
 
-        const product = await findProductById(result.value._id)
+        const product = await findProductById( result.value._id )
 
-        if (!isSubset(result.value, patch) || patch.images && !equalArray(result.value.images, patch.images)) {
+        if ( !isSubset( result.value, patch ) || patch.images && !equalArray( result.value.images, patch.images ) ) {
 
-            const idTenant = patch.idTenant | Number(HUB2B_TENANT) // TODO: remove idTenant?
+            const idTenant = patch.idTenant | Number( HUB2B_TENANT ) // TODO: remove idTenant?
 
-            if (patch.price || patch.price_discounted) productEventEmitter.emit('update_price', product, idTenant)
+            if ( patch.price || patch.price_discounted ) productEventEmitter.emit( 'update_price', product, idTenant )
 
-            productEventEmitter.emit('update', product, idTenant)
+            productEventEmitter.emit( 'update', product, idTenant )
         }
 
         return product
@@ -137,22 +137,22 @@ export const updateVariationById = async ( _id: any, patch: any ): Promise<Produ
 
         const query = { _id: new ObjectID( _id ) }
 
-        const result = await variationCollection.findOneAndUpdate(query, options)
+        const result = await variationCollection.findOneAndUpdate( query, options )
 
         if ( !result.value ) return null
 
-        if (patch.stock) {
+        if ( patch.stock ) {
 
             result.value.stock = patch.stock
 
-            productEventEmitter.emit('update_stock', result.value)
+            productEventEmitter.emit( 'update_stock', result.value )
         }
 
-        const product = await findProductById(result.value.product_id)
+        const product = await findProductById( result.value.product_id )
 
-        const idTenant = patch.idTenant | Number(HUB2B_TENANT) // TODO: review this patch.idTenant
+        const idTenant = patch.idTenant | Number( HUB2B_TENANT ) // TODO: review this patch.idTenant
 
-        if (!isSubset(result.value, patch)) productEventEmitter.emit('update', product, idTenant)
+        if ( !isSubset( result.value, patch ) ) productEventEmitter.emit( 'update', product, idTenant )
 
         return product
 
@@ -176,20 +176,20 @@ export const findProductById = async ( productId: string ): Promise<Product | nu
 
         const query = { _id: new ObjectID( productId ) }
 
-        const productsCursor = await productCollection.aggregate( [
+        const productsCursor = await productCollection.aggregate([
             {
                 $lookup:
                 {
                     from: VARIATION_COLLECTION,
-                    localField: "_id",
-                    foreignField: "product_id",
-                    as: "variations"
+                    localField: '_id',
+                    foreignField: 'product_id',
+                    as: 'variations'
                 }
             },
             { $match: query }
-        ] )
+        ])
 
-        if ( !productsCursor ) throw new MongoError( "Could not retrieve product." )
+        if ( !productsCursor ) throw new MongoError( 'Could not retrieve product.' )
 
         const product = await productsCursor.toArray()
 
@@ -215,22 +215,22 @@ export const findProductsByShopId = async ( shop_id: string  ): Promise<Product[
 
         const query = { shop_id }
 
-        const productsCursor = productCollection.aggregate( [
+        const productsCursor = productCollection.aggregate([
             {
                 $lookup:
                 {
                     from: VARIATION_COLLECTION,
-                    localField: "_id",
-                    foreignField: "product_id",
-                    as: "variations"
+                    localField: '_id',
+                    foreignField: 'product_id',
+                    as: 'variations'
                 }
             },
             { $match: query },
             { $sort: { _id: -1 } },
             { $limit: 300 }
-        ] )
+        ])
 
-        if ( !productsCursor ) throw new MongoError( "Could not retrieve products." )
+        if ( !productsCursor ) throw new MongoError( 'Could not retrieve products.' )
 
         const results = await productsCursor.toArray()
 
@@ -249,47 +249,47 @@ export const findPaginatedProductsByShopId = async ( shop_id: string, page = 1, 
 
     try {
 
-        const query = { ...{ shop_id }, ...(search.length ? { name: { $regex: search, $options: 'i' } } : {}) }
+        const query = { ...{ shop_id }, ...( search.length ? { name: { $regex: search, $options: 'i' } } : {}) }
 
-        const total = await productCollection.countDocuments(query)
+        const total = await productCollection.countDocuments( query )
 
-        const startIndex = (page - 1) * limit
+        const startIndex = ( page - 1 ) * limit
 
         const endIndex = page * limit
 
         const results: PaginatedResults = {total}
 
-        if (endIndex < total) {
+        if ( endIndex < total ) {
             results.next = {
                 page: page + 1,
                 limit: limit
             }
         }
 
-        if (startIndex > 0) {
+        if ( startIndex > 0 ) {
             results.previous = {
                 page: page - 1,
                 limit: limit
             }
         }
 
-        const productsCursor = productCollection.aggregate( [
+        const productsCursor = productCollection.aggregate([
             {
                 $lookup:
                 {
                     from: VARIATION_COLLECTION,
-                    localField: "_id",
-                    foreignField: "product_id",
-                    as: "variations"
+                    localField: '_id',
+                    foreignField: 'product_id',
+                    as: 'variations'
                 }
             },
             { $match: query },
             { $sort: { _id: -1 } },
             { $skip: startIndex },
             { $limit: limit }
-        ] )
+        ])
 
-        if ( !productsCursor ) throw new MongoError( "Could not retrieve products." )
+        if ( !productsCursor ) throw new MongoError( 'Could not retrieve products.' )
 
         results.products = await productsCursor.toArray()
 
@@ -311,26 +311,26 @@ export const findPaginatedProductsByShopId = async ( shop_id: string, page = 1, 
  * @param name
  * @returns Product
  */
- export const findProductByShopIdAndName = async ( shopId: string, name: string ): Promise<Product | null> => {
+export const findProductByShopIdAndName = async ( shopId: string, name: string ): Promise<Product | null> => {
 
     try {
 
         const query = { shop_id: new ObjectID( shopId ), name }
 
-        const productsCursor = await productCollection.aggregate( [
+        const productsCursor = await productCollection.aggregate([
             {
                 $lookup:
                 {
                     from: VARIATION_COLLECTION,
-                    localField: "_id",
-                    foreignField: "product_id",
-                    as: "variations"
+                    localField: '_id',
+                    foreignField: 'product_id',
+                    as: 'variations'
                 }
             },
             { $match: query }
-        ] )
+        ])
 
-        if ( !productsCursor ) throw new MongoError( "Could not retrieve product." )
+        if ( !productsCursor ) throw new MongoError( 'Could not retrieve product.' )
 
         const product = await productsCursor.toArray()
 
@@ -345,35 +345,35 @@ export const findPaginatedProductsByShopId = async ( shop_id: string, page = 1, 
     }
 }
 
-export const findProductByShopIdAndSku = async (shopId: string, sku: string): Promise<Product | null> => {
+export const findProductByShopIdAndSku = async ( shopId: string, sku: string ): Promise<Product | null> => {
 
     try {
 
-        const query = { shop_id: new ObjectID(shopId), sku }
+        const query = { shop_id: new ObjectID( shopId ), sku }
 
         const productsCursor = productCollection.aggregate([
             {
                 $lookup:
                 {
                     from: VARIATION_COLLECTION,
-                    localField: "_id",
-                    foreignField: "product_id",
-                    as: "variations"
+                    localField: '_id',
+                    foreignField: 'product_id',
+                    as: 'variations'
                 }
             },
             { $match: query }
         ])
 
-        if (!productsCursor) throw new MongoError("Could not retrieve product.")
+        if ( !productsCursor ) throw new MongoError( 'Could not retrieve product.' )
 
         const product = await productsCursor.toArray()
 
         return product[0]
 
-    } catch (error) {
+    } catch ( error ) {
 
-        if (error instanceof MongoError || error instanceof Error)
-            log(error.message, 'EVENT', `Product Repository - ${getFunctionName()}`, 'ERROR')
+        if ( error instanceof MongoError || error instanceof Error )
+            log( error.message, 'EVENT', `Product Repository - ${getFunctionName()}`, 'ERROR' )
 
         return null
     }
@@ -412,7 +412,7 @@ export const findVariationsByProductId = async ( product_id: string ): Promise<V
  */
 export const findVariationById = async ( variation_id: string ): Promise<Variation | null> => {
 
-    if (!ObjectID.isValid(variation_id)) return null
+    if ( !ObjectID.isValid( variation_id ) ) return null
 
     try {
 
@@ -444,7 +444,7 @@ export const createVariation = async ( variation: Variation ): Promise<Variation
 
         const variationInserted = result.ops[0] ? result.ops[0] : null
 
-        if ( !variationInserted ) throw new Error( "Could not save into database" )
+        if ( !variationInserted ) throw new Error( 'Could not save into database' )
 
         return variationInserted
 
@@ -467,7 +467,7 @@ export const deleteVariation = async ( variation_id: string ): Promise<boolean> 
 
     try {
 
-        const query = await variationCollection.deleteOne( { _id: variation_id } )
+        const query = await variationCollection.deleteOne({ _id: variation_id })
 
         const result = query.deletedCount ? query.deletedCount >= 1 : false
 
@@ -487,19 +487,19 @@ export const deleteVariation = async ( variation_id: string ): Promise<boolean> 
 export const deleteProductById = async ( product_id: string ): Promise<boolean> => {
 
     try {
-        const query = await productCollection.deleteOne({ _id: new ObjectID(product_id)})
+        const query = await productCollection.deleteOne({ _id: new ObjectID( product_id )})
 
         const result = query.deletedCount ? query.deletedCount >= 1 : false
 
-        if (result) productEventEmitter.emit('delete', product_id)
+        if ( result ) productEventEmitter.emit( 'delete', product_id )
 
         return result
 
-    } catch (error) {
+    } catch ( error ) {
 
-        if (error instanceof MongoError || error instanceof Error)
+        if ( error instanceof MongoError || error instanceof Error )
 
-            log(error.message, 'EVENT', `Product Repository - ${getFunctionName()}`, 'ERROR')
+            log( error.message, 'EVENT', `Product Repository - ${getFunctionName()}`, 'ERROR' )
 
         return false
     }
