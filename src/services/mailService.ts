@@ -2,29 +2,29 @@
 //      Mail Service
 //
 
-import { log } from "../utils/loggerUtil"
-import { getFunctionName } from "../utils/util"
-import nodemailer from "nodemailer"
-import { EMAIL_PASSWORD, FRONT_END_URL, PROJECT_EMAIL, PROJECT_NAME } from "../utils/consts"
-import { activationEmailContent } from "../models/emails/activationEmail"
-import { User } from "../models/user"
-import { generateAccessToken } from "./tokenService"
-import { resetPasswordContent } from "../models/emails/resetPassword"
-import { findOneUserAndModify, findUserByShopId } from "../repositories/userRepository"
-import { orderEmailContent } from "../models/emails/orderEmail"
-import { lowStockEmailContent } from "../models/emails/lowStockEmail"
-import { lateShippingEmailContent } from "../models/emails/lateShippingEmail"
-import { noProductsEmailContent } from "../models/emails/noProductsEmail"
-import { Variation } from "../models/product"
-import { findProductByVariation } from "./productService"
+import { log } from '../utils/loggerUtil'
+import { getFunctionName } from '../utils/util'
+import nodemailer from 'nodemailer'
+import { EMAIL_PASSWORD, FRONT_END_URL, PROJECT_EMAIL, PROJECT_NAME } from '../utils/consts'
+import { activationEmailContent } from '../models/emails/activationEmail'
+import { User } from '../models/user'
+import { generateAccessToken } from './tokenService'
+import { resetPasswordContent } from '../models/emails/resetPassword'
+import { findOneUserAndModify, findUserByShopId } from '../repositories/userRepository'
+import { orderEmailContent } from '../models/emails/orderEmail'
+import { lowStockEmailContent } from '../models/emails/lowStockEmail'
+import { lateShippingEmailContent } from '../models/emails/lateShippingEmail'
+import { noProductsEmailContent } from '../models/emails/noProductsEmail'
+import { Variation } from '../models/product'
+import { findProductByVariation } from './productService'
 
-const transporter = nodemailer.createTransport( {
+const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: PROJECT_EMAIL,
         pass: EMAIL_PASSWORD,
     }
-} )
+})
 
 /**
  * Save a new user and creates account
@@ -104,7 +104,7 @@ export const sendOrderEmailToSeller = async ( shop_id: string ): Promise<any> =>
     const user = await findUserByShopId( shop_id )
 
     if ( !user ) {
-        log(`Could not send order email for shop_id ${shop_id}. User not found.`, 'EVENT', getFunctionName(), 'ERROR' )
+        log( `Could not send order email for shop_id ${shop_id}. User not found.`, 'EVENT', getFunctionName(), 'ERROR' )
         return
     }
 
@@ -121,73 +121,73 @@ export const sendOrderEmailToSeller = async ( shop_id: string ): Promise<any> =>
 
 export const sendLowStockEmailToSeller = async ( variation: Variation ): Promise<any> => {
 
-    const product = await findProductByVariation( variation._id)
+    const product = await findProductByVariation( variation._id )
 
-    if (! product ) return null
+    if ( ! product ) return null
 
     const user = await findUserByShopId( product.shop_id )
 
-    if (!user) return null
+    if ( !user ) return null
 
     const variationName = `${product.name} | Tamanho ${variation.size} | ${variation.color || variation.flavor}`
 
-    const result = await sendEmail(user.email, 'OZLLO360 | Atenção: seu estoque está quase acabando!', lowStockEmailContent(variationName) )
+    const result = await sendEmail( user.email, 'OZLLO360 | Atenção: seu estoque está quase acabando!', lowStockEmailContent( variationName ) )
 
     result
-        ? log(`Stock low email sent to ${user.email}`, 'EVENT', getFunctionName())
-        : log(`Could not send stock low email to ${user.email}`, 'EVENT', getFunctionName(), 'ERROR')
+        ? log( `Stock low email sent to ${user.email}`, 'EVENT', getFunctionName() )
+        : log( `Could not send stock low email to ${user.email}`, 'EVENT', getFunctionName(), 'ERROR' )
 
     return result
 }
 
-export const sendLateShippingEmailToSeller = async (shop_id: string, orderId: string): Promise<any> => {
+export const sendLateShippingEmailToSeller = async ( shop_id: string, orderId: string ): Promise<any> => {
 
-    const user = await findUserByShopId(shop_id)
+    const user = await findUserByShopId( shop_id )
 
-    if (!user) return null
+    if ( !user ) return null
 
-    const result = await sendEmail(user.email, 'OZLLO360 | Atenção: um pedido está atrasado para o despacho!', lateShippingEmailContent(orderId))
+    const result = await sendEmail( user.email, 'OZLLO360 | Atenção: um pedido está atrasado para o despacho!', lateShippingEmailContent( orderId ) )
 
     result
-        ? log(`Late shipping email sent to ${user.email}`, 'EVENT', getFunctionName())
-        : log(`Could not send late shipping email to ${user.email}`, 'EVENT', getFunctionName(), 'ERROR')
+        ? log( `Late shipping email sent to ${user.email}`, 'EVENT', getFunctionName() )
+        : log( `Could not send late shipping email to ${user.email}`, 'EVENT', getFunctionName(), 'ERROR' )
 
     return result
 }
 
-export const sendNoProductsEmailToSeller = async (user: User): Promise<any> => {
+export const sendNoProductsEmailToSeller = async ( user: User ): Promise<any> => {
 
-    const result = await sendEmail(user.email, 'OZLLO360 | Ainda não cadastrou nenhum produto?', noProductsEmailContent())
+    const result = await sendEmail( user.email, 'OZLLO360 | Ainda não cadastrou nenhum produto?', noProductsEmailContent() )
 
-    if (result) findOneUserAndModify('_id', user._id, {idleNotifications: 1})
+    if ( result ) findOneUserAndModify( '_id', user._id, {idleNotifications: 1})
 
     result
-        ? log(`No products email sent to ${user.email}`, 'EVENT', getFunctionName())
-        : log(`Could not send no products email to ${user.email}`, 'EVENT', getFunctionName(), 'ERROR')
+        ? log( `No products email sent to ${user.email}`, 'EVENT', getFunctionName() )
+        : log( `Could not send no products email to ${user.email}`, 'EVENT', getFunctionName(), 'ERROR' )
 
     return result
 }
 
-export const sendIntegrationEmailToOperator = async (integration: any): Promise<any> => {
+export const sendIntegrationEmailToOperator = async ( integration: any ): Promise<any> => {
 
     const email = process.env.INTEGRATION_EMAIL
 
-    if ( !email) return
+    if ( !email ) return
 
-    const user = await findUserByShopId(integration.shop_id)
+    const user = await findUserByShopId( integration.shop_id )
 
-    if (!user) return null
+    if ( !user ) return null
 
     const content = `
         email: ${user.email}<br>
         sistema: ${integration.name}<br><br>
-        ${Object.entries(integration.data).map(([key, value]) => `${key}: ${value}`).join('<br>')}
+        ${Object.entries( integration.data ).map( ([key, value]) => `${key}: ${value}` ).join( '<br>' )}
     `
-    const result = await sendEmail(email, `OZLLO360 | Nova integração ${integration.name} para ${user.email}`, content)
+    const result = await sendEmail( email, `OZLLO360 | Nova integração ${integration.name} para ${user.email}`, content )
 
     result
-        ? log(`Integration email sent to ${email}`, 'EVENT', getFunctionName())
-        : log(`Could not send integration email to ${email}`, 'EVENT', getFunctionName(), 'ERROR')
+        ? log( `Integration email sent to ${email}`, 'EVENT', getFunctionName() )
+        : log( `Could not send integration email to ${email}`, 'EVENT', getFunctionName(), 'ERROR' )
 
     return result
 }
