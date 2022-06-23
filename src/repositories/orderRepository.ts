@@ -2,29 +2,29 @@
 //      Order Repository
 //
 
-import { MongoError } from "mongodb"
-import { Order, OrderIntegration } from "../models/order"
-import { orderCollection, orderIntegrationCollection } from "../utils/db/collections"
-import { log } from "../utils/loggerUtil"
-import { getFunctionName } from "../utils/util"
+import { MongoError } from 'mongodb'
+import { Order, OrderIntegration } from '../models/order'
+import { orderCollection, orderIntegrationCollection } from '../utils/db/collections'
+import { log } from '../utils/loggerUtil'
+import { getFunctionName } from '../utils/util'
 
 /**
  * Save a new hub2b integration
  *
  * @param orderIntegration -orderIntegration
  */
-export const newIntegrationHub2b = async (orderIntegration: OrderIntegration): Promise<boolean> => {
+export const newIntegrationHub2b = async ( orderIntegration: OrderIntegration ): Promise<boolean> => {
 
     try {
 
-        const result = await orderIntegrationCollection.insertOne(orderIntegration)
+        const result = await orderIntegrationCollection.insertOne( orderIntegration )
 
         return result.ops[0] ? true : false
 
-    } catch (error) {
+    } catch ( error ) {
 
-        if (error instanceof MongoError || error instanceof Error)
-            log(error.message, 'EVENT', `Order Repository - ${getFunctionName()}`, 'ERROR')
+        if ( error instanceof MongoError || error instanceof Error )
+            log( error.message, 'EVENT', `Order Repository - ${getFunctionName()}`, 'ERROR' )
 
         return false
     }
@@ -38,14 +38,14 @@ export const findLastIntegrationOrder = async (): Promise<OrderIntegration | nul
 
     try {
 
-        const result = await orderIntegrationCollection.find({}).sort({ _id: -1 }).limit(1).toArray();
+        const result = await orderIntegrationCollection.find({}).sort({ _id: -1 }).limit( 1 ).toArray()
 
         return result ? result[0] : null
 
-    } catch (error) {
+    } catch ( error ) {
 
-        if (error instanceof MongoError || error instanceof Error)
-            log(error.message, 'EVENT', `Order Repository - ${getFunctionName()}`, 'ERROR')
+        if ( error instanceof MongoError || error instanceof Error )
+            log( error.message, 'EVENT', `Order Repository - ${getFunctionName()}`, 'ERROR' )
 
         return null
     }
@@ -56,18 +56,18 @@ export const findLastIntegrationOrder = async (): Promise<OrderIntegration | nul
  *
  * @param user - new user
  */
-export const newOrderHub2b = async (orderIntegration: Order): Promise<Order | null> => {
+export const newOrderHub2b = async ( orderIntegration: Order ): Promise<Order | null> => {
 
     try {
 
-        const result = await orderCollection.insertOne(updateOrderMeta(orderIntegration))
+        const result = await orderCollection.insertOne( updateOrderMeta( orderIntegration ) )
 
         return result.ops[0] ? result.ops[0] : null
 
-    } catch (error) {
+    } catch ( error ) {
 
-        if (error instanceof MongoError || error instanceof Error)
-            log(error.message, 'EVENT', `Order Repository - ${getFunctionName()}`, 'ERROR')
+        if ( error instanceof MongoError || error instanceof Error )
+            log( error.message, 'EVENT', `Order Repository - ${getFunctionName()}`, 'ERROR' )
 
         return null
     }
@@ -79,93 +79,93 @@ export const newOrderHub2b = async (orderIntegration: Order): Promise<Order | nu
  * @param shop_id
  * @param filter optional filter fields.
  */
-export const findOrderByShopId = async (shop_id: string, filter = {}): Promise<Order[] | null> => {
+export const findOrderByShopId = async ( shop_id: string, filter = {}): Promise<Order[] | null> => {
 
     try {
 
-        const result = orderCollection.find({ shop_id: shop_id, ...filter }).sort('_id', -1).limit(300)
+        const result = orderCollection.find({ shop_id: shop_id, ...filter }).sort( '_id', -1 ).limit( 300 )
 
         const orders = await result.toArray()
 
         return orders
 
-    } catch (error) {
+    } catch ( error ) {
 
-        if (error instanceof MongoError || error instanceof Error)
-            log(error.message, 'EVENT', `User Repository - ${getFunctionName()}`, 'ERROR')
+        if ( error instanceof MongoError || error instanceof Error )
+            log( error.message, 'EVENT', `User Repository - ${getFunctionName()}`, 'ERROR' )
 
         return null
     }
 }
 
-export const findOneOrderAndModify = async (where: any, by: any, fields: {}) => {
+export const findOneOrderAndModify = async ( where: any, by: any, fields: any ) => {
 
     try {
 
-        const filter = { [where]: Number(by) }
+        const filter = { [where]: Number( by ) }
 
-        const result = await orderCollection.findOneAndUpdate(filter, { $set: fields }, { returnOriginal: false })
+        const result = await orderCollection.findOneAndUpdate( filter, { $set: fields }, { returnOriginal: false })
 
-        if (result.value) log(`Order field updated`, 'EVENT', `Order Repository - ${getFunctionName()}`, 'INFO')
+        if ( result.value ) log( `Order field updated`, 'EVENT', `Order Repository - ${getFunctionName()}`, 'INFO' )
 
         return result
 
-    } catch (error) {
+    } catch ( error ) {
 
-        if (error instanceof MongoError || error instanceof Error)
-            log(error.message, 'EVENT', `Order Repository - ${getFunctionName()}`, 'ERROR')
+        if ( error instanceof MongoError || error instanceof Error )
+            log( error.message, 'EVENT', `Order Repository - ${getFunctionName()}`, 'ERROR' )
 
         return null
     }
 }
 
-export const findOrderByField = async(field: any, value: any) => {
+export const findOrderByField = async ( field: any, value: any ) => {
 
     try {
 
         const filter = { [field]: value }
 
-        const result = await orderCollection.findOne(filter)
+        const result = await orderCollection.findOne( filter )
 
         return result
 
-    } catch (error) {
+    } catch ( error ) {
 
-        if (error instanceof MongoError || error instanceof Error)
-            log(error.message, 'EVENT', `User Repository - ${getFunctionName()}`, 'ERROR')
+        if ( error instanceof MongoError || error instanceof Error )
+            log( error.message, 'EVENT', `User Repository - ${getFunctionName()}`, 'ERROR' )
 
         return null
     }
 }
 
-export const findOrdersByFields = async(filter: object): Promise<Order[]|null> => {
+export const findOrdersByFields = async ( filter: object ): Promise<Order[]|null> => {
 
     try {
 
-        const result = orderCollection.find(filter)
+        const result = orderCollection.find( filter )
 
         const orders = await result.toArray()
 
         return orders
 
-    } catch (error) {
+    } catch ( error ) {
 
-        if (error instanceof MongoError || error instanceof Error)
-            log(error.message, 'EVENT', `User Repository - ${getFunctionName()}`, 'ERROR')
+        if ( error instanceof MongoError || error instanceof Error )
+            log( error.message, 'EVENT', `User Repository - ${getFunctionName()}`, 'ERROR' )
 
         return null
     }
 }
 
-export const updateOrderMeta = (order: Order): Order => {
+export const updateOrderMeta = ( order: Order ): Order => {
 
-    if ('Approved' == order.order.status.status) order.meta = {...order.meta, approved_at: order.order.status.updatedDate}
+    if ( 'Approved' == order.order.status.status ) order.meta = {...order.meta, approved_at: order.order.status.updatedDate}
 
-    if ('Invoiced' == order.order.status.status) order.meta = {...order.meta, invoiced_at: order.order.status.updatedDate}
+    if ( 'Invoiced' == order.order.status.status ) order.meta = {...order.meta, invoiced_at: order.order.status.updatedDate}
 
-    if ('Shipped' == order.order.status.status) order.meta = {...order.meta, shipped_at: order.order.status.updatedDate}
+    if ( 'Shipped' == order.order.status.status ) order.meta = {...order.meta, shipped_at: order.order.status.updatedDate}
 
-    if ('Delivered' == order.order.status.status) order.meta = {...order.meta, delivered_at: order.order.status.updatedDate}
+    if ( 'Delivered' == order.order.status.status ) order.meta = {...order.meta, delivered_at: order.order.status.updatedDate}
 
     return order
 }
