@@ -8,6 +8,7 @@
 
 # misc
 .DS_Store
+docs
 
 # debug
 npm-debug.log*
@@ -31,4 +32,4 @@ dist
 
 # local npm and yarn files
 yarn.lock
-package-lock.json 
+package-lock.json
