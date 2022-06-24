@@ -242,8 +242,8 @@ export interface HUB2B_Catalog_Product {
     },
     idProductType: 0,
     metaData: {
-      createDate: "2021-12-11T01:55:35.528Z",
-      updateDate: "2021-12-11T01:55:35.528Z",
+      createDate: '2021-12-11T01:55:35.528Z',
+      updateDate: '2021-12-11T01:55:35.528Z',
       updateAction: string,
       updateIdUser: string,
       updateUserName: string,
@@ -321,46 +321,46 @@ export interface HUB2B_TenantCredentials {
 }
 
 export const productExample = {
-    "sku": "testeWithTemplate2",
-    "parentSKU": "",
-    "ean13": "6669996669990",
-    "warrantyMonths": 30,
-    "handlingTime": 2,
-    "stock": "7",
-    "weightKg": "5.2",
-    "url": "http://testes.com",
-    "sourceId": "999",
-    "categoryCode": "123",
-    "name": "product testeWithTemplate2 teste 84",
-    "sourceDescription": "product testeWithTemplate2 Base desc",
-    "description": "product testeWithTemplate2",
-    "brand": "marca teste",
-    "videoURL": "http://videourl.com",
-    "ncm": "",
-    "idProductType": 1,
-    "idTypeCondition": 1,
-    "shippingType": "me1;me2",
-    "height_m": "1",
-    "width_m": "0.1",
-    "length_m": "1",
-    "priceBase": "357.64",
-    "priceSale": "357.64",
-    "images": [
+    'sku': 'testeWithTemplate2',
+    'parentSKU': '',
+    'ean13': '6669996669990',
+    'warrantyMonths': 30,
+    'handlingTime': 2,
+    'stock': '7',
+    'weightKg': '5.2',
+    'url': 'http://testes.com',
+    'sourceId': '999',
+    'categoryCode': '123',
+    'name': 'product testeWithTemplate2 teste 84',
+    'sourceDescription': 'product testeWithTemplate2 Base desc',
+    'description': 'product testeWithTemplate2',
+    'brand': 'marca teste',
+    'videoURL': 'http://videourl.com',
+    'ncm': '',
+    'idProductType': 1,
+    'idTypeCondition': 1,
+    'shippingType': 'me1;me2',
+    'height_m': '1',
+    'width_m': '0.1',
+    'length_m': '1',
+    'priceBase': '357.64',
+    'priceSale': '357.64',
+    'images': [
         {
-            "url": "http://www.images.com/teste"
+            'url': 'http://www.images.com/teste'
         }, {
-            "url": "http://www.images.com/2/teste"
+            'url': 'http://www.images.com/2/teste'
         }
     ],
-    "specifications": [
+    'specifications': [
         {
-            "name": "Garantia",
-            "value": "30 dias",
-            "type": 2
+            'name': 'Garantia',
+            'value': '30 dias',
+            'type': 2
         }, {
-            "name": "Especificações",
-            "value": "é teste!",
-            "type": 2
+            'name': 'Especificações',
+            'value': 'é teste!',
+            'type': 2
         }
     ]
 }

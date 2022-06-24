@@ -15,11 +15,11 @@ describe( 'Tests Middlewares', () => {
 
         expect( next ).toHaveBeenCalled()
         done()
-    } )
+    })
 
     it( 'A request with error should response with error', async ( done ) => {
 
-        const error = createHttpStatus( { status: 404, message: 'Not Found' } )
+        const error = createHttpStatus({ status: 404, message: 'Not Found' })
 
         const response = createResponse()
 
@@ -33,22 +33,22 @@ describe( 'Tests Middlewares', () => {
         expect( response._getStatusMessage() ).toStrictEqual( error.message )
         expect( response._getData() ).toStrictEqual( res )
         done()
-    } )
+    })
 
     it( 'Tests corsMiddleware should have headers allowing origin', async ( done ) => {
 
         middlewares.corsMiddleware( request, response, next )
 
-        expect( response._getHeaders()['access-control-allow-origin'] ).toStrictEqual( '*' )
-        expect( response._getHeaders()['access-control-allow-methods'] ).toStrictEqual( 'GET, POST, PATCH, PUT, DELETE, OPTIONS' )
-        expect( response._getHeaders()['access-control-allow-headers'] ).toStrictEqual( 'Origin, Accept, Content-Type, Authorization' )
+        expect( response._getHeaders()['access-control-allow-origin']).toStrictEqual( '*' )
+        expect( response._getHeaders()['access-control-allow-methods']).toStrictEqual( 'GET, POST, PATCH, PUT, DELETE, OPTIONS' )
+        expect( response._getHeaders()['access-control-allow-headers']).toStrictEqual( 'Origin, Accept, Content-Type, Authorization' )
         expect( next ).toHaveBeenCalled()
         done()
-    } )
+    })
 
     it( 'Tests corsMiddleware should handle preflight', async ( done ) => {
 
-        let _request = request
+        const _request = request
         _request.method = 'OPTIONS'
 
         middlewares.corsMiddleware( _request, response, next )
@@ -56,7 +56,7 @@ describe( 'Tests Middlewares', () => {
         expect( response._getStatusCode() ).toStrictEqual( 200 )
         expect( next ).toBeCalledTimes( 0 )
         done()
-    } )
+    })
 
     it( 'TODO test for authMiddleware', async ( done ) => {
 
@@ -64,15 +64,15 @@ describe( 'Tests Middlewares', () => {
 
         expect( next ).toHaveBeenCalled()
         done()
-    } )
+    })
 
     it( 'TODO test for loggerRequest', async ( done ) => {
         expect( middlewares.loggerResponse ).toBeTruthy()
         done()
-    } )
+    })
 
     it( 'TODO test for loggerResponse', async ( done ) => {
         expect( middlewares.loggerResponse ).toBeTruthy()
         done()
-    } )
-} )
+    })
+})

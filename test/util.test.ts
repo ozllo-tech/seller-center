@@ -8,7 +8,7 @@ describe( 'Tests util', () => {
     it( 'Tests sleep function', async ( done ) => {
         await util.sleep()
         done()
-    } )
+    })
 
     it( 'Tests getFunctionName', async ( done ) => {
         let functionName
@@ -16,13 +16,13 @@ describe( 'Tests util', () => {
         func()
         expect( functionName ).toEqual( 'func' )
         done()
-    } )
+    })
 
     it( 'Tests findError', async ( done ) => {
         const error = findError( 0 )
         expect( error ).toStrictEqual( voidError )
         done()
-    } )
+    })
 
     it( 'Tests formatDAte', async ( done ) => {
         const timeStamp = 1577883600000
@@ -31,19 +31,19 @@ describe( 'Tests util', () => {
 
         expect( formated ).toBe( '2020-01-01' )
         done()
-    } )
+    })
 
     it( 'Tests nowIsoDate ', async ( done ) => {
 
         expect( util.nowIsoDate().length ).toEqual( 24 )
         done()
-    } )
+    })
 
     it( 'Tests nowInSeconds', async ( done ) => {
 
         expect( util.nowInSeconds() ).toBeGreaterThan( 1610025657 )
         done()
-    } )
+    })
 
     it( 'Tests getRandomFromList with empty array', async ( done ) => {
 
@@ -54,7 +54,7 @@ describe( 'Tests util', () => {
         expect( result ).toBeNull()
 
         done()
-    } )
+    })
 
     it( 'Tests getRandomFromList with list', async ( done ) => {
 
@@ -66,13 +66,13 @@ describe( 'Tests util', () => {
 
         expect( expected ).toBeTruthy()
         done()
-    } )
+    })
 
     it( 'Tests logAxiosError ', async ( done ) => {
 
         const url = 'https://'
 
-        const data = { message: util.nowInSeconds() + " represents " + util.nowIsoDate() + " in seconds." }
+        const data = { message: util.nowInSeconds() + ' represents ' + util.nowIsoDate() + ' in seconds.' }
 
         const headers = { 'Content-Type': 'application/json' }
 
@@ -103,12 +103,12 @@ describe( 'Tests util', () => {
 
         util.logAxiosError( error )
         done()
-    } )
+    })
 
     it( 'Tests prettyFormat ', async ( done ) => {
 
-        util.prettyFormat( { message: "Hi there, I'm a robot!" } )
+        util.prettyFormat({ message: 'Hi there, I\'m a robot!' })
         done()
-    } )
+    })
 
-} )
+})

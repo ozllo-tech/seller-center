@@ -9,11 +9,11 @@ const router = Router()
 /**
  * POST -> Creates a tenant (Sellers)
  */
-router.post('/create', userCanAccessShop, async (request: Request, response: Response) => {
+router.post( '/create', userCanAccessShop, async ( request: Request, response: Response ) => {
 
-    const tenant = await createTenant(request.shop)
+    const tenant = await createTenant( request.shop )
 
-    if (!tenant) return response.status(internalServerError.status).send(createHttpStatus(internalServerError))
+    if ( !tenant ) return response.status( internalServerError.status ).send( createHttpStatus( internalServerError ) )
 
     return response.status( ok.status ).send( tenant )
 })
@@ -21,8 +21,8 @@ router.post('/create', userCanAccessShop, async (request: Request, response: Res
 /**
  * PUT -> Update a tenant (Seller)
  */
- router.put('/:idTenant', validatePayloadUpdateTenant(),
-    async (request: Request, response: Response) => {
+router.put( '/:idTenant', validatePayloadUpdateTenant(),
+    async ( request: Request, response: Response ) => {
         const body = request.body
         body.idTenant = request.params.idTenant
         const tenant = await updateHub2bTenant( body )
@@ -41,8 +41,8 @@ router.post('/create', userCanAccessShop, async (request: Request, response: Res
 /**
  * GET -> Retrieve tenant (Seller)
  */
- router.get('/:idTenant', validatePayloadGetTenant(),
-    async (request: Request, response: Response) => {
+router.get( '/:idTenant', validatePayloadGetTenant(),
+    async ( request: Request, response: Response ) => {
         const idTenant = request.params.idTenant
         const tenant = await getHub2bTenant( idTenant )
 

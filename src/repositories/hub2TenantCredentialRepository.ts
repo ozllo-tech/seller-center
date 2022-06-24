@@ -2,11 +2,11 @@
 //      hub2b tenantCredential Repository
 //
 
-import { MongoError } from "mongodb"
-import { HUB2B_TenantCredentials } from "../models/hub2b"
-import { hub2bTenantCredentialCollection } from "../utils/db/collections"
-import { log } from "../utils/loggerUtil"
-import { getFunctionName } from "../utils/util"
+import { MongoError } from 'mongodb'
+import { HUB2B_TenantCredentials } from '../models/hub2b'
+import { hub2bTenantCredentialCollection } from '../utils/db/collections'
+import { log } from '../utils/loggerUtil'
+import { getFunctionName } from '../utils/util'
 
 /**
  * Save hub2b tenantCredentials
@@ -58,7 +58,7 @@ export const deleteTenantCredential = async ( access_token: string ): Promise<bo
 
     try {
 
-        const result = await hub2bTenantCredentialCollection.deleteOne( { access_token } )
+        const result = await hub2bTenantCredentialCollection.deleteOne({ access_token })
 
         return result.result.ok === 1
 
@@ -71,18 +71,18 @@ export const deleteTenantCredential = async ( access_token: string ): Promise<bo
     }
 }
 
-export const findTenantCredential = async (idTenant: number): Promise<HUB2B_TenantCredentials | null> => {
+export const findTenantCredential = async ( idTenant: number ): Promise<HUB2B_TenantCredentials | null> => {
 
     try {
 
-        const result = await hub2bTenantCredentialCollection.findOne({ idTenant: Number(idTenant) })
+        const result = await hub2bTenantCredentialCollection.findOne({ idTenant: Number( idTenant ) })
 
         return result
 
-    } catch (error) {
+    } catch ( error ) {
 
-        if (error instanceof MongoError || error instanceof Error)
-            log(error.message, 'EVENT', `HUB2B tenantCredential Repository - ${getFunctionName()}`, 'ERROR')
+        if ( error instanceof MongoError || error instanceof Error )
+            log( error.message, 'EVENT', `HUB2B tenantCredential Repository - ${getFunctionName()}`, 'ERROR' )
 
         return null
     }

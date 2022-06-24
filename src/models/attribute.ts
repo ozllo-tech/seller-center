@@ -1,7 +1,7 @@
-import { CATEGORIES } from "./category"
-import { COLORS } from "./color"
-import { FLAVORS } from "./flavors"
-import { SIZES_ALIMENTOS_BEBIDAS, SIZES_BEACHWEAR, SIZES_BEAUTY, SIZES_CALCADOS, SIZES_DEFAULT, SIZES_FITNESS, SIZES_HOME, SIZES_PET } from "./size"
+import { CATEGORIES } from './category'
+import { COLORS } from './color'
+import { FLAVORS } from './flavors'
+import { SIZES_ALIMENTOS_BEBIDAS, SIZES_BEACHWEAR, SIZES_BEAUTY, SIZES_CALCADOS, SIZES_DEFAULT, SIZES_FITNESS, SIZES_HOME, SIZES_PET } from './size'
 
 export interface Attribute {
     name: string,

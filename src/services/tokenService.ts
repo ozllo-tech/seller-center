@@ -2,12 +2,12 @@
 //      Token Service
 //
 
-import { AccessToken } from "../models/token"
-import { User } from "../models/user"
-import { createAccessToken, deleteAccessToken, findAccessTokenByToken, retrieveAllAccessToken } from "../repositories/tokenRepository"
-import { log } from "../utils/loggerUtil"
-import { create_UUID, getFunctionName, nowInSeconds } from "../utils/util"
-import { deleteInactiveUser } from "./userService"
+import { AccessToken } from '../models/token'
+import { User } from '../models/user'
+import { createAccessToken, deleteAccessToken, findAccessTokenByToken, retrieveAllAccessToken } from '../repositories/tokenRepository'
+import { log } from '../utils/loggerUtil'
+import { create_UUID, getFunctionName, nowInSeconds } from '../utils/util'
+import { deleteInactiveUser } from './userService'
 
 const ONE_DAY_IN_SECONDS = 86400
 const TWO_DAYS_IN_SECONDS = 172800
@@ -83,7 +83,7 @@ export const deleteAllInvalid = async () => {
             removeAccessToken( token.token )
             deleteInactiveUser( token.user_id )
         }
-    } )
+    })
 }
 
 setInterval( deleteAllInvalid, 2 * 60 * 1000 ) // 2min

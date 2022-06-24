@@ -18,7 +18,7 @@ router.post( '/personalInfo', async ( req: Request, res: Response, next: NextFun
 
     body.userId = req.user?._id
 
-    let errors = await isPersonalInfoValid( body )
+    const errors = await isPersonalInfoValid( body )
 
     if ( errors.length > 0 )
         return res
@@ -35,7 +35,7 @@ router.post( '/personalInfo', async ( req: Request, res: Response, next: NextFun
     return res
         .status( ok.status )
         .send( personalInfo )
-} )
+})
 
 /**
  * Post -> Create address for an User
@@ -46,7 +46,7 @@ router.post( '/address', async ( req: Request, res: Response, next: NextFunction
 
     body.userId = req.user?._id
 
-    let errors = await isAddressValid( body )
+    const errors = await isAddressValid( body )
 
     if ( errors.length > 0 )
         return res
@@ -63,7 +63,7 @@ router.post( '/address', async ( req: Request, res: Response, next: NextFunction
     return res
         .status( ok.status )
         .send( address )
-} )
+})
 
 /**
  * Post -> Create shop info for an User
@@ -74,7 +74,7 @@ router.post( '/shopInfo', async ( req: Request, res: Response, next: NextFunctio
 
     body.userId = req.user?._id
 
-    let errors = await isShopInfoValid( body )
+    const errors = await isShopInfoValid( body )
 
     if ( errors.length > 0 )
         return res
@@ -91,7 +91,7 @@ router.post( '/shopInfo', async ( req: Request, res: Response, next: NextFunctio
     return res
         .status( ok.status )
         .send( shopInfo )
-} )
+})
 
 /**
  * Post -> Create bank info for an User
@@ -102,7 +102,7 @@ router.post( '/bankInfo', async ( req: Request, res: Response, next: NextFunctio
 
     body.userId = req.user?._id
 
-    let errors = await isBankInfoValid( body )
+    const errors = await isBankInfoValid( body )
 
     if ( errors.length > 0 )
         return res
@@ -119,7 +119,7 @@ router.post( '/bankInfo', async ( req: Request, res: Response, next: NextFunctio
     return res
         .status( ok.status )
         .send( bankInfo )
-} )
+})
 
 
 /**
@@ -131,7 +131,7 @@ router.post( '/contact', async ( req: Request, res: Response, next: NextFunction
 
     body.userId = req.user?._id
 
-    let errors = await isContactValid( body )
+    const errors = await isContactValid( body )
 
     if ( errors.length > 0 )
         return res
@@ -148,7 +148,7 @@ router.post( '/contact', async ( req: Request, res: Response, next: NextFunction
     return res
         .status( ok.status )
         .send( contact )
-} )
+})
 
 /**
  * GET -> Account Details
@@ -158,7 +158,7 @@ router.get( '/decode', async ( req: Request, res: Response, next: NextFunction )
     return res
         .status( ok.status )
         .send( req.user )
-} )
+})
 
 /**
  * GET -> Account Details
@@ -175,6 +175,6 @@ router.get( '/detail', async ( req: Request, res: Response, next: NextFunction )
     return res
         .status( ok.status )
         .send( account )
-} )
+})
 
 export { router as accountRouter }

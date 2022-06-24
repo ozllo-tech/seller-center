@@ -2,15 +2,15 @@
 //      hub2b user Repository
 //
 
-import { MongoError } from "mongodb"
-import { HUB2B_Users } from "../models/hub2b"
-import { hub2bUserCollection } from "../utils/db/collections"
-import { log } from "../utils/loggerUtil"
-import { getFunctionName } from "../utils/util"
+import { MongoError } from 'mongodb'
+import { HUB2B_Users } from '../models/hub2b'
+import { hub2bUserCollection } from '../utils/db/collections'
+import { log } from '../utils/loggerUtil'
+import { getFunctionName } from '../utils/util'
 
 /**
  * Save hub2b users
- * 
+ *
  * @param users
  */
 export const saveUser = async ( users: HUB2B_Users ): Promise<boolean> => {
@@ -29,7 +29,7 @@ export const saveUser = async ( users: HUB2B_Users ): Promise<boolean> => {
 
 /**
  * Retrieve users
- * 
+ *
  * @param token
  */
 export const retrieveUsers = async (): Promise<HUB2B_Users[] | null> => {
@@ -51,14 +51,14 @@ export const retrieveUsers = async (): Promise<HUB2B_Users[] | null> => {
 
 /**
  * Deleta user
- * 
+ *
  * @param access_token
  */
 export const deleteUser = async ( access_token: string ): Promise<boolean> => {
 
     try {
 
-        const result = await hub2bUserCollection.deleteOne( { access_token } )
+        const result = await hub2bUserCollection.deleteOne({ access_token })
 
         return result.result.ok === 1
 

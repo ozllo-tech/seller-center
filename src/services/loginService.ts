@@ -2,12 +2,12 @@
 //      Login Service
 //
 
-import { User } from "../models/user"
-import { comparePassword, getToken } from "../utils/cryptUtil"
-import { log } from "../utils/loggerUtil"
-import { getFunctionName } from "../utils/util"
-import { sendEmailToResetPassword } from "./mailService"
-import { findUser } from "./userService"
+import { User } from '../models/user'
+import { comparePassword, getToken } from '../utils/cryptUtil'
+import { log } from '../utils/loggerUtil'
+import { getFunctionName } from '../utils/util'
+import { sendEmailToResetPassword } from './mailService'
+import { findUser } from './userService'
 
 export const loginUser = async ( user: User ) => {
 
@@ -21,7 +21,7 @@ export const loginUser = async ( user: User ) => {
 /**
  * Verifies whether a login is Valid
  *
- * @param email - 
+ * @param email -
  * @param username -
  */
 export const isUserLoginValid = async ( email: string, username: string, password: string ): Promise<User | null> => {
@@ -45,7 +45,7 @@ export const isUserLoginValid = async ( email: string, username: string, passwor
 /**
  * forgetPassword
  *
- * @param email - 
+ * @param email -
  */
 export const forgetPassword = async ( user: User ): Promise<boolean> => {
 

@@ -75,9 +75,9 @@ export const authMiddleware = async ( req: Request, res: Response, next: NextFun
     const user_decoded = decodeJWT( token )
 
     if ( !user_decoded ||
-        typeof user_decoded === "string" ||
+        typeof user_decoded === 'string' ||
         !user_decoded.data ||
-        typeof user_decoded.data === "string" ) {
+        typeof user_decoded.data === 'string' ) {
         return next( createHttpStatus( internalServerError ) )
     }
 
@@ -101,7 +101,7 @@ export const loggerRequest = logger( 'from :remote-addr - :method :url HTTP/:htt
             log( message.trim(), 'REQUEST' )
         }
     }
-} )
+})
 
 /**
  * Middleware para logar os responses
@@ -112,7 +112,7 @@ export const loggerResponse = logger( 'to :remote-addr - STATUS :status in :resp
             log( message.trim(), 'RESPONSE' )
         }
     }
-} )
+})
 
 /**
  * Verifies whether the user can access shop
@@ -129,7 +129,7 @@ export const userCanAccessShop = async ( req: Request, res: Response, next: Next
 
     if ( !user_id || !shop_id || Array.isArray( shop_id ) || !ObjectID.isValid( shop_id ) ) return next( createHttpStatus( unauthorized ) )
 
-    const [user, shop] = await Promise.all( [findUserById( user_id ), findShop( shop_id )] )
+    const [user, shop] = await Promise.all([findUserById( user_id ), findShop( shop_id )])
 
     if ( !user || !shop ) return next( createHttpStatus( unauthorized ) )
 
@@ -155,7 +155,7 @@ export const isProductFromShop = async ( req: Request, res: Response, next: Next
 
     if ( !product_id || !shop_id || !ObjectID.isValid( product_id ) ) return next( createHttpStatus( unauthorized, invalidProductReference ) )
 
-    const [product, shop] = await Promise.all( [findProductById( product_id ), findShop( shop_id )] )
+    const [product, shop] = await Promise.all([findProductById( product_id ), findShop( shop_id )])
 
     if ( !product || !shop ) return next( createHttpStatus( unauthorized, invalidProductReference ) )
 
@@ -195,30 +195,30 @@ export const isVariationFromProduct = async ( req: Request, res: Response, next:
 /**
  * Middleware para validar payload de update tenant
  */
- export const validatePayloadUpdateTenant = () => {
+export const validatePayloadUpdateTenant = () => {
     return celebrate({
         [Segments.PARAMS]: {
-          idTenant: Joi.number().required(),
+            idTenant: Joi.number().required(),
         },
         [Segments.BODY]: {
-          name: Joi.string().required(),
-          website: Joi.string().required(),
-          documentNumber: Joi.string().required(),
-          companyName: Joi.string().required(),
-          ownerName: Joi.string().required(),
-          ownerEmail: Joi.string().required(),
-          ownerPhoneNumber: Joi.string().required(),
-          idAgency: Joi.number(),
-          address: {
-              zipCode: Joi.string().required(),
-              street: Joi.string().required(),
-              neighborhood: Joi.string().required(),
-              number: Joi.number().required(),
-              city: Joi.string().required(),
-              state: Joi.string().required(),
-              country: Joi.string().required(),
-              reference: Joi.string()
-          }
+            name: Joi.string().required(),
+            website: Joi.string().required(),
+            documentNumber: Joi.string().required(),
+            companyName: Joi.string().required(),
+            ownerName: Joi.string().required(),
+            ownerEmail: Joi.string().required(),
+            ownerPhoneNumber: Joi.string().required(),
+            idAgency: Joi.number(),
+            address: {
+                zipCode: Joi.string().required(),
+                street: Joi.string().required(),
+                neighborhood: Joi.string().required(),
+                number: Joi.number().required(),
+                city: Joi.string().required(),
+                state: Joi.string().required(),
+                country: Joi.string().required(),
+                reference: Joi.string()
+            }
         },
     })
 }
@@ -226,17 +226,17 @@ export const isVariationFromProduct = async ( req: Request, res: Response, next:
 /**
  * Middleware para validar payload de get tenant
  */
- export const validatePayloadGetTenant = () => {
+export const validatePayloadGetTenant = () => {
     return celebrate({
         [Segments.PARAMS]: {
-          idTenant: Joi.number().required(),
+            idTenant: Joi.number().required(),
         },
     })
 }
 
-export const isOrderInvoiceable = async (req: Request, res: Response, next: NextFunction) => {
+export const isOrderInvoiceable = async ( req: Request, res: Response, next: NextFunction ) => {
 
-    const order = await getOrderHub2b(req.params.id)
+    const order = await getOrderHub2b( req.params.id )
 
     if ( !order ) return next( createHttpStatus( notFound ) )
 
@@ -255,36 +255,36 @@ export const validateSystemPayload = () => {
 
     return celebrate({
         [Segments.BODY]: {
-            name: Joi.string().required().valid(...names),
+            name: Joi.string().required().valid( ...names ),
             data: Joi.object().required()
         }
     })
 }
 
-export const isTinyOrderInvoiceable = async (req: Request, res: Response, next: NextFunction) => {
+export const isTinyOrderInvoiceable = async ( req: Request, res: Response, next: NextFunction ) => {
 
-    const order = await getOrderHub2b(req.body.dados.idPedidoEcommerce)
+    const order = await getOrderHub2b( req.body.dados.idPedidoEcommerce )
 
-    if (!order) return next(createHttpStatus(badRequest))
+    if ( !order ) return next( createHttpStatus( badRequest ) )
 
-    if ('Approved' !== order.status.status) return next(createHttpStatus(badRequest, invalidOrderStatusReferenceToInvoice))
+    if ( 'Approved' !== order.status.status ) return next( createHttpStatus( badRequest, invalidOrderStatusReferenceToInvoice ) )
 
     req.order = order
 
     next()
 }
 
-export const isTinyOrderTrackable = async (req: Request, res: Response, next: NextFunction) => {
+export const isTinyOrderTrackable = async ( req: Request, res: Response, next: NextFunction ) => {
 
-    const order = await getOrderHub2b(req.body.dados.idPedidoEcommerce)
+    const order = await getOrderHub2b( req.body.dados.idPedidoEcommerce )
 
-    if (!order) return next(createHttpStatus(badRequest))
+    if ( !order ) return next( createHttpStatus( badRequest ) )
 
-    if ('Invoiced' !== order.status.status) return next(createHttpStatus(badRequest, invalidOrderStatusReferenceToShip))
+    if ( 'Invoiced' !== order.status.status ) return next( createHttpStatus( badRequest, invalidOrderStatusReferenceToShip ) )
 
-    if (!req.body?.dados?.formaFrete?.length) return next(createHttpStatus(badRequest, invalidTrackingFields))
+    if ( !req.body?.dados?.formaFrete?.length ) return next( createHttpStatus( badRequest, invalidTrackingFields ) )
 
-    if (!req.body?.dados?.urlRastreio?.length) return next(createHttpStatus(badRequest, invalidTrackingFields))
+    if ( !req.body?.dados?.urlRastreio?.length ) return next( createHttpStatus( badRequest, invalidTrackingFields ) )
 
     req.order = order
 

@@ -8,10 +8,10 @@ import { log } from './loggerUtil'
  *
  * @param ms - milliseconds
  */
-export const sleep = ( ms: number = 1 ) => {
+export const sleep = ( ms = 1 ) => {
     return new Promise( ( resolve ) => {
         setTimeout( resolve, ms )
-    } )
+    })
 }
 
 /**
@@ -19,11 +19,11 @@ export const sleep = ( ms: number = 1 ) => {
  *
  * @param depth - depth
  */
-export const getFunctionName = ( depth: number = 1 ) => {
+export const getFunctionName = ( depth = 1 ) => {
     const error = new Error()
     if ( error.stack ) {
         // tslint:disable-next-line:max-line-length
-        return ( ( ( ( error.stack.split( 'at ' ) || [] )[1 + depth] || '' ).match( /(^|\.| <| )(.*[^(<])( \()/ ) || [] )[2] || '' ).split( '.' ).pop()
+        return ( ( ( ( error.stack.split( 'at ' ) || [])[1 + depth] || '' ).match( /(^|\.| <| )(.*[^(<])( \()/ ) || [])[2] || '' ).split( '.' ).pop()
     }
     return 'NULL'
 }
@@ -54,7 +54,7 @@ export const formatDateEnglish = ( timestamp: number ) => {
     const hour = date.getHours() < 10 ? '0' + date.getHours() : date.getHours()
     const minutes = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()
     const seconds = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds()
-    return year + '-' + month + '-' + day + 'T' + hour + ":" + minutes + ":" + seconds
+    return year + '-' + month + '-' + day + 'T' + hour + ':' + minutes + ':' + seconds
 }
 
 /**
@@ -129,7 +129,7 @@ export const isCNPJValid = ( _cnpj: string ) => {
  * @param offset
  * @returns
  */
-export const nowForPostgre = ( offset: number = 0 ) => {
+export const nowForPostgre = ( offset = 0 ) => {
     return new Date( Date.now() - offset ).toLocaleString()
 }
 
@@ -145,7 +145,7 @@ export const nowInSeconds = () => {
     return Math.floor( Date.now() / 1000 )
 }
 
-export const getRandomFromList = ( array: any[] ) => {
+export const getRandomFromList = ( array: any[]) => {
     if ( array && array.length === 0 ) return null
     const random = Math.floor( Math.random() * 10000000000000000 + 1 )
     const index = random % array.length
@@ -168,7 +168,7 @@ export const logAxiosError = ( error: AxiosError ) => {
     -- RESPONSE DATA --
     ${ error.response?.data ? error.response?.data : error.response }
     ------ END LOG -------
-    `)
+    ` )
 }
 
 export const logResponse = ( response: AxiosResponse ) => {
@@ -187,7 +187,7 @@ export const logResponse = ( response: AxiosResponse ) => {
     -- RESPONSE DATA --
     ${ response.data }
     ------ END LOG -------
-    `)
+    ` )
 }
 
 // Not Safe
@@ -196,12 +196,12 @@ export const prettyFormat = ( object: any ) => {
 }
 
 export const create_UUID = () => {
-    var dt = new Date().getTime()
-    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace( /[xy]/g, function ( c ) {
-        var r = ( dt + Math.random() * 16 ) % 16 | 0
+    let dt = new Date().getTime()
+    const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace( /[xy]/g, function ( c ) {
+        const r = ( dt + Math.random() * 16 ) % 16 | 0
         dt = Math.floor( dt / 16 )
         return ( c == 'x' ? r : ( r & 0x3 | 0x8 ) ).toString( 16 )
-    } )
+    })
     return uuid
 }
 
@@ -249,8 +249,9 @@ export const parsePotentiallyGroupedFloat = ( stringValue: string ) => {
     try {
         stringValue = stringValue.trim()
 
-        var result = stringValue.replace( /[^0-9]/g, '' )
+        let result = stringValue.replace( /[^0-9]/g, '' )
 
+        // eslint-disable-next-line no-useless-escape
         if ( /[,\.]\d{2}$/.test( stringValue ) ) {
             result = result.replace( /(\d{2})$/, '.$1' )
         }
@@ -264,21 +265,21 @@ export const parsePotentiallyGroupedFloat = ( stringValue: string ) => {
     }
 }
 
-export const isSubset = (superObj: any, subObj: any): boolean => {
-    return Object.keys(subObj).every(ele => {
-        if (typeof subObj[ele] == 'object') {
-            return isSubset(superObj[ele], subObj[ele]);
+export const isSubset = ( superObj: any, subObj: any ): boolean => {
+    return Object.keys( subObj ).every( ele => {
+        if ( typeof subObj[ele] == 'object' ) {
+            return isSubset( superObj[ele], subObj[ele])
         }
         return subObj[ele] === superObj[ele]
     })
 }
 
-export const equalArray = (array1: any, array2: any) => {
-    return JSON.stringify(array1) == JSON.stringify(array2)
+export const equalArray = ( array1: any, array2: any ) => {
+    return JSON.stringify( array1 ) == JSON.stringify( array2 )
 }
 
-export const waitforme = (ms: number) => {
-    return new Promise(resolve => setTimeout(resolve, ms));
+export const waitforme = ( ms: number ) => {
+    return new Promise( resolve => setTimeout( resolve, ms ) )
 }
 
 /**
@@ -290,29 +291,29 @@ export const waitforme = (ms: number) => {
  *
  * @returns {Promise<any>}
  */
-export const asyncFilter = async (array: any[], predicate: any): Promise<any[]> => {
+export const asyncFilter = async ( array: any[], predicate: any ): Promise<any[]> => {
 
-    const results = await Promise.all(array.map(predicate))
+    const results = await Promise.all( array.map( predicate ) )
 
-    return array.filter((_v, index) => results[index])
+    return array.filter( ( _v, index ) => results[index])
 }
 
-export const flatString = (string: string) => {
+export const flatString = ( string: string ) => {
 
-    return string.toLowerCase().replace(/\s/gm, '').trim()
+    return string.toLowerCase().replace( /\s/gm, '' ).trim()
 }
 
-export const getUrlExtension = (url: string) =>  {
+export const getUrlExtension = ( url: string ) =>  {
 
-    return url.split(/[#?]/)[0].split('.')?.pop()?.trim()
+    return url.split( /[#?]/ )[0].split( '.' )?.pop()?.trim()
 }
 
-export const makeNiceURL = (url: string) => {
+export const makeNiceURL = ( url: string ) => {
 
-    return url.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9.]+/g, '-').replace(/\s/g, '').toLowerCase()
+    return url.normalize( 'NFD' ).replace( /[\u0300-\u036f]/g, '' ).replace( /[^a-z0-9.]+/g, '-' ).replace( /\s/g, '' ).toLowerCase()
 }
 
-export const removeAllTagsExceptBr = (string: string) => {
+export const removeAllTagsExceptBr = ( string: string ) => {
 
-    return string.replace(/<((?!\/?br\s?\/?>)\s*)[^>]+>|/g, '')
+    return string.replace( /<((?!\/?br\s?\/?>)\s*)[^>]+>|/g, '' )
 }

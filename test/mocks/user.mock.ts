@@ -1,4 +1,4 @@
-import { User } from "../../src/models/account"
+import { User } from '../../src/models/account'
 
 export const USER_MOCK_NULL: User = {
     _id: undefined,

@@ -13,6 +13,6 @@ router.get( '/', async ( req: Request, res: Response, next: NextFunction ) => {
 
     return res.redirect( permanentRedirect.status, '/healthcheck' )
 
-} )
+})
 
 export { router as rootRouter }

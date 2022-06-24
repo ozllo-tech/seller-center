@@ -2,11 +2,11 @@
 //      Account Service
 //
 
-import { ObjectID } from "mongodb"
-import { Account, Address, BankInfo, Contact, PersonalInfo, ShopInfo } from "../models/account"
-import { createOrUpdateAddress, createOrUpdateBankInfo, createOrUpdatePersonalInfo, createOrUpdateShopInfo, createOrUpdateContact, findAddressByUserID, findBankInfoByUserID, findContactByUserID, findPersonalInfoByUserID, findShopInfoByID, findShopInfoByUserID } from "../repositories/accountRepository"
-import { log } from "../utils/loggerUtil"
-import { formatDate, getFunctionName, parseDate } from "../utils/util"
+import { ObjectID } from 'mongodb'
+import { Account, Address, BankInfo, Contact, PersonalInfo, ShopInfo } from '../models/account'
+import { createOrUpdateAddress, createOrUpdateBankInfo, createOrUpdatePersonalInfo, createOrUpdateShopInfo, createOrUpdateContact, findAddressByUserID, findBankInfoByUserID, findContactByUserID, findPersonalInfoByUserID, findShopInfoByID, findShopInfoByUserID } from '../repositories/accountRepository'
+import { log } from '../utils/loggerUtil'
+import { formatDate, getFunctionName, parseDate } from '../utils/util'
 
 /**
  * Creates new Personal Information
@@ -78,7 +78,7 @@ export const createShopInfo = async ( body: any ): Promise<ShopInfo | null> => {
 
     const newShopInfo = await createOrUpdateShopInfo( shopInfo )
 
-    if (newShopInfo) {
+    if ( newShopInfo ) {
         log( `Shop Info for ${ userId } added.`, 'EVENT', getFunctionName() )
         // TODO: Create user tenant with shopInfo data.
     } else {
@@ -146,7 +146,7 @@ export const getAccount = async ( userId: any ): Promise<Account | null> => {
 
     const contactPromise = findContactByUserID( userId )
 
-    const [personalInfo, address, shopInfo, bankInfo, contact] = await Promise.all( [personalInfoPromise, addressPromise, shopInfoPromise, bankInfoPromise, contactPromise] )
+    const [personalInfo, address, shopInfo, bankInfo, contact] = await Promise.all([personalInfoPromise, addressPromise, shopInfoPromise, bankInfoPromise, contactPromise])
 
     const account: Account = { bankInfo, address, personalInfo, shopInfo, contact }
 
@@ -160,7 +160,7 @@ export const getAccount = async ( userId: any ): Promise<Account | null> => {
  */
 export const findShop = async ( shopId: any ): Promise<ShopInfo | null> => {
 
-    if (!ObjectID.isValid(shopId)) return null
+    if ( !ObjectID.isValid( shopId ) ) return null
 
     const shopInfo = await findShopInfoByID( shopId )
 

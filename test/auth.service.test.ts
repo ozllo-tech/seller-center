@@ -1,6 +1,6 @@
 import 'jest'
 import supertest from 'supertest'
-import app from "../src/expressConfig"
+import app from '../src/expressConfig'
 import { User } from '../src/models/account'
 import { ok } from '../src/utils/httpStatus'
 import { USER_MOCK_1, USER_MOCK_NULL } from './mocks/user.mock'
@@ -25,7 +25,7 @@ describe( 'Authentication Router', () => {
         expect( newUser.role ).toStrictEqual( 'seller' )
         expect( newUser._id ).toBeTruthy()
         done()
-    } )
+    })
 
     it( 'Should ...', async ( done ) => {
 
@@ -34,5 +34,5 @@ describe( 'Authentication Router', () => {
             .send( USER_MOCK_NULL )
 
         const expected = USER_MOCK_NULL
-    } )
-} )
+    })
+})

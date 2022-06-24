@@ -15,7 +15,7 @@ router.get( '/all', async ( req: Request, res: Response, next: NextFunction ) =>
     return res
         .status( ok.status )
         .send( await getAllCategories() )
-} )
+})
 
 /**
  * GET -> lista de sub categorias
@@ -33,12 +33,12 @@ router.get( '/:category_code/subcategories', async ( req: Request, res: Response
         .status( ok.status )
         .send( await getAllSubCategories( category_code ) )
 
-} )
+})
 
 /**
  * GET -> atributos de uma categoria
  */
- router.get( '/:category_code/attributes', async ( req: Request, res: Response, next: NextFunction ) => {
+router.get( '/:category_code/attributes', async ( req: Request, res: Response, next: NextFunction ) => {
 
     const category_code = parseInt( req.params.category_code )
 
@@ -51,6 +51,6 @@ router.get( '/:category_code/subcategories', async ( req: Request, res: Response
         .status( ok.status )
         .send( getCategoryAttributes( category_code ) )
 
-} )
+})
 
 export { router as categoryRouter }

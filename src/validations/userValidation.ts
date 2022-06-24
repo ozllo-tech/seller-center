@@ -2,13 +2,13 @@
 //     User Validation
 //
 
-import { findUserByEmail } from "../services/userService"
-import { AppError, invalidEmail, invalidPassword, userExists } from "../utils/errors/errors"
-import { isEmailValid, isPasswordSecure } from "../utils/util"
+import { findUserByEmail } from '../services/userService'
+import { AppError, invalidEmail, invalidPassword, userExists } from '../utils/errors/errors'
+import { isEmailValid, isPasswordSecure } from '../utils/util'
 
 /**
  * Verifies whether the new user can be created
- * 
+ *
  * @param email
  * @param password
  * @returns `true` if new user can be created or `false` the other way around

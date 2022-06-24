@@ -39,7 +39,7 @@ router.post( '/create', async ( req: Request, res: Response, next: NextFunction 
     return res
         .status( ok.status )
         .send( user )
-} )
+})
 
 /**
  * GET -> Activates an User
@@ -58,7 +58,7 @@ router.get( '/activate/:token', async ( req: Request, res: Response, next: NextF
     return res
         .status( ok.status )
         .send( await loginUser( user ) )
-} )
+})
 
 /**
  * Post -> Verifies if can log in user
@@ -69,7 +69,7 @@ router.post( '/login', async ( req: Request, res: Response, next: NextFunction )
     const username = req.body.login
     const password = req.body.password
 
-    let user = await isUserLoginValid( email, username, password )
+    const user = await isUserLoginValid( email, username, password )
 
     if ( !user )
         return res
@@ -79,7 +79,7 @@ router.post( '/login', async ( req: Request, res: Response, next: NextFunction )
     return res
         .status( ok.status )
         .send( await loginUser( user ) )
-} )
+})
 
 /**
  * PUT -> Verifies if can log in user
@@ -89,7 +89,7 @@ router.put( '/logout', ( req: Request, res: Response, next: NextFunction ) => {
     return res
         .status( ok.status )
         .send( true )
-} )
+})
 
 /**
  * get -> Verifies if can log in user
@@ -112,8 +112,8 @@ router.get( '/forgotPassword/:email', async ( req: Request, res: Response, next:
 
     return res
         .status( ok.status )
-        .send( { data: 'Email sent to reset password' } )
-} )
+        .send({ data: 'Email sent to reset password' })
+})
 
 /**
  * GET -> Verifies if the token is valid and return the user id
@@ -130,7 +130,7 @@ router.get( '/resetPassword/:token', async ( req: Request, res: Response, next: 
     return res
         .status( ok.status )
         .send( token.user_id )
-} )
+})
 
 /**
  * POST -> Reset password
@@ -156,7 +156,7 @@ router.post( '/resetPassword', async ( req: Request, res: Response, next: NextFu
     return res
         .status( ok.status )
         .send( await loginUser( user ) )
-} )
+})
 
 /**
  * get -> Verifies if a token still valid
@@ -167,7 +167,7 @@ router.get( '/token/:token', ( req: Request, res: Response, next: NextFunction )
 
     return res
         .status( ok.status )
-        .send( { isValid: result } )
-} )
+        .send({ isValid: result })
+})
 
 export { router as authRouter }

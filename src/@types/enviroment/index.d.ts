@@ -27,6 +27,7 @@ declare global {
             HUB2B_USERNAME: string
             HUB2B_PASSWORD: string
         }
+        // eslint-disable-next-line @typescript-eslint/no-empty-interface
         interface Global {
         }
     }

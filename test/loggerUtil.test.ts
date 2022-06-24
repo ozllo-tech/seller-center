@@ -7,7 +7,7 @@ describe( 'Tests loggerUtil', () => {
     it( 'It should log Event', async ( done ) => {
         log( 'Event called', 'event' )
         done()
-    } )
+    })
 
     it( 'Should return a log as String', async ( done ) => {
 
@@ -21,5 +21,5 @@ describe( 'Tests loggerUtil', () => {
 
         printLogger( log )
         done()
-    } )
-} )
+    })
+})

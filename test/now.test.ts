@@ -8,5 +8,5 @@ describe( 'Teste', () => {
 
         expect( expected ).toBeTruthy()
         done()
-    } )
-} )
+    })
+})

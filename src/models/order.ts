@@ -2,7 +2,7 @@
 //      Interface Order
 //
 
-import { HUB2B_Order } from "./hub2b"
+import { HUB2B_Order } from './hub2b'
 
 export interface Order {
     _id?: any,

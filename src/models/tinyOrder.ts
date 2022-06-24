@@ -40,7 +40,7 @@ export interface Cliente {
     codigo?: string
     nome: string,
     nome_fantasia?: string,
-    tipo_pessoa?: "F" | "J" | "E",
+    tipo_pessoa?: 'F' | 'J' | 'E',
     cpf_cnpj: string,
     ie?: string,
     rg?: string,
@@ -54,11 +54,11 @@ export interface Cliente {
     fone?: string
     pais?: string,
     email?: string,
-    atualizar_cliente?: "S" | "N"
+    atualizar_cliente?: 'S' | 'N'
 }
 
 export interface Endereco_Entrega {
-    tipo_pessoa?: "F" | "J" | "E",
+    tipo_pessoa?: 'F' | 'J' | 'E',
     cpf_cnpj?: string,
     endereco: string,
     numero: string,
@@ -121,20 +121,20 @@ export interface Erro {
 }
 
 export const ORDER_STATUS_HUB2B_TINY = {
-    Pending: "aberto",
-    Approved: "aprovado",
-    Invoiced: "faturado",
-    Shipped: "enviado",
-    Delivered: "entregue",
-    Canceled: "cancelado",
-    Completed: "entregue"
+    Pending: 'aberto',
+    Approved: 'aprovado',
+    Invoiced: 'faturado',
+    Shipped: 'enviado',
+    Delivered: 'entregue',
+    Canceled: 'cancelado',
+    Completed: 'entregue'
 }
 
 export const ORDER_STATUS_TINY_HUB2B = {
-    aberto: "Pending",
-    aprovado: "Approved",
-    faturado: "Invoiced",
-    enviado: "Shipped",
-    entregue: "Delivered",
-    cancelado: "Canceled"
+    aberto: 'Pending',
+    aprovado: 'Approved',
+    faturado: 'Invoiced',
+    enviado: 'Shipped',
+    entregue: 'Delivered',
+    cancelado: 'Canceled'
 }

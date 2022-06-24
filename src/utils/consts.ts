@@ -12,14 +12,14 @@ let isDev = false
  * Verifies what environment we are working with
  */
 switch ( process.env.NODE_ENV ) {
-    case 'test':
-        isTest = true
-        break
-    case 'production':
-        isProd = true
-        break
-    default:
-        isDev = true
+case 'test':
+    isTest = true
+    break
+case 'production':
+    isProd = true
+    break
+default:
+    isDev = true
 }
 
 /**
@@ -58,13 +58,13 @@ export const AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY || ''
 
 export const AWS_ACCESS_SECRET = process.env.AWS_ACCESS_SECRET || ''
 
-export const AWS_REGION = "sa-east-1"
+export const AWS_REGION = 'sa-east-1'
 
 export const IMPORT_FOLDER = `${ ROOT_DIR }/import`
 
-export const HUB2B_URL_V1 = "https://eb-api.plataformahub.com.br/RestServiceImpl.svc"
+export const HUB2B_URL_V1 = 'https://eb-api.plataformahub.com.br/RestServiceImpl.svc'
 
-export const HUB2B_URL_V2 = "https://rest.hub2b.com.br"
+export const HUB2B_URL_V2 = 'https://rest.hub2b.com.br'
 
 export const HUB2B_TENANT = process.env.HUB2B_TENANT || ''
 

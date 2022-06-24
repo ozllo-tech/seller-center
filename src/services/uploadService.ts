@@ -16,28 +16,28 @@ import { findProductsByShop, updateProductImages } from './productService'
 
 const s3 = new aws.S3()
 
-s3.config.update( {
+s3.config.update({
     accessKeyId: AWS_ACCESS_KEY,
     secretAccessKey: AWS_ACCESS_SECRET,
     region: AWS_REGION,
     signatureVersion: 'v4'
-} )
+})
 
 type MuterCallback = ( error: any, key?: boolean | undefined ) => void
 
 const error1: HttpStatusResponse = {
-    message: "Invalid file type, only JPG, JPEG and PNG is allowed.",
+    message: 'Invalid file type, only JPG, JPEG and PNG is allowed.',
     status: 400
 }
 
 const error2: HttpStatusResponse = {
-    message: "Invalid file type, only xls and xlsx allowed.",
+    message: 'Invalid file type, only xls and xlsx allowed.',
     status: 400
 }
 
 const productImageFilter = ( req: Express.Request, file: Express.Multer.File, cb: MuterCallback ) => {
 
-    if ( file.mimetype !== "image/jpg" && file.mimetype !== "image/jpeg" && file.mimetype !== "image/png" )
+    if ( file.mimetype !== 'image/jpg' && file.mimetype !== 'image/jpeg' && file.mimetype !== 'image/png' )
         cb( error1, false )
 
     cb( null, true )
@@ -47,56 +47,56 @@ const productImageFilter = ( req: Express.Request, file: Express.Multer.File, cb
 const excelFilter = ( req: Express.Request, file: Express.Multer.File, cb: MuterCallback ) => {
 
     if (
-        file.mimetype !== "application/vnd.ms-excel" &&
-        file.mimetype !== "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        file.mimetype !== 'application/vnd.ms-excel' &&
+        file.mimetype !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
         cb( error2, false )
 
     cb( null, true )
 }
 
-export const uploadProductPicture = multer( {
+export const uploadProductPicture = multer({
     fileFilter: productImageFilter,
-    storage: multerS3( {
+    storage: multerS3({
         s3: s3,
         bucket: 'ozllo-seller-center-photos',
         acl: 'public-read',
         metadata: function ( req, file, cb ) {
-            cb( null, { fieldName: file.fieldname } )
+            cb( null, { fieldName: file.fieldname })
         },
         key: function ( req, file, cb ) {
-            cb( null, Date.now().toString() + '_' + req.shop?._id + '_' + makeNiceURL(file.originalname) )
+            cb( null, Date.now().toString() + '_' + req.shop?._id + '_' + makeNiceURL( file.originalname ) )
         },
-    } )
-} )
+    })
+})
 
-export const uploadProfilePicture = multer( {
-    storage: multerS3( {
+export const uploadProfilePicture = multer({
+    storage: multerS3({
         s3: s3,
         bucket: 'ozllo-seller-center-photos',
         acl: 'public-read',
         metadata: function ( req, file, cb ) {
-            cb( null, { fieldName: file.fieldname } )
+            cb( null, { fieldName: file.fieldname })
         },
         key: function ( req, file, cb ) {
             cb( null, Date.now().toString() + '_' + req.user?._id )
         },
-    } )
-} )
+    })
+})
 
-const storage = multer.diskStorage( {
+const storage = multer.diskStorage({
     destination: ( req, file, cb ) => {
         cb( null, IMPORT_FOLDER )
     },
     filename: ( req, file, cb ) => {
         cb( null, file.originalname )
     }
-} )
+})
 
-export const importXLSX = multer( {
+export const importXLSX = multer({
     fileFilter: excelFilter,
     storage
-} )
+})
 
 export const deleteFile = ( filePath: string ) => {
     fs.unlinkSync( filePath )
@@ -108,26 +108,26 @@ export const sendExternalFileToS3 = async ( url: string, productId: string, inde
     // https://stackoverflow.com/questions/61605078/axios-get-a-file-from-url-and-upload-to-s3
     // https://dev.to/vikasgarghb/streaming-files-to-s3-using-axios-h32
 
-    if (url.startsWith('https://ik.imagekit.io/3m391sequ/')) return null
+    if ( url.startsWith( 'https://ik.imagekit.io/3m391sequ/' ) ) return null
 
     try {
 
-        const response = await axios.get(url, {
+        const response = await axios.get( url, {
             responseType: 'arraybuffer',
         })
 
-        if (!response.data.length) return null
+        if ( !response.data.length ) return null
 
         const image = s3.putObject({
             'ACL': 'public-read',
             'Body': response.data,
             'Bucket': 'ozllo-seller-center-photos',
             'Key': `${productId}_${index}`,
-        }, function (error: AWSError, data) {
+        }, function ( error: AWSError, data ) {
 
-            if (error) {
+            if ( error ) {
 
-                log(error.message, 'EVENT', getFunctionName(), "ERROR")
+                log( error.message, 'EVENT', getFunctionName(), 'ERROR' )
 
                 return null
             }
@@ -135,14 +135,14 @@ export const sendExternalFileToS3 = async ( url: string, productId: string, inde
             return data
         })
 
-        if (!image) return null
+        if ( !image ) return null
 
         // https://stackoverflow.com/questions/44400227/how-to-get-the-url-of-a-file-on-aws-s3-using-aws-sdk
         return image.httpRequest.path
 
-    } catch (error: any) {
+    } catch ( error: any ) {
 
-        log(`Could not send image ${url} to S3`, 'EVENT', getFunctionName(), "ERROR")
+        log( `Could not send image ${url} to S3`, 'EVENT', getFunctionName(), 'ERROR' )
 
         return null
     }
@@ -152,7 +152,7 @@ export const getImageKitUrl = ( s3ImageKey : string ): string => {
 
     // TODO: if empty string, insert placeholder image.
 
-    return `https://ik.imagekit.io/3m391sequ/${s3ImageKey.replace(/\+/g, '%20')}?tr=w-1000,h-1000,f-jpg,fo-auto`
+    return `https://ik.imagekit.io/3m391sequ/${s3ImageKey.replace( /\+/g, '%20' )}?tr=w-1000,h-1000,f-jpg,fo-auto`
 }
 
 /**
@@ -163,46 +163,46 @@ export const getImageKitUrl = ( s3ImageKey : string ): string => {
  * @param shopId
  * @returns
  */
-export const applyImageTransformations = async ( shopId: string): Promise<any> => {
+export const applyImageTransformations = async ( shopId: string ): Promise<any> => {
 
-    console.log(`Start applying image transformations for ${shopId}`)
+    console.log( `Start applying image transformations for ${shopId}` )
 
-    const products = await findProductsByShop(new ObjectID(shopId))
+    const products = await findProductsByShop( new ObjectID( shopId ) )
 
-    if (!products) {
+    if ( !products ) {
 
-        console.log(`Could not find products for shop ${shopId}`)
+        console.log( `Could not find products for shop ${shopId}` )
 
         return null
     }
 
-    for await (const product of products) {
+    for await ( const product of products ) {
 
-        for await ( const [index, url] of product.images.entries()) {
+        for await ( const [index, url] of product.images.entries() ) {
 
-            if (!url) continue
+            if ( !url ) continue
 
-            const s3Image = await sendExternalFileToS3(url, product._id.toString(), index)
+            const s3Image = await sendExternalFileToS3( url, product._id.toString(), index )
 
             s3Image
-                ? console.log(`Image ${index + 1} of ${product.images.length} for ${product._id}`)
-                : console.log(`Could not send image ${index +1} of ${product.images.length} for ${product._id}`)
+                ? console.log( `Image ${index + 1} of ${product.images.length} for ${product._id}` )
+                : console.log( `Could not send image ${index +1} of ${product.images.length} for ${product._id}` )
 
-            if (!s3Image) continue
+            if ( !s3Image ) continue
 
             product.images[index] = s3Image
         }
 
-        await waitforme(1000)
+        await waitforme( 1000 )
 
-        const updatedProduct = await updateProductImages(product._id, product)
+        const updatedProduct = await updateProductImages( product._id, product )
 
         updatedProduct
-            ? console.log(`Updated product ${product._id}`)
-            : console.log(`Could not update product ${product._id}`)
+            ? console.log( `Updated product ${product._id}` )
+            : console.log( `Could not update product ${product._id}` )
 
-        if (!updatedProduct) continue
+        if ( !updatedProduct ) continue
     }
 
-    return console.log(`Finish applying image transformations for ${shopId}`)
+    return console.log( `Finish applying image transformations for ${shopId}` )
 }

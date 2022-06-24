@@ -2,11 +2,11 @@
 //      hub2b credential Repository
 //
 
-import { MongoError } from "mongodb"
-import { HUB2B_Credentials } from "../models/hub2b"
-import { hub2bAuthCollection } from "../utils/db/collections"
-import { log } from "../utils/loggerUtil"
-import { getFunctionName } from "../utils/util"
+import { MongoError } from 'mongodb'
+import { HUB2B_Credentials } from '../models/hub2b'
+import { hub2bAuthCollection } from '../utils/db/collections'
+import { log } from '../utils/loggerUtil'
+import { getFunctionName } from '../utils/util'
 
 /**
  * Save hub2b credentials
@@ -68,7 +68,7 @@ export const deleteCredential = async ( access_token: string ): Promise<boolean>
 
     try {
 
-        const result = await hub2bAuthCollection.deleteOne( { access_token } )
+        const result = await hub2bAuthCollection.deleteOne({ access_token })
 
         return result.result.ok === 1
 
@@ -86,16 +86,16 @@ export const deleteCredential = async ( access_token: string ): Promise<boolean>
  *
  * @param idTenant
  */
-export const findAuthByTenant = async (idTenant: any): Promise<HUB2B_Credentials | null> => {
+export const findAuthByTenant = async ( idTenant: any ): Promise<HUB2B_Credentials | null> => {
 
     try {
 
         return await hub2bAuthCollection.findOne({ tenant_id: idTenant })
 
-    } catch (error) {
+    } catch ( error ) {
 
-        if (error instanceof MongoError || error instanceof Error)
-            log(error.message, 'EVENT', `HUB2B credential Repository - ${getFunctionName()}`, 'ERROR')
+        if ( error instanceof MongoError || error instanceof Error )
+            log( error.message, 'EVENT', `HUB2B credential Repository - ${getFunctionName()}`, 'ERROR' )
 
         return null
     }

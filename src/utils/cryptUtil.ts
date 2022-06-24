@@ -24,7 +24,7 @@ export const comparePassword = async ( password: string, encryptedPassword: stri
 }
 
 export const getToken = ( data: any ): string => {
-    return jwt.sign( { data }, SECRET, jwtConfig )
+    return jwt.sign({ data }, SECRET, jwtConfig )
 }
 
 export const isJWTTokenValid = ( token: string | undefined ): boolean => {
@@ -34,7 +34,7 @@ export const isJWTTokenValid = ( token: string | undefined ): boolean => {
     let decoded: any
 
     try {
-        decoded = jwt.verify( token, SECRET, {} )
+        decoded = jwt.verify( token, SECRET, {})
     } catch ( error ) {
         if ( error instanceof Error )
             log( error.message, 'EVENT', 'JWT Verification', 'ERROR' )

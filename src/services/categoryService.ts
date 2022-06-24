@@ -2,10 +2,10 @@
 //      Token Service
 //
 
-import { log } from "../utils/loggerUtil"
-import { getFunctionName } from "../utils/util"
-import { CATEGORIES, Category, SUBCATEGORIES, SubCategory } from "../models/category"
-import { ATTRIBUTES, Category_Attribute } from "../models/attribute"
+import { log } from '../utils/loggerUtil'
+import { getFunctionName } from '../utils/util'
+import { CATEGORIES, Category, SUBCATEGORIES, SubCategory } from '../models/category'
+import { ATTRIBUTES, Category_Attribute } from '../models/attribute'
 
 /**
  * List category

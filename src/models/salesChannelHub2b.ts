@@ -2,248 +2,248 @@
 export const SALES_CHANNEL_HUB2B = [
     {
         code: 2,
-        ticker: "NVP",
-        name: "Cnova"
+        ticker: 'NVP',
+        name: 'Cnova'
     },
     {
         code: 4,
-        ticker: "mrc",
-        name: "MercadoLivre"
+        ticker: 'mrc',
+        name: 'MercadoLivre'
     },
     {
         code: 7,
-        ticker: "amz",
-        name: "Amazon"
+        ticker: 'amz',
+        name: 'Amazon'
     },
     {
         code: 10,
-        ticker: "bus",
-        name: "Buscape"
+        ticker: 'bus',
+        name: 'Buscape'
     },
     {
         code: 12,
-        ticker: "zoo",
-        name: "Zoom"
+        ticker: 'zoo',
+        name: 'Zoom'
     },
     {
         code: 41,
-        ticker: "daf",
-        name: "Dafiti"
+        ticker: 'daf',
+        name: 'Dafiti'
     },
     {
         code: 46,
-        ticker: "mob",
-        name: "Mobly"
+        ticker: 'mob',
+        name: 'Mobly'
     },
     {
         code: 51,
-        ticker: "nsh",
-        name: "Netshoes"
+        ticker: 'nsh',
+        name: 'Netshoes'
     },
     {
         code: 71,
-        ticker: "css",
-        name: "CissaMagazine"
+        ticker: 'css',
+        name: 'CissaMagazine'
     },
     {
         code: 73,
-        ticker: "cfr",
-        name: "Carrefour"
+        ticker: 'cfr',
+        name: 'Carrefour'
     },
     {
         code: 74,
-        ticker: "fsh",
-        name: "Fastshop"
+        ticker: 'fsh',
+        name: 'Fastshop'
     },
     {
         code: 75,
-        ticker: "mav",
-        name: "Mercado Aventura"
+        ticker: 'mav',
+        name: 'Mercado Aventura'
     },
     {
         code: 76,
-        ticker: "mag",
-        name: "MagazineLuiza"
+        ticker: 'mag',
+        name: 'MagazineLuiza'
     },
     {
         code: 77,
-        ticker: "cnt",
-        name: "Centauro"
+        ticker: 'cnt',
+        name: 'Centauro'
     },
     {
         code: 78,
-        ticker: "rce",
-        name: " Ricardo Eletro"
+        ticker: 'rce',
+        name: ' Ricardo Eletro'
     },
     {
         code: 79,
-        ticker: "fnw",
-        name: "Farma Now"
+        ticker: 'fnw',
+        name: 'Farma Now'
     },
     {
         code: 82,
-        ticker: "sky",
-        name: "B2WSkyHub"
+        ticker: 'sky',
+        name: 'B2WSkyHub'
     },
     {
         code: 85,
-        ticker: "cea",
-        name: "CeA"
+        ticker: 'cea',
+        name: 'CeA'
     },
     {
         code: 86,
-        ticker: "cpt",
-        name: "ConnectParts"
+        ticker: 'cpt',
+        name: 'ConnectParts'
     },
     {
         code: 88,
-        ticker: "vev",
-        name: "Via Evangélica"
+        ticker: 'vev',
+        name: 'Via Evangélica'
     },
     {
         code: 91,
-        ticker: "lml",
-        name: "Leroy Merlin"
+        ticker: 'lml',
+        name: 'Leroy Merlin'
     },
     {
         code: 92,
-        ticker: "llt",
-        name: "Luxury Loyalty"
+        ticker: 'llt',
+        name: 'Luxury Loyalty'
     },
     {
         code: 93,
-        ticker: "ccj",
-        name: "Cidade Jardim"
+        ticker: 'ccj',
+        name: 'Cidade Jardim'
     },
     {
         code: 94,
-        ticker: "fft",
-        name: "Farfetch"
+        ticker: 'fft',
+        name: 'Farfetch'
     },
     {
         code: 96,
-        ticker: "htg",
-        name: "HomeToGo"
+        ticker: 'htg',
+        name: 'HomeToGo'
     },
     {
         code: 97,
-        ticker: "clb",
-        name: "Colombo"
+        ticker: 'clb',
+        name: 'Colombo'
     },
     {
         code: 99,
-        ticker: "wbc",
-        name: "WebContinental"
+        ticker: 'wbc',
+        name: 'WebContinental'
     },
     {
         code: 101,
-        ticker: "mam",
-        name: "Madeira Madeira"
+        ticker: 'mam',
+        name: 'Madeira Madeira'
     },
     {
         code: 102,
-        ticker: "est",
-        name: "eStyle"
+        ticker: 'est',
+        name: 'eStyle'
     },
     {
         code: 104,
-        ticker: "liv",
-        name: "LVL"
+        ticker: 'liv',
+        name: 'LVL'
     },
     {
         code: 107,
-        ticker: "hil",
-        name: "HiLo"
+        ticker: 'hil',
+        name: 'HiLo'
     },
     {
         code: 108,
-        ticker: "coo",
-        name: "Coopera"
+        ticker: 'coo',
+        name: 'Coopera'
     },
     {
         code: 110,
-        ticker: "jsm",
-        name: "JuntosSomosMais Marketplace"
+        ticker: 'jsm',
+        name: 'JuntosSomosMais Marketplace'
     },
     {
         code: 111,
-        ticker: "nvm",
-        name: "Novo Mundo"
+        ticker: 'nvm',
+        name: 'Novo Mundo'
     },
     {
         code: 112,
-        ticker: "mnu",
-        name: "Menu"
+        ticker: 'mnu',
+        name: 'Menu'
     },
     {
         code: 113,
-        ticker: "bof",
-        name: "Bestoff"
+        ticker: 'bof',
+        name: 'Bestoff'
     },
     {
         code: 114,
-        ticker: "rhp",
-        name: "RiHappy"
+        ticker: 'rhp',
+        name: 'RiHappy'
     },
     {
         code: 115,
-        ticker: "eji",
-        name: "Enjoei"
+        ticker: 'eji',
+        name: 'Enjoei'
     },
     {
         code: 116,
-        ticker: "hbd",
-        name: "Hibrido"
+        ticker: 'hbd',
+        name: 'Hibrido'
     },
     {
         code: 119,
-        ticker: "nts",
-        name: "NetSuprimentos"
+        ticker: 'nts',
+        name: 'NetSuprimentos'
     },
     {
         code: 120,
-        ticker: "caq",
-        name: "CompreAqui"
+        ticker: 'caq',
+        name: 'CompreAqui'
     },
     {
         code: 122,
-        ticker: "gpa",
-        name: "GPA"
+        ticker: 'gpa',
+        name: 'GPA'
     },
     {
         code: 123,
-        ticker: "kbm",
-        name: "Kabum"
+        ticker: 'kbm',
+        name: 'Kabum'
     },
     {
         code: 124,
-        ticker: "shp",
-        name: "Shopee"
+        ticker: 'shp',
+        name: 'Shopee'
     },
     {
         code: 126,
-        ticker: "ats",
-        name: "AtivoStore"
+        ticker: 'ats',
+        name: 'AtivoStore'
     },
     {
         code: 128,
-        ticker: "prf",
-        name: "ProntaReforma"
+        ticker: 'prf',
+        name: 'ProntaReforma'
     },
     {
         code: 130,
-        ticker: "ecd",
-        name: "eCadeiras"
+        ticker: 'ecd',
+        name: 'eCadeiras'
     },
     {
         code: 131,
-        ticker: "tcob",
-        name: "TocaObra"
+        ticker: 'tcob',
+        name: 'TocaObra'
     },
     {
         code: 133,
-        ticker: "rds",
-        name: "RaiaDrogasil"
+        ticker: 'rds',
+        name: 'RaiaDrogasil'
     }
 ]
 
@@ -251,57 +251,57 @@ export const SALES_CHANNEL_HUB2B = [
 export const USED_CHANNELS = [
     {
         code: 4,
-        ticker: "mrc",
-        name: "MercadoLivre"
+        ticker: 'mrc',
+        name: 'MercadoLivre'
     },
     {
         code: 7,
-        ticker: "amz",
-        name: "Amazon"
+        ticker: 'amz',
+        name: 'Amazon'
     },
     {
         code: 41,
-        ticker: "daf",
-        name: "Dafiti"
+        ticker: 'daf',
+        name: 'Dafiti'
     },
     {
         code: 73,
-        ticker: "cfr",
-        name: "Carrefour"
+        ticker: 'cfr',
+        name: 'Carrefour'
     },
     {
         code: 76,
-        ticker: "mag",
-        name: "MagazineLuiza"
+        ticker: 'mag',
+        name: 'MagazineLuiza'
     },
     {
         code: 82,
-        ticker: "sky",
-        name: "B2WSkyHub"
+        ticker: 'sky',
+        name: 'B2WSkyHub'
     },
     {
         code: 85,
-        ticker: "cea",
-        name: "CeA"
+        ticker: 'cea',
+        name: 'CeA'
     },
     {
         code: 115,
-        ticker: "eji",
-        name: "Enjoei"
+        ticker: 'eji',
+        name: 'Enjoei'
     },
     {
         code: 124,
-        ticker: "shp",
-        name: "Shopee"
+        ticker: 'shp',
+        name: 'Shopee'
     },
     {
         code: 122,
-        ticker: "gpa",
-        name: "GPA"
+        ticker: 'gpa',
+        name: 'GPA'
     },
     {
         code: 133,
-        ticker: "rds",
-        name: "RaiaDrogasil"
+        ticker: 'rds',
+        name: 'RaiaDrogasil'
     }
 ]

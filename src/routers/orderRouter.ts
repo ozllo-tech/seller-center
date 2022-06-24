@@ -5,105 +5,105 @@
 import { Router, Request, Response, NextFunction } from 'express'
 import { findOrdersByShop, sendInvoice, retrieveInvoice, sendTracking, retrieveTracking, getOrderAverageShippingTime, retrieveOrderShippingLabel } from '../services/orderService'
 import { createHttpStatus, internalServerError, noContent, ok } from '../utils/httpStatus'
-import { isOrderInvoiceable } from "../utils/middlewares"
+import { isOrderInvoiceable } from '../utils/middlewares'
 const router = Router()
 
 /**
  * GET -> lista de pedidos
  */
-router.get('/all', async (req: Request, res: Response, next: NextFunction) => {
+router.get( '/all', async ( req: Request, res: Response, next: NextFunction ) => {
 
-    const orders = await findOrdersByShop(req.shop?._id.toString())
+    const orders = await findOrdersByShop( req.shop?._id.toString() )
 
-    if (!orders)
+    if ( !orders )
         return res
-            .status(internalServerError.status)
-            .send(createHttpStatus(internalServerError))
+            .status( internalServerError.status )
+            .send( createHttpStatus( internalServerError ) )
 
     return res
-        .status(ok.status)
-        .send(orders)
+        .status( ok.status )
+        .send( orders )
 })
 
-router.post('/:id/invoice', isOrderInvoiceable, async (req: Request, res: Response, next: NextFunction) => {
+router.post( '/:id/invoice', isOrderInvoiceable, async ( req: Request, res: Response, next: NextFunction ) => {
 
-    const invoice = await sendInvoice(req?.order, req.body)
+    const invoice = await sendInvoice( req?.order, req.body )
 
-    if (!invoice)
+    if ( !invoice )
         return res
-            .status(internalServerError.status)
-            .send(createHttpStatus(internalServerError))
+            .status( internalServerError.status )
+            .send( createHttpStatus( internalServerError ) )
 
     return res
-        .status(ok.status)
-        .send(invoice)
+        .status( ok.status )
+        .send( invoice )
 })
 
-router.get('/:id/invoice', async (req: Request, res: Response, next: NextFunction) => {
+router.get( '/:id/invoice', async ( req: Request, res: Response, next: NextFunction ) => {
 
-    const invoice = await retrieveInvoice(req.params.id)
+    const invoice = await retrieveInvoice( req.params.id )
 
-    if (!invoice)
+    if ( !invoice )
         return res
-            .status(internalServerError.status)
-            .send(createHttpStatus(internalServerError))
+            .status( internalServerError.status )
+            .send( createHttpStatus( internalServerError ) )
 
     return res
-        .status(ok.status)
-        .send(invoice)
+        .status( ok.status )
+        .send( invoice )
 })
 
-router.get('/:id/tracking', async (req: Request, res: Response, next: NextFunction) => {
+router.get( '/:id/tracking', async ( req: Request, res: Response, next: NextFunction ) => {
 
-    const tracking = await retrieveTracking(req.params.id)
+    const tracking = await retrieveTracking( req.params.id )
 
-    if (!tracking)
+    if ( !tracking )
         return res
-            .status(internalServerError.status)
-            .send(createHttpStatus(internalServerError))
+            .status( internalServerError.status )
+            .send( createHttpStatus( internalServerError ) )
 
     return res
-        .status(ok.status)
-        .send(tracking)
+        .status( ok.status )
+        .send( tracking )
 })
 
-router.post('/:id/tracking', async (req: Request, res: Response, next: NextFunction) => {
+router.post( '/:id/tracking', async ( req: Request, res: Response, next: NextFunction ) => {
 
-    const tracking = await sendTracking(req.params.id, req.body)
+    const tracking = await sendTracking( req.params.id, req.body )
 
-    if (!tracking)
+    if ( !tracking )
         return res
-            .status(internalServerError.status)
-            .send(createHttpStatus(internalServerError))
+            .status( internalServerError.status )
+            .send( createHttpStatus( internalServerError ) )
 
     return res
-        .status(ok.status)
-        .send(tracking)
+        .status( ok.status )
+        .send( tracking )
 })
 
-router.get('/insigths', async (req: Request, res: Response, next: NextFunction) => {
+router.get( '/insigths', async ( req: Request, res: Response, next: NextFunction ) => {
 
-    const result = await getOrderAverageShippingTime(req.shop?._id)
+    const result = await getOrderAverageShippingTime( req.shop?._id )
 
-    if (!result)
+    if ( !result )
         return res
-            .status(internalServerError.status)
-            .send(createHttpStatus(internalServerError))
+            .status( internalServerError.status )
+            .send( createHttpStatus( internalServerError ) )
 
     return res
-        .status(ok.status)
-        .send(result)
+        .status( ok.status )
+        .send( result )
 })
 
-router.get('/:id/shippingLabel', async (req: Request, res: Response, next: NextFunction) => {
+router.get( '/:id/shippingLabel', async ( req: Request, res: Response, next: NextFunction ) => {
 
-    const result = await retrieveOrderShippingLabel(req.params.id)
+    const result = await retrieveOrderShippingLabel( req.params.id )
 
-    if (!result) return res.status(internalServerError.status).send(createHttpStatus(internalServerError))
+    if ( !result ) return res.status( internalServerError.status ).send( createHttpStatus( internalServerError ) )
 
-    if ('url not available yet' === result?.error) return res.status(noContent.status).send(result)
+    if ( 'url not available yet' === result?.error ) return res.status( noContent.status ).send( result )
 
-    return res.status(ok.status).send(result)
+    return res.status( ok.status ).send( result )
 
 })
 

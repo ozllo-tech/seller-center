@@ -131,12 +131,12 @@ export interface HttpStatusResponse extends HttpStatus {
 
 /**
  * Cria um http error
- * 
- * @param HttpStatus 
- * @param error 
- * @param message 
+ *
+ * @param HttpStatus
+ * @param error
+ * @param message
  */
-export const createHttpStatus = ( httpStatus: HttpStatus, errors?: AppError | AppError[] ) => {
+export const createHttpStatus = ( httpStatus: HttpStatus, errors?: AppError | AppError[]) => {
     const newError: HttpStatusResponse = {
         status: httpStatus.status,
         message: httpStatus.message,

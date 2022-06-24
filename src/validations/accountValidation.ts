@@ -2,10 +2,10 @@
 //     Account Validation
 //
 
-import { isBankCodeValid } from "../models/listaBancosBR"
-import { findUserById } from "../repositories/userRepository"
-import { AppError, invalidAccount, invalidAddress, invalidAddressNumber, invalidAgency, invalidBankCode, invalidBirthday, invalidCellphone, invalidCEP, invalidCity, invalidCNPJ, invalidCompanyName, invalidComplement, invalidCPF, invalidDistrict, invalidFirstName, invalidLastName, invalidRazaoSocial, invalidShopName, invalidUserReference, invalidUserTypeRegistration } from "../utils/errors/errors"
-import { isCNPJValid, isCPFValid, isDateValid } from "../utils/util"
+import { isBankCodeValid } from '../models/listaBancosBR'
+import { findUserById } from '../repositories/userRepository'
+import { AppError, invalidAccount, invalidAddress, invalidAddressNumber, invalidAgency, invalidBankCode, invalidBirthday, invalidCellphone, invalidCEP, invalidCity, invalidCNPJ, invalidCompanyName, invalidComplement, invalidCPF, invalidDistrict, invalidFirstName, invalidLastName, invalidRazaoSocial, invalidShopName, invalidUserReference, invalidUserTypeRegistration } from '../utils/errors/errors'
+import { isCNPJValid, isCPFValid, isDateValid } from '../utils/util'
 
 /**
  * Verifies whether the Personal Information for an user is valid
@@ -67,7 +67,7 @@ export const isPJValid = async ( body: any ): Promise<AppError[]> => {
 
 /**
  * Verifies whether the address information for an user is valid
- * 
+ *
  * @param body
  * @returns a list of `AppError` containing description of errors
  */
@@ -92,7 +92,7 @@ export const isAddressValid = async ( body: any ): Promise<AppError[]> => {
 
 /**
  * Verifies whether the shop information for an user can be created
- * 
+ *
  * @param body
  * @returns a list of `AppError` containing description of errors
  */

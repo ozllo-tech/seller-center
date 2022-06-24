@@ -18,54 +18,54 @@ const router = Router()
  */
 router.get( '/users', async ( req: Request, res: Response, next: NextFunction ) => {
 
-    let users = await findUsers();
+    const users = await findUsers()
 
-    if(!users){
-        console.log('Erro')
+    if( !users ){
+        console.log( 'Erro' )
         return res
-            .status(internalServerError.status)
-            .send(createHttpStatus(internalServerError))
+            .status( internalServerError.status )
+            .send( createHttpStatus( internalServerError ) )
     }
 
     return res
-        .status(ok.status)
-        .send(users)
-} )
+        .status( ok.status )
+        .send( users )
+})
 
 /**
  * Post -> Verifies if can log in user
  */
- router.post( '/login', async ( req: Request, res: Response, next: NextFunction ) => {
+router.post( '/login', async ( req: Request, res: Response, next: NextFunction ) => {
 
     const admin = req.body.admin
     const userId = req.body.userId
     const token = req.headers.authorization
 
-    let result = await isJWTTokenValid( token )
+    const result = await isJWTTokenValid( token )
 
     if ( !result )
         return res
             .status( badRequest.status )
             .send( createHttpStatus( badRequest, loginFail ) )
 
-    const isAdmin = await isUserAdmin(admin)
+    const isAdmin = await isUserAdmin( admin )
 
-    if(!isAdmin)
-    return res
+    if( !isAdmin )
+        return res
             .status( badRequest.status )
             .send( createHttpStatus( badRequest, loginFail ) )
 
-    const user = await findUserById(userId)
-    console.log(userId)
-    if(!user)
-    return res
+    const user = await findUserById( userId )
+    console.log( userId )
+    if( !user )
+        return res
             .status( badRequest.status )
             .send( createHttpStatus( badRequest, loginFail ) )
-        
+
     return res
         .status( ok.status )
         .send( await loginUser( user ) )
-} )
+})
 
 export { router as adminRouter }
 

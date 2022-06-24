@@ -8,13 +8,13 @@ import { ok } from '../utils/httpStatus'
 const router = Router()
 
 /**
- * GET -> lista de bancos 
+ * GET -> lista de bancos
  */
 router.get( '/all', async ( req: Request, res: Response, next: NextFunction ) => {
 
     return res
         .status( ok.status )
         .send( BANKS )
-} )
+})
 
 export { router as bankRouter }

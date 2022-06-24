@@ -58,13 +58,13 @@ export const createCollections = async ( database: Db ) => {
     hub2bTenantCollection = database.collection<HUB2B_Tenants>( HUB2B_TENANT_COLLECTION )
     hub2bUserCollection = database.collection<HUB2B_Users>( HUB2B_USER_COLLECTION )
     hub2bTenantCredentialCollection = database.collection<HUB2B_TenantCredentials>( HUB2B_TENANT_CREDENTIAL_COLLECTION )
-    systemIntegrationCollection = database.collection<System_Integration>(SYSTEM_INTEGRATION_COLLECTION )
+    systemIntegrationCollection = database.collection<System_Integration>( SYSTEM_INTEGRATION_COLLECTION )
 
     await startIndexes()
 }
 
 const startIndexes = () => {
-    userCollection.createIndex( { "email": 1 }, { unique: true } )
+    userCollection.createIndex({ 'email': 1 }, { unique: true })
 }
 
 export {

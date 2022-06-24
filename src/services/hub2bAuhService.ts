@@ -2,13 +2,13 @@
 //      HUB2B Auth Service
 //
 
-import { log } from "../utils/loggerUtil"
-import { getFunctionName, nowInSeconds } from "../utils/util"
-import { deleteCredential, retrieveCredentials, saveCredential, findAuthByTenant } from "../repositories/hub2AuthRepository"
-import { HUB2B_Credentials } from "../models/hub2b"
-import { HUB2B_CLIENT_ID, HUB2B_CLIENT_SECRET, HUB2B_PASSWORD, HUB2B_AGENCY_SUB_SCOPE, HUB2B_DEFAULT_SCOPE, HUB2B_TENANT, HUB2B_URL_V2, HUB2B_USERNAME, HUB2B_AGENCY_MAIN_SCOPE, HUB2B_AGENCY_MAIN_USERNAME, HUB2B_AGENCY_MAIN_PASSWORD } from "../utils/consts"
-import { requestHub2B } from "./hub2bService"
-import { findTenantCredential  } from "../repositories/hub2TenantCredentialRepository"
+import { log } from '../utils/loggerUtil'
+import { getFunctionName, nowInSeconds } from '../utils/util'
+import { deleteCredential, retrieveCredentials, saveCredential, findAuthByTenant } from '../repositories/hub2AuthRepository'
+import { HUB2B_Credentials } from '../models/hub2b'
+import { HUB2B_CLIENT_ID, HUB2B_CLIENT_SECRET, HUB2B_PASSWORD, HUB2B_AGENCY_SUB_SCOPE, HUB2B_DEFAULT_SCOPE, HUB2B_TENANT, HUB2B_URL_V2, HUB2B_USERNAME, HUB2B_AGENCY_MAIN_SCOPE, HUB2B_AGENCY_MAIN_USERNAME, HUB2B_AGENCY_MAIN_PASSWORD } from '../utils/consts'
+import { requestHub2B } from './hub2bService'
+import { findTenantCredential  } from '../repositories/hub2TenantCredentialRepository'
 
 export let HUB2B_CREDENTIALS: HUB2B_Credentials = {
     tenant_id: HUB2B_TENANT,
@@ -50,37 +50,37 @@ export const isAccessTokenValidHub2b = ( credentials: HUB2B_Credentials ) => {
     return true
 }
 
-export const generateAccessTokenV2Hub2b = async (idTenant = null , agency = false) => {
+export const generateAccessTokenV2Hub2b = async ( idTenant = null , agency = false ) => {
 
     let hub2bUsername = HUB2B_USERNAME
     let hub2bPassword = HUB2B_PASSWORD
 
     let scope = HUB2B_DEFAULT_SCOPE
 
-    if (idTenant) {
+    if ( idTenant ) {
         scope = HUB2B_AGENCY_SUB_SCOPE
-        const credentials = await findTenantCredential(idTenant)
-        if (!credentials) return null
+        const credentials = await findTenantCredential( idTenant )
+        if ( !credentials ) return null
 
         hub2bUsername = credentials.apiV2.userName
         hub2bPassword = credentials.apiV2.password
     }
 
-    if (agency) {
+    if ( agency ) {
         scope = HUB2B_AGENCY_MAIN_SCOPE
 
         hub2bUsername = HUB2B_AGENCY_MAIN_USERNAME
         hub2bPassword = HUB2B_AGENCY_MAIN_PASSWORD
     }
 
-    const URL_OAUTH = HUB2B_URL_V2 + "/oauth2/login"
+    const URL_OAUTH = HUB2B_URL_V2 + '/oauth2/login'
 
     const body = {
         client_id: HUB2B_CLIENT_ID,
         client_secret: HUB2B_CLIENT_SECRET,
         username: hub2bUsername,
         password: hub2bPassword,
-        grant_type: "password",
+        grant_type: 'password',
         scope: scope
     }
 
@@ -89,29 +89,29 @@ export const generateAccessTokenV2Hub2b = async (idTenant = null , agency = fals
     if ( !response ) return null
 
     response.data.access_token
-        ? log( "Access Token obtido com sucesso", "EVENT", getFunctionName() )
-        : log( "Não foi passível obter o token de acesso", "EVENT", getFunctionName(), "WARN" )
+        ? log( 'Access Token obtido com sucesso', 'EVENT', getFunctionName() )
+        : log( 'Não foi passível obter o token de acesso', 'EVENT', getFunctionName(), 'WARN' )
 
     response.data.update_at = Math.floor( nowInSeconds() )
 
-    if (idTenant) {
+    if ( idTenant ) {
 
         TENANT_CREDENTIALS = response.data
 
         TENANT_CREDENTIALS.tenant_id = idTenant
 
-        await createCredential(TENANT_CREDENTIALS)
+        await createCredential( TENANT_CREDENTIALS )
 
         return TENANT_CREDENTIALS.access_token
     }
 
-    if (agency) {
+    if ( agency ) {
 
         AGENCY_CREDENTIALS = response.data
 
         AGENCY_CREDENTIALS.tenant_id = '9999'
 
-        await createCredential(AGENCY_CREDENTIALS)
+        await createCredential( AGENCY_CREDENTIALS )
 
         return AGENCY_CREDENTIALS.access_token
     }
@@ -120,7 +120,7 @@ export const generateAccessTokenV2Hub2b = async (idTenant = null , agency = fals
 
     HUB2B_CREDENTIALS.tenant_id = HUB2B_TENANT
 
-    await createCredential(HUB2B_CREDENTIALS)
+    await createCredential( HUB2B_CREDENTIALS )
 
     return HUB2B_CREDENTIALS.access_token
 
@@ -131,7 +131,7 @@ export const generateAccessTokenV2Hub2b = async (idTenant = null , agency = fals
  *
  * @param user  `User`
  */
-export const createCredential = async (data: any): Promise<void> => {
+export const createCredential = async ( data: any ): Promise<void> => {
 
     const credential = await saveCredential( data )
 
@@ -172,16 +172,16 @@ export const deleteAllInvalid = async () => {
 
     credentials.forEach( credential => {
         if ( !isAccessTokenValidHub2b( credential ) ) removeInvalidCredentials( credential.access_token )
-    } )
+    })
 }
 
 export const renewAccessTokenHub2b = async ( force = false, idTenant: any, agency = false ) => {
 
-    if (idTenant) {
+    if ( idTenant ) {
 
-        const auth = await findAuthByTenant(idTenant)
+        const auth = await findAuthByTenant( idTenant )
 
-        if (!auth || !isAccessTokenValidHub2b(auth)) return await generateAccessTokenV2Hub2b(idTenant)
+        if ( !auth || !isAccessTokenValidHub2b( auth ) ) return await generateAccessTokenV2Hub2b( idTenant )
 
         // TODO: check if it's possible (or necessary) to refresh token for TENANT_CREDENTIALS.
 
@@ -191,11 +191,11 @@ export const renewAccessTokenHub2b = async ( force = false, idTenant: any, agenc
 
     }
 
-    if (agency) {
+    if ( agency ) {
 
-        const auth = await findAuthByTenant('9999')
+        const auth = await findAuthByTenant( '9999' )
 
-        if (!auth || !isAccessTokenValidHub2b(auth)) return await generateAccessTokenV2Hub2b(null, true)
+        if ( !auth || !isAccessTokenValidHub2b( auth ) ) return await generateAccessTokenV2Hub2b( null, true )
 
         // TODO: check if it's possible (or necessary) to refresh token for AGENCY_CREDENTIALS.
 
@@ -207,30 +207,30 @@ export const renewAccessTokenHub2b = async ( force = false, idTenant: any, agenc
 
     if ( !force && isAccessTokenValidHub2b( HUB2B_CREDENTIALS ) ) return
 
-    if (!HUB2B_CREDENTIALS.refresh_token) return await generateAccessTokenV2Hub2b()
+    if ( !HUB2B_CREDENTIALS.refresh_token ) return await generateAccessTokenV2Hub2b()
 
-    const URL_REFRESH = HUB2B_URL_V2 + "/oauth2/token"
+    const URL_REFRESH = HUB2B_URL_V2 + '/oauth2/token'
 
     const body = {
         client_id: HUB2B_CLIENT_ID,
         client_secret: HUB2B_CLIENT_SECRET,
-        grant_type: "refresh_token",
+        grant_type: 'refresh_token',
         refresh_token: HUB2B_CREDENTIALS.refresh_token
     }
 
     const response = await requestHub2B( URL_REFRESH, 'POST', body )
 
-    if (!response) return await generateAccessTokenV2Hub2b()
+    if ( !response ) return await generateAccessTokenV2Hub2b()
 
     response.data.access_token
-        ? log("Token atualizado com sucesso", "EVENT", getFunctionName())
-        : log("Não foi passível atualizar o token de acesso", "EVENT", getFunctionName(), "WARN")
+        ? log( 'Token atualizado com sucesso', 'EVENT', getFunctionName() )
+        : log( 'Não foi passível atualizar o token de acesso', 'EVENT', getFunctionName(), 'WARN' )
 
     response.data.update_at = nowInSeconds() / 60
 
     HUB2B_CREDENTIALS = response.data
 
-    await createCredential(HUB2B_CREDENTIALS)
+    await createCredential( HUB2B_CREDENTIALS )
 
     return HUB2B_CREDENTIALS.access_token
 }
@@ -239,7 +239,7 @@ export const recoverLateCredential = async () => {
 
     const credential = await findValidCredential()
 
-    if (!isAccessTokenValidHub2b(credential)) return await renewAccessTokenHub2b(true, false)
+    if ( !isAccessTokenValidHub2b( credential ) ) return await renewAccessTokenHub2b( true, false )
 
     HUB2B_CREDENTIALS = credential
 }

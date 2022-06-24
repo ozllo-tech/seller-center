@@ -2,11 +2,11 @@
 //      hub2b tenant Repository
 //
 
-import { ObjectID, MongoError } from "mongodb"
-import { HUB2B_Tenants } from "../models/hub2b"
-import { hub2bTenantCollection } from "../utils/db/collections"
-import { log } from "../utils/loggerUtil"
-import { getFunctionName } from "../utils/util"
+import { ObjectID, MongoError } from 'mongodb'
+import { HUB2B_Tenants } from '../models/hub2b'
+import { hub2bTenantCollection } from '../utils/db/collections'
+import { log } from '../utils/loggerUtil'
+import { getFunctionName } from '../utils/util'
 
 /**
  * Save hub2b tenants
@@ -32,13 +32,13 @@ export const saveTenant = async ( tenants: HUB2B_Tenants ): Promise<boolean> => 
  *
  * @param tenants
  */
- export const updateTenant = async ( tenants: HUB2B_Tenants ): Promise<HUB2B_Tenants | null> => {
+export const updateTenant = async ( tenants: HUB2B_Tenants ): Promise<HUB2B_Tenants | null> => {
 
     try {
         const result = await hub2bTenantCollection.updateOne(
             { idTenant: tenants.idTenant },
             { $set: tenants },
-            { upsert: true } )
+            { upsert: true })
 
         let id: ObjectID | null = null
 
@@ -48,7 +48,7 @@ export const saveTenant = async ( tenants: HUB2B_Tenants ): Promise<boolean> => 
         if ( result.matchedCount )
             return await findHub2bTenantByIdTenant( tenants.idTenant )
 
-        if ( !id ) throw new MongoError( "Não gerou id" )
+        if ( !id ) throw new MongoError( 'Não gerou id' )
 
         tenants._id = id
 
@@ -66,11 +66,11 @@ export const saveTenant = async ( tenants: HUB2B_Tenants ): Promise<boolean> => 
  *
  * @param idTenant
  */
- export const findHub2bTenantByIdTenant = async ( idTenant: number ): Promise<HUB2B_Tenants | null> => {
+export const findHub2bTenantByIdTenant = async ( idTenant: number ): Promise<HUB2B_Tenants | null> => {
 
     try {
 
-        const hub2bTenant = await hub2bTenantCollection.findOne( { idTenant } )
+        const hub2bTenant = await hub2bTenantCollection.findOne({ idTenant })
 
         return hub2bTenant
 
@@ -114,7 +114,7 @@ export const deleteTenant = async ( access_token: string ): Promise<boolean> => 
 
     try {
 
-        const result = await hub2bTenantCollection.deleteOne( { access_token } )
+        const result = await hub2bTenantCollection.deleteOne({ access_token })
 
         return result.result.ok === 1
 
@@ -131,7 +131,7 @@ export const findTenantByOwnerEmail = async ( email: string ): Promise<HUB2B_Ten
 
     try {
 
-        return await hub2bTenantCollection.findOne({ ownerEmail: email } )
+        return await hub2bTenantCollection.findOne({ ownerEmail: email })
 
     } catch ( error ) {
 

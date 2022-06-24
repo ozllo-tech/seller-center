@@ -17,16 +17,16 @@ const onError = ( error: any ) => {
     }
     // handle specific listen errors with friendly messages
     switch ( error.code ) {
-        case 'EACCES':
-            console.error( 'Port ' + DEFAULT_PORT + ' requires elevated privileges' )
-            exitProcess( 1 )
-            break
-        case 'EADDRINUSE':
-            console.error( 'Port ' + DEFAULT_PORT + ' is already in use' )
-            exitProcess( 1 )
-            break
-        default:
-            throw error
+    case 'EACCES':
+        console.error( 'Port ' + DEFAULT_PORT + ' requires elevated privileges' )
+        exitProcess( 1 )
+        break
+    case 'EADDRINUSE':
+        console.error( 'Port ' + DEFAULT_PORT + ' is already in use' )
+        exitProcess( 1 )
+        break
+    default:
+        throw error
     }
 }
 
@@ -46,7 +46,7 @@ const onClose = () => {
 app.on( 'ready', () => {
     server.listen( DEFAULT_PORT )
     init()
-} )
+})
 
 // Add on error handle
 server.on( 'error', onError )
@@ -61,16 +61,16 @@ server.on( 'close', onClose )
 process.on( 'SIGINT', () => {
     console.debug( 'Process exiting...' )
     exitProcess()
-} )
+})
 
 // If an unhandled rejection thrown it prints and exit application
 process.on( 'unhandledRejection', ( err ) => {
     console.error( err )
     exitProcess( 1 )
-} )
+})
 
 // Exit application
-const exitProcess = ( code: number = 0 ) => {
+const exitProcess = ( code = 0 ) => {
     closeConnection()
     process.exit( code )
 }

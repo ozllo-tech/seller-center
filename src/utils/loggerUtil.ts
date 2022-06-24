@@ -5,15 +5,15 @@ import { fillString, nowForPostgre, nowIsoDate } from './util'
 
 /**
  * Função responsável por criar e salvar logs
- * 
- * @param message 
- * @param type 
- * @param eventType 
+ *
+ * @param message
+ * @param type
+ * @param eventType
  */
 export const log = (
     message: string,
     type: LoggerType,
-    service: string = 'Authentication Service',
+    service = 'Authentication Service',
     severity: SeverityType = 'INFO'
 ) => {
 

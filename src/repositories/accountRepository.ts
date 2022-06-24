@@ -2,12 +2,12 @@
 //      Account Repository
 //
 
-import { MongoError, ObjectID } from "mongodb"
-import { Address, BankInfo, ShopInfo, Contact, PersonalInfo } from "../models/account"
-import { addressCollection, bankInfoCollection, contactCollection, personalInfoCollection, shopInfoCollection } from "../utils/db/collections"
-import { log } from "../utils/loggerUtil"
-import { getFunctionName } from "../utils/util"
-import { findOneUser } from "./userRepository"
+import { MongoError, ObjectID } from 'mongodb'
+import { Address, BankInfo, ShopInfo, Contact, PersonalInfo } from '../models/account'
+import { addressCollection, bankInfoCollection, contactCollection, personalInfoCollection, shopInfoCollection } from '../utils/db/collections'
+import { log } from '../utils/loggerUtil'
+import { getFunctionName } from '../utils/util'
+import { findOneUser } from './userRepository'
 
 // #####################  PersonalInfo  ############################ //
 
@@ -32,7 +32,7 @@ export const createOrUpdatePersonalInfo = async ( personalInfo: PersonalInfo ): 
 
         const result = await personalInfoCollection.findOneAndReplace( query, replacement, options )
 
-        if ( !result.ok ) throw new MongoError( "Erro ao salvar no banco de dados." )
+        if ( !result.ok ) throw new MongoError( 'Erro ao salvar no banco de dados.' )
 
         let id: ObjectID | null = null
 
@@ -42,7 +42,7 @@ export const createOrUpdatePersonalInfo = async ( personalInfo: PersonalInfo ): 
         if ( result.ok )
             return await findPersonalInfoByUserID( personalInfo.userId )
 
-        if ( !id ) throw new MongoError( "Não gerou id" )
+        if ( !id ) throw new MongoError( 'Não gerou id' )
 
         personalInfo._id = id
 
@@ -79,7 +79,7 @@ export const findPersonalInfoByUserID = async ( userId: string ): Promise<Person
             ...projectionPJ,
         }
 
-        const personalInfo = await personalInfoCollection.findOne( { userId }, { projection } )
+        const personalInfo = await personalInfoCollection.findOne({ userId }, { projection })
 
         if ( !personalInfo ) return null
 
@@ -122,7 +122,7 @@ export const createOrUpdateAddress = async ( address: Address ): Promise<Address
         if ( result.matchedCount )
             return await findAddressByUserID( address.userId )
 
-        if ( !id ) throw new MongoError( "Não gerou id" )
+        if ( !id ) throw new MongoError( 'Não gerou id' )
 
         address._id = id
 
@@ -148,7 +148,7 @@ export const findAddressByUserID = async ( userId: string ): Promise<Address | n
 
         const projection = { cep: 1, address: 1, number: 1, complement: 1, district: 1, city: 1 }
 
-        const address = await addressCollection.findOne( { userId }, { projection } )
+        const address = await addressCollection.findOne({ userId }, { projection })
 
         return address
 
@@ -190,7 +190,7 @@ export const createOrUpdateBankInfo = async ( bankInfo: BankInfo ): Promise<Bank
         if ( result.matchedCount )
             return await findBankInfoByUserID( bankInfo.userId )
 
-        if ( !id ) throw new MongoError( "Não gerou id" )
+        if ( !id ) throw new MongoError( 'Não gerou id' )
 
         bankInfo._id = id
 
@@ -216,7 +216,7 @@ export const findBankInfoByUserID = async ( userId: string ): Promise<BankInfo |
 
         const projection = { account: 1, agency: 1, bank: 1, name: 1 }
 
-        const bankInfo = await bankInfoCollection.findOne( { userId }, { projection } )
+        const bankInfo = await bankInfoCollection.findOne({ userId }, { projection })
 
         return bankInfo
 
@@ -257,7 +257,7 @@ export const createOrUpdateShopInfo = async ( shopInfo: ShopInfo ): Promise<Shop
         if ( result.matchedCount )
             return await findShopInfoByUserID( shopInfo.userId )
 
-        if ( !id ) throw new MongoError( "Não gerou id" )
+        if ( !id ) throw new MongoError( 'Não gerou id' )
 
         shopInfo._id = id
 
@@ -283,7 +283,7 @@ export const findShopInfoByUserID = async ( userId: string ): Promise<ShopInfo |
 
         const projection = { userId: 1, name: 1 }
 
-        const shopInfo = await shopInfoCollection.findOne( { userId }, { projection } )
+        const shopInfo = await shopInfoCollection.findOne({ userId }, { projection })
 
         return shopInfo
 
@@ -303,13 +303,13 @@ export const findShopInfoByUserID = async ( userId: string ): Promise<ShopInfo |
  */
 export const findShopInfoByID = async ( _id: string ): Promise<ShopInfo | null> => {
 
-    if (!ObjectID.isValid(_id)) return null
+    if ( !ObjectID.isValid( _id ) ) return null
 
     try {
 
         const projection = { userId: 1, name: 1 }
 
-        const shopInfo = await shopInfoCollection.findOne( { _id: new ObjectID( _id ) }, { projection } )
+        const shopInfo = await shopInfoCollection.findOne({ _id: new ObjectID( _id ) }, { projection })
 
         return shopInfo
 
@@ -349,7 +349,7 @@ export const createOrUpdateContact = async ( contact: Contact ): Promise<Contact
         if ( result.matchedCount )
             return await findContactByUserID( contact.userId )
 
-        if ( !id ) throw new MongoError( "Não gerou id" )
+        if ( !id ) throw new MongoError( 'Não gerou id' )
 
         contact._id = id
 
@@ -375,7 +375,7 @@ export const findContactByUserID = async ( userId: string ): Promise<Contact | n
 
         const projection = { userId: 1, phone: 1, whatsapp: 1, url: 1 }
 
-        const shopInfo = await contactCollection.findOne( { userId }, { projection } )
+        const shopInfo = await contactCollection.findOne({ userId }, { projection })
 
         return shopInfo
 
@@ -393,21 +393,21 @@ export const findContactByUserID = async ( userId: string ): Promise<Contact | n
  *
  * @param email
  */
-export const findShopInfoByUserEmail = async (email: string): Promise<ShopInfo | null> => {
+export const findShopInfoByUserEmail = async ( email: string ): Promise<ShopInfo | null> => {
 
     try {
-        const user = await findOneUser( {email} )
+        const user = await findOneUser({email})
 
-        if (!user) return null
+        if ( !user ) return null
 
         const shopInfo = await shopInfoCollection.findOne({ userId: user._id })
 
         return shopInfo
 
-    } catch (error) {
+    } catch ( error ) {
 
-        if (error instanceof MongoError || error instanceof Error)
-            log(error.message, 'EVENT', `Account Repository - ${getFunctionName()}`, 'ERROR')
+        if ( error instanceof MongoError || error instanceof Error )
+            log( error.message, 'EVENT', `Account Repository - ${getFunctionName()}`, 'ERROR' )
 
         return null
     }

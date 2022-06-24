@@ -2,18 +2,18 @@
 //      Tenant Service
 //
 
-import { HUB2B_Tenants } from "../models/hub2b"
-import { saveTenant, updateTenant, findHub2bTenantByIdTenant, findTenantByOwnerEmail, retrieveTenants } from "../repositories/hub2TenantRepository"
-import { saveUser } from "../repositories/hub2UserRepository"
-import { saveTenantCredential } from "../repositories/hub2TenantCredentialRepository"
-import { log } from "../utils/loggerUtil"
-import { getFunctionName, waitforme } from "../utils/util"
-import { HUB2B_URL_V2, HUB2B_TENANT, HUB2B_AGENCY } from "../utils/consts"
-import { AGENCY_CREDENTIALS, renewAccessTokenHub2b } from "./hub2bAuhService"
-import { requestHub2B } from "./hub2bService"
-import { findUserByShopId } from "../repositories/userRepository"
-import { findAddressByUserID, findContactByUserID, findPersonalInfoByUserID } from "../repositories/accountRepository"
-import { randomUUID } from "crypto"
+import { HUB2B_Tenants } from '../models/hub2b'
+import { saveTenant, updateTenant, findHub2bTenantByIdTenant, findTenantByOwnerEmail, retrieveTenants } from '../repositories/hub2TenantRepository'
+import { saveUser } from '../repositories/hub2UserRepository'
+import { saveTenantCredential } from '../repositories/hub2TenantCredentialRepository'
+import { log } from '../utils/loggerUtil'
+import { getFunctionName, waitforme } from '../utils/util'
+import { HUB2B_URL_V2, HUB2B_TENANT, HUB2B_AGENCY } from '../utils/consts'
+import { AGENCY_CREDENTIALS, renewAccessTokenHub2b } from './hub2bAuhService'
+import { requestHub2B } from './hub2bService'
+import { findUserByShopId } from '../repositories/userRepository'
+import { findAddressByUserID, findContactByUserID, findPersonalInfoByUserID } from '../repositories/accountRepository'
+import { randomUUID } from 'crypto'
 
 /**
  * Save a new Tenant
@@ -22,13 +22,13 @@ import { randomUUID } from "crypto"
  */
 export const createTenant = async ( shopInfo: any ): Promise<HUB2B_Tenants | null> => {
 
-    if (!shopInfo) return null
+    if ( !shopInfo ) return null
 
     const [ user, personalInfo, contact, address ] = await Promise.all([
-        findUserByShopId(shopInfo._id),
-        findPersonalInfoByUserID(shopInfo.userId),
-        findContactByUserID(shopInfo.userId),
-        findAddressByUserID(shopInfo.userId),
+        findUserByShopId( shopInfo._id ),
+        findPersonalInfoByUserID( shopInfo.userId ),
+        findContactByUserID( shopInfo.userId ),
+        findAddressByUserID( shopInfo.userId ),
     ])
 
     if ( !user || !personalInfo || !contact || !address ) return null
@@ -48,7 +48,7 @@ export const createTenant = async ( shopInfo: any ): Promise<HUB2B_Tenants | nul
             zipCode: address.cep,
             street: address.address,
             neighborhood: address.district,
-            number: Number(address.number) || 0,
+            number: Number( address.number ) || 0,
             city: address.city,
             state: 'XX',
             country: 'XX',
@@ -68,7 +68,7 @@ export const createTenant = async ( shopInfo: any ): Promise<HUB2B_Tenants | nul
     const savedTenant = await saveTenant( data )
 
     // Save a new User
-    await saveUser( newTenant.users[0] )
+    await saveUser( newTenant.users[0])
 
     // Save Tenant Credentials
     const tenantCredential = await getTenantCredentialsInHub2b( newTenant.idTenant )
@@ -92,12 +92,12 @@ export const createTenant = async ( shopInfo: any ): Promise<HUB2B_Tenants | nul
  *
  * @returns
  */
- export const getTenantInHub2b = async (idTenant: any): Promise<HUB2B_Tenants | null> => {
+export const getTenantInHub2b = async ( idTenant: any ): Promise<HUB2B_Tenants | null> => {
 
-    await renewAccessTokenHub2b(false, null, true)
+    await renewAccessTokenHub2b( false, null, true )
 
     const SETUP_URL = HUB2B_URL_V2 +
-      "/Setup/Tenants/" + idTenant + "?access_token=" + AGENCY_CREDENTIALS.access_token
+      '/Setup/Tenants/' + idTenant + '?access_token=' + AGENCY_CREDENTIALS.access_token
 
     const response = await requestHub2B( SETUP_URL, 'GET' )
     if ( !response ) return null
@@ -105,8 +105,8 @@ export const createTenant = async ( shopInfo: any ): Promise<HUB2B_Tenants | nul
     const tenant = response.data
 
     tenant
-        ? log( "GET Tenant in hub2b success", "EVENT", getFunctionName() )
-        : log( "GET Tenant in hub2b error", "EVENT", getFunctionName(), "WARN" )
+        ? log( 'GET Tenant in hub2b success', 'EVENT', getFunctionName() )
+        : log( 'GET Tenant in hub2b error', 'EVENT', getFunctionName(), 'WARN' )
 
     return tenant
 }
@@ -117,14 +117,14 @@ export const createTenant = async ( shopInfo: any ): Promise<HUB2B_Tenants | nul
  * @param body
  * @returns
  */
-export const setupTenantsHub2b = async (body: any) => {
+export const setupTenantsHub2b = async ( body: any ) => {
 
-    await renewAccessTokenHub2b(false, null, true)
+    await renewAccessTokenHub2b( false, null, true )
 
     // TODO: send email password only when requires manual authentication (Tray).
 
     const SETUP_URL = HUB2B_URL_V2 +
-        "/Setup/Tenants?SendPasswordEmail=false&access_token=" + AGENCY_CREDENTIALS.access_token
+        '/Setup/Tenants?SendPasswordEmail=false&access_token=' + AGENCY_CREDENTIALS.access_token
 
     const response = await requestHub2B( SETUP_URL, 'POST', body )
     if ( !response ) return null
@@ -132,8 +132,8 @@ export const setupTenantsHub2b = async (body: any) => {
     const create_tenant = response.data
 
     create_tenant
-        ? log( "create new Tenant success", "EVENT", getFunctionName() )
-        : log( "create new Tenant error", "EVENT", getFunctionName(), "WARN" )
+        ? log( 'create new Tenant success', 'EVENT', getFunctionName() )
+        : log( 'create new Tenant error', 'EVENT', getFunctionName(), 'WARN' )
 
     return create_tenant
 }
@@ -144,12 +144,12 @@ export const setupTenantsHub2b = async (body: any) => {
  * @param body
  * @returns
  */
- export const getTenantCredentialsInHub2b = async (idTenant: any) => {
+export const getTenantCredentialsInHub2b = async ( idTenant: any ) => {
 
-    await renewAccessTokenHub2b(false, null, true)
+    await renewAccessTokenHub2b( false, null, true )
 
     const SETUP_URL = HUB2B_URL_V2 +
-        "/Setup/Tenants/" + idTenant + "/Credentials?access_token=" + AGENCY_CREDENTIALS.access_token
+        '/Setup/Tenants/' + idTenant + '/Credentials?access_token=' + AGENCY_CREDENTIALS.access_token
 
     const response = await requestHub2B( SETUP_URL, 'POST' )
     if ( !response ) return null
@@ -157,8 +157,8 @@ export const setupTenantsHub2b = async (body: any) => {
     const tenantCredentials = response.data
 
     tenantCredentials
-        ? log( "POST Tenant Credentials success", "EVENT", getFunctionName() )
-        : log( "POST Tenant Credentials error", "EVENT", getFunctionName(), "WARN" )
+        ? log( 'POST Tenant Credentials success', 'EVENT', getFunctionName() )
+        : log( 'POST Tenant Credentials error', 'EVENT', getFunctionName(), 'WARN' )
 
     return tenantCredentials
 }
@@ -168,10 +168,10 @@ export const setupTenantsHub2b = async (body: any) => {
  *
  * @param body
  */
- export const updateHub2bTenant = async ( body: any ): Promise<HUB2B_Tenants | null> => {
+export const updateHub2bTenant = async ( body: any ): Promise<HUB2B_Tenants | null> => {
 
     if ( !body.idAgency ) {
-        const agency = await getTenantInHub2b(HUB2B_TENANT)
+        const agency = await getTenantInHub2b( HUB2B_TENANT )
 
         if ( !agency ) {
             log( `Agency ${ body.idAgency } not found in the hub2b`, 'EVENT', getFunctionName(), 'ERROR' )
@@ -206,12 +206,12 @@ export const setupTenantsHub2b = async (body: any) => {
  * @param body
  * @returns
  */
- export const updateTenantsInHub2b = async (body: any) => {
+export const updateTenantsInHub2b = async ( body: any ) => {
 
-    await renewAccessTokenHub2b(false, null, true)
+    await renewAccessTokenHub2b( false, null, true )
 
     const SETUP_URL = HUB2B_URL_V2 +
-        "/Setup/Tenants/" + body.idTenant + "?access_token=" + AGENCY_CREDENTIALS.access_token
+        '/Setup/Tenants/' + body.idTenant + '?access_token=' + AGENCY_CREDENTIALS.access_token
 
     const response = await requestHub2B( SETUP_URL, 'PUT', body )
     if ( !response ) return null
@@ -219,8 +219,8 @@ export const setupTenantsHub2b = async (body: any) => {
     const tenant = response.data
 
     tenant
-        ? log( "update Tenant success", "EVENT", getFunctionName() )
-        : log( "update Tenant error", "EVENT", getFunctionName(), "WARN" )
+        ? log( 'update Tenant success', 'EVENT', getFunctionName() )
+        : log( 'update Tenant error', 'EVENT', getFunctionName(), 'WARN' )
 
     return tenant
 }
@@ -230,7 +230,7 @@ export const setupTenantsHub2b = async (body: any) => {
  *
  * @param idTenant
  */
- export const getHub2bTenant = async ( idTenant: any ): Promise<HUB2B_Tenants | null> => {
+export const getHub2bTenant = async ( idTenant: any ): Promise<HUB2B_Tenants | null> => {
 
     const tenant = await findHub2bTenantByIdTenant( idTenant )
 
@@ -242,13 +242,13 @@ export const setupTenantsHub2b = async (body: any) => {
     return tenant
 }
 
-export const findTenantfromShopID = async (shopID: string): Promise<HUB2B_Tenants | null> => {
+export const findTenantfromShopID = async ( shopID: string ): Promise<HUB2B_Tenants | null> => {
 
-    const user = await findUserByShopId(shopID)
+    const user = await findUserByShopId( shopID )
 
     if ( !user ) return null
 
-    const tenant = findTenantByOwnerEmail(user.email)
+    const tenant = findTenantByOwnerEmail( user.email )
 
     if ( !tenant ) return null
 
@@ -261,11 +261,11 @@ export const getTenantAuths = async () => {
 
     if ( !accounts ) return null
 
-    for await (let account of accounts) {
+    for await ( const account of accounts ) {
 
-        await waitforme(1000)
+        await waitforme( 1000 )
 
-        await renewAccessTokenHub2b(false, account.idTenant)
+        await renewAccessTokenHub2b( false, account.idTenant )
     }
 
 }

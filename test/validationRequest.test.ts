@@ -9,7 +9,7 @@ describe( 'Test validations', () => {
 
         expect( expectted ).toBeTruthy()
         done()
-    } )
+    })
 
     it( 'Test validations false', async ( done ) => {
 
@@ -17,5 +17,5 @@ describe( 'Test validations', () => {
 
         expect( expectted ).toBeFalsy()
         done()
-    } )
-} )
+    })
+})

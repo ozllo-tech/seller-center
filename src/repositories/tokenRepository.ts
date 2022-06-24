@@ -2,15 +2,15 @@
 //      Activation Token Repository
 //
 
-import { MongoError } from "mongodb"
-import { AccessToken } from "../models/token"
-import { accessTokenCollection } from "../utils/db/collections"
-import { log } from "../utils/loggerUtil"
-import { getFunctionName } from "../utils/util"
+import { MongoError } from 'mongodb'
+import { AccessToken } from '../models/token'
+import { accessTokenCollection } from '../utils/db/collections'
+import { log } from '../utils/loggerUtil'
+import { getFunctionName } from '../utils/util'
 
 /**
  * Save activation token
- * 
+ *
  * @param activationToken - the token to be saved
  */
 export const createAccessToken = async ( activationToken: AccessToken ): Promise<AccessToken | null> => {
@@ -32,14 +32,14 @@ export const createAccessToken = async ( activationToken: AccessToken ): Promise
 
 /**
  * Find activation token by token string
- * 
+ *
  * @param token
  */
 export const findAccessTokenByToken = async ( token: string ): Promise<AccessToken | null> => {
 
     try {
 
-        return await accessTokenCollection.findOne( { token } )
+        return await accessTokenCollection.findOne({ token })
 
     } catch ( error ) {
 
@@ -52,7 +52,7 @@ export const findAccessTokenByToken = async ( token: string ): Promise<AccessTok
 
 /**
  * Retrieve all access tokens
- * 
+ *
  * @param token
  */
 export const retrieveAllAccessToken = async (): Promise<AccessToken[] | null> => {
@@ -74,14 +74,14 @@ export const retrieveAllAccessToken = async (): Promise<AccessToken[] | null> =>
 
 /**
  * Find activation token by token string
- * 
+ *
  * @param token
  */
 export const deleteAccessToken = async ( token: string ): Promise<boolean> => {
 
     try {
 
-        const result = await accessTokenCollection.deleteOne( { token } )
+        const result = await accessTokenCollection.deleteOne({ token })
 
         return result.result.ok === 1
 

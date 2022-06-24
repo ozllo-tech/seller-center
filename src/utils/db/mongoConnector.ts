@@ -5,7 +5,7 @@ import { createCollections } from './collections'
 
 /**
  * Defines a mongo client options object
- * 
+ *
  * @see `MongoClientOptions`
  */
 const mongoClientOptions: MongoClientOptions = {
@@ -18,7 +18,7 @@ const mongoClientOptions: MongoClientOptions = {
 
 /**
  * Defines a mongo client object
- * 
+ *
  * @param MONGO_DB_URL is the database url to connect
  * @param mongoClientOptions are options to configure mongo connection
  */
@@ -28,22 +28,22 @@ const mongoClient = new MongoClient( MONGO_DB_URL, mongoClientOptions )
 mongoClient.on( 'error', ( error ) => {
     console.error( 'Database error' )
     console.error( error )
-} )
+})
 
 // Event listening when database is connected
 mongoClient.on( 'open', async () => {
 
     console.debug( 'Database connected' )
 
-    // Create collection ( repository ) 
+    // Create collection ( repository )
     await createCollections( mongoClient.db( MONGO_DB_NAME ) )
-} )
+})
 
 // Event listening when database is closed
 mongoClient.on( 'close', ( client: MongoClient ) => {
     if ( client && !client.isConnected() )
         console.debug( 'Database disconnected.' )
-} )
+})
 
 /**
  * Try to connect to server using mongo client,

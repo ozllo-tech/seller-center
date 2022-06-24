@@ -24,7 +24,7 @@ app.use( compression() )
 app.use( express.json() )
 
 // Middleware to parse only url encoded
-app.use( express.urlencoded( { extended: false } ) )
+app.use( express.urlencoded({ extended: false }) )
 
 // Cors to parse only url encoded
 app.use( corsMiddleware )
