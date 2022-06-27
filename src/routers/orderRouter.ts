@@ -2,7 +2,7 @@
 //      Rota de pedidos
 //
 
-import { Router, Request, Response, NextFunction } from 'express'
+import { Router, Request, Response } from 'express'
 import { findOrdersByShop, sendInvoice, retrieveInvoice, sendTracking, retrieveTracking, getOrderAverageShippingTime, retrieveOrderShippingLabel } from '../services/orderService'
 import { createHttpStatus, internalServerError, noContent, ok } from '../utils/httpStatus'
 import { isOrderInvoiceable } from '../utils/middlewares'
@@ -11,7 +11,7 @@ const router = Router()
 /**
  * GET -> lista de pedidos
  */
-router.get( '/all', async ( req: Request, res: Response, next: NextFunction ) => {
+router.get( '/all', async ( req: Request, res: Response ) => {
 
     const orders = await findOrdersByShop( req.shop?._id.toString() )
 
@@ -25,7 +25,7 @@ router.get( '/all', async ( req: Request, res: Response, next: NextFunction ) =>
         .send( orders )
 })
 
-router.post( '/:id/invoice', isOrderInvoiceable, async ( req: Request, res: Response, next: NextFunction ) => {
+router.post( '/:id/invoice', isOrderInvoiceable, async ( req: Request, res: Response ) => {
 
     const invoice = await sendInvoice( req?.order, req.body )
 
@@ -39,7 +39,7 @@ router.post( '/:id/invoice', isOrderInvoiceable, async ( req: Request, res: Resp
         .send( invoice )
 })
 
-router.get( '/:id/invoice', async ( req: Request, res: Response, next: NextFunction ) => {
+router.get( '/:id/invoice', async ( req: Request, res: Response ) => {
 
     const invoice = await retrieveInvoice( req.params.id )
 
@@ -53,7 +53,7 @@ router.get( '/:id/invoice', async ( req: Request, res: Response, next: NextFunct
         .send( invoice )
 })
 
-router.get( '/:id/tracking', async ( req: Request, res: Response, next: NextFunction ) => {
+router.get( '/:id/tracking', async ( req: Request, res: Response ) => {
 
     const tracking = await retrieveTracking( req.params.id )
 
@@ -67,7 +67,7 @@ router.get( '/:id/tracking', async ( req: Request, res: Response, next: NextFunc
         .send( tracking )
 })
 
-router.post( '/:id/tracking', async ( req: Request, res: Response, next: NextFunction ) => {
+router.post( '/:id/tracking', async ( req: Request, res: Response ) => {
 
     const tracking = await sendTracking( req.params.id, req.body )
 
@@ -81,7 +81,7 @@ router.post( '/:id/tracking', async ( req: Request, res: Response, next: NextFun
         .send( tracking )
 })
 
-router.get( '/insigths', async ( req: Request, res: Response, next: NextFunction ) => {
+router.get( '/insigths', async ( req: Request, res: Response ) => {
 
     const result = await getOrderAverageShippingTime( req.shop?._id )
 
@@ -95,7 +95,7 @@ router.get( '/insigths', async ( req: Request, res: Response, next: NextFunction
         .send( result )
 })
 
-router.get( '/:id/shippingLabel', async ( req: Request, res: Response, next: NextFunction ) => {
+router.get( '/:id/shippingLabel', async ( req: Request, res: Response ) => {
 
     const result = await retrieveOrderShippingLabel( req.params.id )
 
