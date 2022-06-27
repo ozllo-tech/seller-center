@@ -245,7 +245,7 @@ export const findProductsByShopId = async ( shop_id: string  ): Promise<Product[
     }
 }
 
-export const findPaginatedProductsByShopId = async ( shop_id: string, page = 1, limit = 300, search: any = '' ): Promise<PaginatedResults | null> => {
+export const findPaginatedProductsByShopId = async ( shop_id: string, page = 1, limit = 300, search = '' ): Promise<PaginatedResults | null> => {
 
     try {
 
