@@ -31,7 +31,7 @@ export const createNewProduct = async ( product: Product, variations: Variation[
 
     try {
 
-        const transactionResults = await session.withTransaction( async () => {
+        await session.withTransaction( async () => {
 
             const productResults = await productCollection.insertOne( product, { session })
 
