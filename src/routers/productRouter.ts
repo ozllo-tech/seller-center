@@ -2,7 +2,7 @@
 //      Rota de produtos
 //
 
-import { Router, Request, Response, NextFunction } from 'express'
+import { Router, Request, Response } from 'express'
 import { findPaginatedProductsByShopId } from '../repositories/productRepository'
 import { createNewVariation, createProduct, updateProduct, updateProductImages, updateProductPrice, updateProductVariation, updateProductVariationStock, deleteProduct, deleteVariationById } from '../services/productService'
 import { importProduct } from '../services/tenant2HubService'
@@ -47,7 +47,7 @@ router.post( '/upload', async ( req, res ) => {
 /**
  * POST -> cria um novo produto vinculado a loja
  */
-router.post( '/', async ( req: Request, res: Response, next: NextFunction ) => {
+router.post( '/', async ( req: Request, res: Response ) => {
 
     const body = req.body
 
@@ -72,7 +72,7 @@ router.post( '/', async ( req: Request, res: Response, next: NextFunction ) => {
         .send( product )
 })
 
-router.delete( '/:product_id', isProductFromShop, async ( req: Request, res: Response, next: NextFunction ) => {
+router.delete( '/:product_id', isProductFromShop, async ( req: Request, res: Response ) => {
 
     const result = await deleteProduct( req.params.product_id )
 
@@ -90,7 +90,7 @@ router.delete( '/:product_id', isProductFromShop, async ( req: Request, res: Res
 /**
  * GET -> produto details
  */
-router.get( '/:product_id', isProductFromShop, async ( req: Request, res: Response, next: NextFunction ) => {
+router.get( '/:product_id', isProductFromShop, async ( req: Request, res: Response ) => {
 
     return res
         .status( ok.status )
@@ -100,7 +100,7 @@ router.get( '/:product_id', isProductFromShop, async ( req: Request, res: Respon
 /**
  * PATCH -> atualiza produto
  */
-router.patch( '/:product_id', isProductFromShop, async ( req: Request, res: Response, next: NextFunction ) => {
+router.patch( '/:product_id', isProductFromShop, async ( req: Request, res: Response ) => {
 
     const body = req.body
 
@@ -128,7 +128,7 @@ router.patch( '/:product_id', isProductFromShop, async ( req: Request, res: Resp
 /**
  * PATCH -> atualiza imagens do produto
  */
-router.patch( '/:product_id/images', isProductFromShop, async ( req: Request, res: Response, next: NextFunction ) => {
+router.patch( '/:product_id/images', isProductFromShop, async ( req: Request, res: Response ) => {
 
     const body = req.body
 
@@ -156,7 +156,7 @@ router.patch( '/:product_id/images', isProductFromShop, async ( req: Request, re
 /**
  * PATCH -> atualiza preço produto
  */
-router.patch( '/:product_id/price', isProductFromShop, async ( req: Request, res: Response, next: NextFunction ) => {
+router.patch( '/:product_id/price', isProductFromShop, async ( req: Request, res: Response ) => {
 
     const body = req.body
 
@@ -184,7 +184,7 @@ router.patch( '/:product_id/price', isProductFromShop, async ( req: Request, res
 /**
  * GET -> variação do produto
  */
-router.get( '/:product_id/variation/:variation_id', isProductFromShop, isVariationFromProduct, async ( req: Request, res: Response, next: NextFunction ) => {
+router.get( '/:product_id/variation/:variation_id', isProductFromShop, isVariationFromProduct, async ( req: Request, res: Response ) => {
 
     if ( !req.product || !req.variation )
         return res
@@ -201,7 +201,7 @@ router.get( '/:product_id/variation/:variation_id', isProductFromShop, isVariati
 /**
  * POST -> cria variação do produto
  */
-router.post( '/:product_id/variation', isProductFromShop, async ( req: Request, res: Response, next: NextFunction ) => {
+router.post( '/:product_id/variation', isProductFromShop, async ( req: Request, res: Response ) => {
 
     const body = req.body
 
@@ -229,7 +229,7 @@ router.post( '/:product_id/variation', isProductFromShop, async ( req: Request, 
 /**
  * PATCH -> atualiza variação do produto
  */
-router.patch( '/:product_id/variation/:variation_id', isProductFromShop, isVariationFromProduct, async ( req: Request, res: Response, next: NextFunction ) => {
+router.patch( '/:product_id/variation/:variation_id', isProductFromShop, isVariationFromProduct, async ( req: Request, res: Response ) => {
 
     const body = req.body
 
@@ -257,7 +257,7 @@ router.patch( '/:product_id/variation/:variation_id', isProductFromShop, isVaria
 /**
  * PATCH -> atualiza estoque da variação
  */
-router.patch( '/:product_id/variation/:variation_id/stock', isProductFromShop, isVariationFromProduct, async ( req: Request, res: Response, next: NextFunction ) => {
+router.patch( '/:product_id/variation/:variation_id/stock', isProductFromShop, isVariationFromProduct, async ( req: Request, res: Response ) => {
 
     const body = req.body
 
@@ -285,7 +285,7 @@ router.patch( '/:product_id/variation/:variation_id/stock', isProductFromShop, i
 /**
  * DELETE -> Exclui variação do produto
  */
-router.delete( '/:product_id/variation/:variation_id', isProductFromShop, isVariationFromProduct, async ( req: Request, res: Response, next: NextFunction ) => {
+router.delete( '/:product_id/variation/:variation_id', isProductFromShop, isVariationFromProduct, async ( req: Request, res: Response ) => {
 
     if ( !req.product || !req.variation )
         return res
@@ -307,7 +307,7 @@ router.delete( '/:product_id/variation/:variation_id', isProductFromShop, isVari
 /**
  * GET -> Retrieve all products for a given shop
  */
-router.get( '/', async ( req: Request, res: Response, next: NextFunction ) => {
+router.get( '/', async ( req: Request, res: Response ) => {
 
     const page = Number( req.query.page ) || 1
 
@@ -330,7 +330,7 @@ router.get( '/', async ( req: Request, res: Response, next: NextFunction ) => {
 /**
  * POST -> importa produtos cadastrados na hub2b
  */
-router.post( '/import/hub2b/:shop_id/:tenant_id', async ( req: Request, res: Response, next: NextFunction ) => {
+router.post( '/import/hub2b/:shop_id/:tenant_id', async ( req: Request, res: Response ) => {
 
     const tenant_id = req.params.tenant_id
     const shop_id = req.params.shop_id
