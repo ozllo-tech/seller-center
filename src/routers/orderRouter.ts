@@ -3,7 +3,8 @@
 //
 
 import { Router, Request, Response } from 'express'
-import { findOrdersByShop, sendInvoice, retrieveInvoice, sendTracking, retrieveTracking, getOrderAverageShippingTime, retrieveOrderShippingLabel } from '../services/orderService'
+import { findPaginatedOrdersByShopId } from '../repositories/orderRepository'
+import { sendInvoice, retrieveInvoice, sendTracking, retrieveTracking, getOrderAverageShippingTime, retrieveOrderShippingLabel } from '../services/orderService'
 import { createHttpStatus, internalServerError, noContent, ok } from '../utils/httpStatus'
 import { isOrderInvoiceable } from '../utils/middlewares'
 const router = Router()
@@ -13,7 +14,33 @@ const router = Router()
  */
 router.get( '/all', async ( req: Request, res: Response ) => {
 
-    const orders = await findOrdersByShop( req.shop?._id.toString() )
+    const page = Number( req.query.page ) || 1
+
+    const limit = Number( req.query.limit ) || 300
+
+    const search = req.query.search?.toString() || ''
+
+    const orders = await findPaginatedOrdersByShopId( req.shop?._id.toString(), page, limit, search )
+
+    if ( !orders )
+        return res
+            .status( internalServerError.status )
+            .send( createHttpStatus( internalServerError ) )
+
+    return res
+        .status( ok.status )
+        .send( orders )
+})
+
+router.get( '/status/:status', async ( req: Request, res: Response ) => {
+
+    const page = Number( req.query.page ) || 1
+
+    const limit = Number( req.query.limit ) || 300
+
+    const search = req.query.search?.toString() || ''
+
+    const orders = await findPaginatedOrdersByShopId( req.shop?._id.toString(), page, limit, search, req.params.status )
 
     if ( !orders )
         return res

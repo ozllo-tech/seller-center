@@ -4,6 +4,7 @@
 
 import { MongoError } from 'mongodb'
 import { Order, OrderIntegration } from '../models/order'
+import { PaginatedResults } from '../models/others'
 import { orderCollection, orderIntegrationCollection } from '../utils/db/collections'
 import { log } from '../utils/loggerUtil'
 import { getFunctionName } from '../utils/util'
@@ -88,6 +89,37 @@ export const findOrderByShopId = async ( shop_id: string, filter = {}): Promise<
         const orders = await result.toArray()
 
         return orders
+
+    } catch ( error ) {
+
+        if ( error instanceof MongoError || error instanceof Error )
+            log( error.message, 'EVENT', `User Repository - ${getFunctionName()}`, 'ERROR' )
+
+        return null
+    }
+}
+
+export const findPaginatedOrdersByShopId = async ( shop_id: string, page = 1, limit = 300, search = '', status = 'all' ): Promise<PaginatedResults | null> => {
+
+    try {
+
+        const total = await orderCollection.countDocuments({
+            shop_id: shop_id,
+            ...( 'all' !== status ? { 'order.status.status':  { $regex: status, $options: 'i' }} : {}),
+            ...( search.length ? { 'order.products': { $elemMatch: { name: { $regex: search, $options: 'i' } } } } : {}), // Search for product name.
+        })
+
+        const results: PaginatedResults = {total}
+
+        const query = orderCollection.find({
+            shop_id: shop_id,
+            ...( 'all' !== status ? { 'order.status.status':  { $regex: status, $options: 'i' } } : {}),
+            ...( search.length ? { 'order.products': { $elemMatch: { name: { $regex: search, $options: 'i' } } } } : {}) // Search for product name.
+        }).sort( '_id', -1 ).skip( ( page - 1 ) * limit ).limit( limit )
+
+        results.items = await query.toArray()
+
+        return results
 
     } catch ( error ) {
 

@@ -47,9 +47,3 @@ export interface Variation {
     sourceSKU?: string
 }
 
-export interface PaginatedResults {
-    products?: Product[]
-    total: number
-    next?: any
-    previous?: any
-}

@@ -1,3 +1,6 @@
+import { Order } from './order'
+import { Product } from './product'
+
 export interface MuterFile {
     fieldname: string,
     originalname: string,
@@ -15,4 +18,16 @@ export interface MuterFile {
     location: string,
     etag: string,
     versionId?: any
+}
+
+export interface PaginatedResults {
+    items?: Product[] | Order[],
+    total: number,
+    next?: PaginatedResultsPage,
+    previous?: PaginatedResultsPage,
+}
+
+export interface PaginatedResultsPage {
+    page: number,
+    limit: number,
 }

@@ -4,7 +4,8 @@
 
 import { MongoError, ObjectID, TransactionOptions } from 'mongodb'
 import productEventEmitter from '../events/product'
-import { Product, Variation, PaginatedResults } from '../models/product'
+import { PaginatedResults } from '../models/others'
+import { Product, Variation } from '../models/product'
 import { HUB2B_TENANT } from '../utils/consts'
 import { productCollection, variationCollection, VARIATION_COLLECTION } from '../utils/db/collections'
 import { getMongoSession } from '../utils/db/mongoConnector'
@@ -16,7 +17,6 @@ const transactionOptions: TransactionOptions = {
     readConcern: { level: 'local' },
     writeConcern: { w: 'majority' }
 }
-
 
 /**
  * Create new Product
@@ -291,7 +291,7 @@ export const findPaginatedProductsByShopId = async ( shop_id: string, page = 1, 
 
         if ( !productsCursor ) throw new MongoError( 'Could not retrieve products.' )
 
-        results.products = await productsCursor.toArray()
+        results.items = await productsCursor.toArray()
 
         return results
 
