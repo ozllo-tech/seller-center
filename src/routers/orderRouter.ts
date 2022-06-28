@@ -4,7 +4,7 @@
 
 import { Router, Request, Response } from 'express'
 import { findPaginatedOrdersByShopId } from '../repositories/orderRepository'
-import { sendInvoice, retrieveInvoice, sendTracking, retrieveTracking, getOrderAverageShippingTime, retrieveOrderShippingLabel } from '../services/orderService'
+import { sendInvoice, retrieveInvoice, sendTracking, retrieveTracking, getOrderAverageShippingTime, retrieveOrderShippingLabel, getOrdersStatusCount } from '../services/orderService'
 import { createHttpStatus, internalServerError, noContent, ok } from '../utils/httpStatus'
 import { isOrderInvoiceable } from '../utils/middlewares'
 const router = Router()
@@ -110,7 +110,11 @@ router.post( '/:id/tracking', async ( req: Request, res: Response ) => {
 
 router.get( '/insigths', async ( req: Request, res: Response ) => {
 
-    const result = await getOrderAverageShippingTime( req.shop?._id )
+    const averageShippingTime = await getOrderAverageShippingTime( req.shop?._id )
+
+    const orderStatusCount = await getOrdersStatusCount( req.shop?._id.toString() )
+
+    const result = [averageShippingTime, orderStatusCount]
 
     if ( !result )
         return res

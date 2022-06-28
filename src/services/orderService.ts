@@ -4,7 +4,7 @@
 
 import { HUB2B_Order, HUB2B_Invoice, HUB2B_Tracking, HUB2B_Integration, HUB2B_Order_Webhook, HUB2B_Status, HUB2B_Product_Order } from '../models/hub2b'
 import { Order, OrderIntegration } from '../models/order'
-import { findLastIntegrationOrder, findOrderByShopId, newIntegrationHub2b, newOrderHub2b, findOneOrderAndModify, findOrdersByFields, findOrderByField } from '../repositories/orderRepository'
+import { findLastIntegrationOrder, findOrderByShopId, newIntegrationHub2b, newOrderHub2b, findOneOrderAndModify, findOrdersByFields, findOrderByField, getOrdersCountByStatus } from '../repositories/orderRepository'
 import { HUB2B_MARKETPLACE, HUB2B_TENANT, PROJECT_HOST } from '../utils/consts'
 import { log } from '../utils/loggerUtil'
 import { flatString, getFunctionName, nowIsoDateHub2b } from '../utils/util'
@@ -443,14 +443,33 @@ export const getOrderAverageShippingTime = async ( shopId: ObjectID ): Promise<u
 
     const lastMonth = await getLastestOrdersShippingAverageTime( shopId, 30 )
 
-    return [
-        {
-            average_shipping_time: {
-                last_week: lastWeek,
-                last_month: lastMonth,
-            }
+    return {
+        average_shipping_time: {
+            last_week: lastWeek,
+            last_month: lastMonth,
         }
-    ]
+    }
+}
+
+export const getOrdersStatusCount = async ( shopId: string ): Promise<unknown> => {
+
+    const approved = await getOrdersCountByStatus( shopId, 'Approved' )
+    const invoiced = await getOrdersCountByStatus( shopId, 'Invoiced' )
+    const shipped = await getOrdersCountByStatus( shopId, 'Shipped' )
+    const delivered = await getOrdersCountByStatus( shopId, 'Delivered' )
+    const canceled = await getOrdersCountByStatus( shopId, 'Canceled' )
+    const pending = await getOrdersCountByStatus( shopId, 'Pending' )
+
+    return {
+        status_count: {
+            pending,
+            approved,
+            invoiced,
+            shipped,
+            delivered,
+            canceled,
+        }
+    }
 }
 
 async function getLastestOrdersShippingAverageTime ( shopId: ObjectID, days: number ): Promise<number|null> {

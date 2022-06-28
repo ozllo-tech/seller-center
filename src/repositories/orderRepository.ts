@@ -201,3 +201,21 @@ export const updateOrderMeta = ( order: Order ): Order => {
 
     return order
 }
+
+export const getOrdersCountByStatus = async ( shop_id: string, status: string ): Promise<number|null> => {
+
+    try {
+
+        const result = await orderCollection.countDocuments({shop_id, 'order.status.status': status})
+
+        return result
+
+    } catch ( error ) {
+
+        if ( error instanceof MongoError || error instanceof Error )
+            log( error.message, 'EVENT', `User Repository - ${getFunctionName()}`, 'ERROR' )
+
+        return null
+    }
+}
+
