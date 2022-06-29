@@ -69,9 +69,7 @@ export const createProduct = async ( body: any ): Promise<Product | null> => {
         is_active: true
     }
 
-    const validatedProduct = await validateProduct( ref_product )
-
-    const product = await createNewProduct( validatedProduct, variations )
+    const product = await createNewProduct( ref_product, variations )
 
     if ( !product ) {
 
@@ -80,13 +78,15 @@ export const createProduct = async ( body: any ): Promise<Product | null> => {
         return null
     }
 
-    log( `Product ${product.name} has been created.`, 'EVENT', getFunctionName() )
+    const validatedProduct = await validateProduct( product )
+
+    log( `Product ${validatedProduct.name} has been created.`, 'EVENT', getFunctionName() )
 
     const idTenant = body.idTenant | Number( HUB2B_TENANT )
 
     productEventEmitter.emit( 'create', product, idTenant )
 
-    return product
+    return validatedProduct
 }
 
 /**
@@ -359,15 +359,15 @@ export const validateProductFields = async ( product: Product ): Promise<Product
 
     type ObjectKey = keyof typeof product // https://bobbyhadz.com/blog/typescript-access-object-property-dynamically
 
-    const fields = ['category', 'images', 'name', 'description', 'brand', 'sku', 'gender', 'height', 'width', 'length', 'weight', 'price', 'price_discounted', 'variations'] as ObjectKey[]
+    const fields = ['category', 'images', 'name', 'description', 'brand', 'sku', 'gender', 'height', 'width', 'length', 'weight', 'price', 'price_discounted'] as ObjectKey[]
 
     for await ( const field of fields ) {
 
-        let errorIndex = product?.validation?.errors.findIndex( error => error.field === field ) ?? -1
+        const errorIndex = product?.validation?.errors.findIndex( error => error.field === field ) ?? -1
 
-        let conditionIndex = product?.validation?.errors[errorIndex]?.conditions.findIndex( condition => condition === 'required' ) ?? -1
+        const conditionIndex = product?.validation?.errors[errorIndex]?.conditions.findIndex( condition => condition === 'required' ) ?? -1
 
-        let condition = product.validation?.errors[errorIndex]?.conditions[conditionIndex] || ''
+        const condition = product.validation?.errors[errorIndex]?.conditions[conditionIndex] || ''
 
         if ( !product[field] || Array.isArray( product[field]) && !product[field].length ) { // Validate required product fields.
 
@@ -398,198 +398,203 @@ export const validateProductFields = async ( product: Product ): Promise<Product
                 // If there are no conditions, remove error
                 if ( product.validation.errors[errorIndex]?.conditions.length === 0 ) product.validation.errors.splice( errorIndex, 1 )
             }
+        }
+    }
 
-            // It'll aways have one variation. So,validate it.
+    // Will aways going to have one variation. So,validate it.
 
-            if ( product.variations?.length && 'variations' === field ) {
+    if ( product.variations?.length ) {
 
-                const updatedVariations = await findVariationsByProductId( product._id )
+        const updatedVariations = await findVariationsByProductId( product._id )
 
-                if ( !updatedVariations ) return product
+        console.log({updatedVariations})
 
-                // console.log({updatedVariations})
+        if ( !updatedVariations ) return product
 
-                for await ( const variationField of updatedVariations ) {
+        // console.log({updatedVariations})
 
-                    errorIndex = product?.validation?.errors.findIndex( error => error.field ===`variation.${variationField._id}.attr` ) ?? -1
+        for await ( const variationField of updatedVariations ) {
 
-                    conditionIndex = product?.validation?.errors[errorIndex]?.conditions.findIndex( condition => condition === 'required' ) ?? -1
+            let errorIndex = product?.validation?.errors.findIndex( error => error.field ===`variation.${variationField._id}.attr` ) ?? -1
 
-                    condition = product.validation?.errors[errorIndex]?.conditions[conditionIndex] || ''
+            let conditionIndex = product?.validation?.errors[errorIndex]?.conditions.findIndex( condition => condition === 'required' ) ?? -1
 
-                    // Validate required product variation color fields.
+            let condition = product.validation?.errors[errorIndex]?.conditions[conditionIndex] || ''
 
-                    const colorAttr = getCategoryAttributes( Number( product.category ) )[0]?.attributes.find( attr => attr.name === 'color' )
+            // Validate required product variation color fields.
 
-                    if ( colorAttr && !variationField.color?.length ) {
+            const colorAttr = getCategoryAttributes( Number( product.category ) )[0]?.attributes.find( attr => attr.name === 'color' )
 
-                        // console.log({condition: 'empty', color: variationField.color, attr: variationField.color})
+            if ( colorAttr && !variationField.color?.length ) {
 
-                        // If field validation error conditions exists, add condition to it.
+                // console.log({condition: 'empty', color: variationField.color, attr: variationField.color})
 
-                        if ( product.validation && product.validation.errors[errorIndex]?.conditions && condition !== 'required' ) {
+                // If field validation error conditions exists, add condition to it.
 
-                            product.validation.errors[errorIndex].conditions = [...product.validation.errors[errorIndex].conditions, 'required']
+                if ( product.validation && product.validation.errors[errorIndex]?.conditions && condition !== 'required' ) {
 
-                        }
+                    product.validation.errors[errorIndex].conditions = [...product.validation.errors[errorIndex].conditions, 'required']
 
-                        // If field validation does not exist, create it.
+                }
 
-                        if ( errorIndex === -1 ) {
+                // If field validation does not exist, create it.
 
-                            product.validation
-                                ? product.validation.errors = [...product.validation.errors, { field:`variation.${variationField._id}.attr`, conditions: ['required'] }]
-                                : product.validation = { errors: [{ field:`variation.${variationField._id}.attr`, conditions: ['required'] }] }
-                        }
+                if ( errorIndex === -1 ) {
 
-                    }
+                    product.validation
+                        ? product.validation.errors = [...product.validation.errors, { field:`variation.${variationField._id}.attr`, conditions: ['required'] }]
+                        : product.validation = { errors: [{ field:`variation.${variationField._id}.attr`, conditions: ['required'] }] }
+                }
 
-                    if ( colorAttr && !!variationField.color?.length ) {
+            }
 
-                        // console.log({condition: 'filled', color: variationField.color})
+            if ( colorAttr && !!variationField.color?.length ) {
 
-                        if ( product?.validation?.errors ) {
+                // console.log({condition: 'filled', color: variationField.color})
 
-                            // Remove condition if exists
-                            product.validation.errors[errorIndex]?.conditions.splice( conditionIndex, 1 )
+                if ( product?.validation?.errors ) {
 
-                            // If there are no conditions, remove error
-                            if ( product.validation.errors[errorIndex]?.conditions.length === 0 ) product.validation.errors.splice( errorIndex, 1 )
-                        }
-                    }
+                    // Remove condition if exists
+                    product.validation.errors[errorIndex]?.conditions.splice( conditionIndex, 1 )
 
-                    // Validate required product variation flavor fields.
+                    // If there are no conditions, remove error
+                    if ( product.validation.errors[errorIndex]?.conditions.length === 0 ) product.validation.errors.splice( errorIndex, 1 )
+                }
+            }
 
-                    const flavorAttr = getCategoryAttributes( Number( product.category ) )[0]?.attributes.find( attr => attr.name === 'flavor' )
+            // Validate required product variation flavor fields.
 
-                    if ( flavorAttr && !variationField.flavor ) {
+            const flavorAttr = getCategoryAttributes( Number( product.category ) )[0]?.attributes.find( attr => attr.name === 'flavor' )
 
-                        // console.log({condition: 'empty', flavor: variationField.flavor})
+            if ( flavorAttr && !variationField.flavor ) {
 
-                        // If field validation error conditions exists, add condition to it.
+                // console.log({condition: 'empty', flavor: variationField.flavor})
 
-                        if ( product.validation && product.validation.errors[errorIndex]?.conditions && condition !== 'required' ) {
+                // If field validation error conditions exists, add condition to it.
 
-                            product.validation.errors[errorIndex].conditions = [...product.validation.errors[errorIndex].conditions, 'required']
+                if ( product.validation && product.validation.errors[errorIndex]?.conditions && condition !== 'required' ) {
 
-                        }
+                    product.validation.errors[errorIndex].conditions = [...product.validation.errors[errorIndex].conditions, 'required']
 
-                        // If field validation does not exist, create it.
+                }
 
-                        if ( errorIndex === -1 ) {
+                // If field validation does not exist, create it.
 
-                            product.validation
-                                ? product.validation.errors = [...product.validation.errors, { field:`variation.${variationField._id}.attr`, conditions: ['required'] }]
-                                : product.validation = { errors: [{ field:`variation.${variationField._id}.attr`, conditions: ['required'] }] }
-                        }
+                if ( errorIndex === -1 ) {
 
-                    }
+                    product.validation
+                        ? product.validation.errors = [...product.validation.errors, { field:`variation.${variationField._id}.attr`, conditions: ['required'] }]
+                        : product.validation = { errors: [{ field:`variation.${variationField._id}.attr`, conditions: ['required'] }] }
+                }
 
-                    if ( flavorAttr && !!variationField.flavor ) {
+            }
 
-                        // console.log({condition: 'filled', flavor: variationField.flavor})
+            if ( flavorAttr && !!variationField.flavor ) {
 
-                        if ( product?.validation?.errors ) {
+                // console.log({condition: 'filled', flavor: variationField.flavor})
 
-                            // Remove condition if exists
-                            product.validation.errors[errorIndex]?.conditions.splice( conditionIndex, 1 )
+                if ( product?.validation?.errors ) {
 
-                            // If there are no conditions, remove error
-                            if ( product.validation.errors[errorIndex]?.conditions.length === 0 ) product.validation.errors.splice( errorIndex, 1 )
-                        }
-                    }
+                    // Remove condition if exists
+                    product.validation.errors[errorIndex]?.conditions.splice( conditionIndex, 1 )
 
-                    // Validate required product variation stock field.
+                    // If there are no conditions, remove error
+                    if ( product.validation.errors[errorIndex]?.conditions.length === 0 ) product.validation.errors.splice( errorIndex, 1 )
+                }
+            }
 
-                    errorIndex = product?.validation?.errors.findIndex( error => error.field ===`variation.${variationField._id}.stock` ) ?? -1
+            // Validate required product variation stock field.
 
-                    conditionIndex = product?.validation?.errors[errorIndex]?.conditions.findIndex( condition => condition === 'required' ) ?? -1
+            errorIndex = product?.validation?.errors.findIndex( error => error.field ===`variation.${variationField._id}.stock` ) ?? -1
 
-                    condition = product.validation?.errors[errorIndex]?.conditions[conditionIndex] || ''
+            conditionIndex = product?.validation?.errors[errorIndex]?.conditions.findIndex( condition => condition === 'required' ) ?? -1
 
-                    if ( !variationField.stock ) {
+            condition = product.validation?.errors[errorIndex]?.conditions[conditionIndex] || ''
 
-                        // console.log({condition: 'empty', stock: variationField.stock})
+            if ( !variationField.stock ) {
 
-                        // If field validation error conditions exists, add condition to it.
+                // console.log({condition: 'empty', stock: variationField.stock})
 
-                        if ( product.validation && product.validation.errors[errorIndex]?.conditions && condition !== 'required' ) {
+                // If field validation error conditions exists, add condition to it.
 
-                            product.validation.errors[errorIndex].conditions = [...product.validation.errors[errorIndex].conditions, 'required']
+                if ( product.validation && product.validation.errors[errorIndex]?.conditions && condition !== 'required' ) {
 
-                        }
+                    product.validation.errors[errorIndex].conditions = [...product.validation.errors[errorIndex].conditions, 'required']
 
-                        // If field validation does not exist, create it.
+                }
 
-                        if ( errorIndex === -1 ) {
+                // If field validation does not exist, create it.
 
-                            product.validation
-                                ? product.validation.errors = [...product.validation.errors, { field:`variation.${variationField._id}.stock`, conditions: ['required'] }]
-                                : product.validation = { errors: [{ field:`variation.${variationField._id}.stock`, conditions: ['required'] }] }
-                        }
-                    }
+                if ( errorIndex === -1 ) {
 
-                    if ( variationField.stock ) {
+                    product.validation
+                        ? product.validation.errors = [...product.validation.errors, { field:`variation.${variationField._id}.stock`, conditions: ['required'] }]
+                        : product.validation = { errors: [{ field:`variation.${variationField._id}.stock`, conditions: ['required'] }] }
+                }
+            }
 
-                        // console.log({condition: 'filled', stock: variationField.stock})
+            if ( variationField.stock ) {
 
-                        if ( product?.validation?.errors ) {
+                // console.log({condition: 'filled', stock: variationField.stock})
 
-                            // Remove condition if exists
-                            product.validation.errors[errorIndex]?.conditions.splice( conditionIndex, 1 )
+                if ( product?.validation?.errors ) {
 
-                            // If there are no conditions, remove error
-                            if ( product.validation.errors[errorIndex]?.conditions.length === 0 ) product.validation.errors.splice( errorIndex, 1 )
-                        }
-                    }
+                    // Remove condition if exists
+                    product.validation.errors[errorIndex]?.conditions.splice( conditionIndex, 1 )
 
-                    // Validate required product variation size field.
+                    // If there are no conditions, remove error
+                    if ( product.validation.errors[errorIndex]?.conditions.length === 0 ) product.validation.errors.splice( errorIndex, 1 )
+                }
+            }
 
-                    errorIndex = product?.validation?.errors.findIndex( error => error.field ===`variation.${variationField._id}.size` ) ?? -1
+            // Validate required product variation size field.
 
-                    conditionIndex = product?.validation?.errors[errorIndex]?.conditions.findIndex( condition => condition === 'required' ) ?? -1
+            errorIndex = product?.validation?.errors.findIndex( error => error.field ===`variation.${variationField._id}.size` ) ?? -1
 
-                    condition = product.validation?.errors[errorIndex]?.conditions[conditionIndex] || ''
+            conditionIndex = product?.validation?.errors[errorIndex]?.conditions.findIndex( condition => condition === 'required' ) ?? -1
 
-                    if ( !variationField.size ) {
+            condition = product.validation?.errors[errorIndex]?.conditions[conditionIndex] || ''
 
-                        // console.log({condition: 'empty', stock: variationField.size})
+            if ( !variationField.size ) {
 
-                        // If field validation error conditions exists, add condition to it.
+                // console.log({condition: 'empty', stock: variationField.size})
 
-                        if ( product.validation && product.validation.errors[errorIndex]?.conditions && condition !== 'required' ) {
+                // If field validation error conditions exists, add condition to it.
 
-                            product.validation.errors[errorIndex].conditions = [...product.validation.errors[errorIndex].conditions, 'required']
+                if ( product.validation && product.validation.errors[errorIndex]?.conditions && condition !== 'required' ) {
 
-                        }
+                    product.validation.errors[errorIndex].conditions = [...product.validation.errors[errorIndex].conditions, 'required']
 
-                        // If field validation does not exist, create it.
+                }
 
-                        if ( errorIndex === -1 ) {
+                // If field validation does not exist, create it.
 
-                            product.validation
-                                ? product.validation.errors = [...product.validation.errors, { field:`variation.${variationField._id}.size`, conditions: ['required'] }]
-                                : product.validation = { errors: [{ field:`variation.${variationField._id}.size`, conditions: ['required'] }] }
-                        }
-                    }
+                if ( errorIndex === -1 ) {
 
-                    if ( variationField.size ) {
+                    product.validation
+                        ? product.validation.errors = [...product.validation.errors, { field:`variation.${variationField._id}.size`, conditions: ['required'] }]
+                        : product.validation = { errors: [{ field:`variation.${variationField._id}.size`, conditions: ['required'] }] }
+                }
+            }
 
-                        // console.log({condition: 'filled', stock: variationField.size})
+            if ( variationField.size ) {
 
-                        if ( product?.validation?.errors ) {
+                // console.log({condition: 'filled', stock: variationField.size})
 
-                            // Remove condition if exists
-                            product.validation.errors[errorIndex]?.conditions.splice( conditionIndex, 1 )
+                if ( product?.validation?.errors ) {
 
-                            // If there are no conditions, remove error
-                            if ( product.validation.errors[errorIndex]?.conditions.length === 0 ) product.validation.errors.splice( errorIndex, 1 )
-                        }
-                    }
+                    // Remove condition if exists
+                    product.validation.errors[errorIndex]?.conditions.splice( conditionIndex, 1 )
+
+                    // If there are no conditions, remove error
+                    if ( product.validation.errors[errorIndex]?.conditions.length === 0 ) product.validation.errors.splice( errorIndex, 1 )
                 }
             }
         }
     }
+
+    // Save empty validation errors case they does not exist.
+    if ( !product.validation?.errors ) product.validation = { errors: [] }
 
     return product
 }
