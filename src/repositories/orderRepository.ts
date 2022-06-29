@@ -99,6 +99,26 @@ export const findOrderByShopId = async ( shop_id: string, filter = {}): Promise<
     }
 }
 
+export const findOrdersByShopIdAndStatus = async ( shop_id: string, status: string ): Promise<Order[] | null> => {
+
+    try {
+
+        const result = orderCollection.find({ shop_id: shop_id, 'order.status.status': status }).sort( '_id', -1 )
+
+        const orders = await result.toArray()
+
+        return orders
+
+    } catch ( error ) {
+
+        if ( error instanceof MongoError || error instanceof Error )
+            log( error.message, 'EVENT', `User Repository - ${getFunctionName()}`, 'ERROR' )
+
+        return null
+
+    }
+}
+
 export const findPaginatedOrdersByShopId = async ( shop_id: string, page = 1, limit = 300, search = '', status = 'all' ): Promise<PaginatedResults | null> => {
 
     try {
@@ -218,4 +238,3 @@ export const getOrdersCountByStatus = async ( shop_id: string, status: string ):
         return null
     }
 }
-

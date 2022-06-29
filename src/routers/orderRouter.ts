@@ -4,7 +4,7 @@
 
 import { Router, Request, Response } from 'express'
 import { findPaginatedOrdersByShopId } from '../repositories/orderRepository'
-import { sendInvoice, retrieveInvoice, sendTracking, retrieveTracking, getOrderAverageShippingTime, retrieveOrderShippingLabel, getOrdersStatusCount } from '../services/orderService'
+import { sendInvoice, retrieveInvoice, sendTracking, retrieveTracking, getOrderAverageShippingTime, retrieveOrderShippingLabel, getOrdersStatusCount, getOrdersRevenue } from '../services/orderService'
 import { createHttpStatus, internalServerError, noContent, ok } from '../utils/httpStatus'
 import { isOrderInvoiceable } from '../utils/middlewares'
 const router = Router()
@@ -124,6 +124,21 @@ router.get( '/insigths', async ( req: Request, res: Response ) => {
     return res
         .status( ok.status )
         .send( result )
+})
+
+router.get( '/revenue', async ( req: Request, res: Response ) => {
+
+    const result = await getOrdersRevenue( req.shop?._id )
+
+    if ( !result )
+        return res
+            .status( internalServerError.status )
+            .send( createHttpStatus( internalServerError ) )
+
+    return res
+        .status( ok.status )
+        .send( result )
+
 })
 
 router.get( '/:id/shippingLabel', async ( req: Request, res: Response ) => {

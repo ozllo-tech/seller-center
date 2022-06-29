@@ -4,7 +4,7 @@
 
 import { HUB2B_Order, HUB2B_Invoice, HUB2B_Tracking, HUB2B_Integration, HUB2B_Order_Webhook, HUB2B_Status, HUB2B_Product_Order } from '../models/hub2b'
 import { Order, OrderIntegration } from '../models/order'
-import { findLastIntegrationOrder, findOrderByShopId, newIntegrationHub2b, newOrderHub2b, findOneOrderAndModify, findOrdersByFields, findOrderByField, getOrdersCountByStatus } from '../repositories/orderRepository'
+import { findLastIntegrationOrder, findOrderByShopId, newIntegrationHub2b, newOrderHub2b, findOneOrderAndModify, findOrdersByFields, findOrderByField, getOrdersCountByStatus, findOrdersByShopIdAndStatus } from '../repositories/orderRepository'
 import { HUB2B_MARKETPLACE, HUB2B_TENANT, PROJECT_HOST } from '../utils/consts'
 import { log } from '../utils/loggerUtil'
 import { flatString, getFunctionName, nowIsoDateHub2b } from '../utils/util'
@@ -469,6 +469,65 @@ export const getOrdersStatusCount = async ( shopId: string ): Promise<unknown> =
             delivered,
             canceled,
         }
+    }
+}
+
+export const getOrdersRevenue = async ( shopId: string ): Promise<unknown> => {
+
+    const approvedOrders = await findOrdersByShopIdAndStatus( shopId.toString(), 'Approved' )
+
+    const approved = new Intl.NumberFormat( 'pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+    }).format( approvedOrders?.reduce( ( acc, order ) => acc + order.order.payment.totalAmount, 0 )|| 0 )
+
+    const pendingOrders = await findOrdersByShopIdAndStatus( shopId.toString(), 'Pending' )
+
+    const pending = new Intl.NumberFormat( 'pt-BR', {
+
+        style: 'currency',
+        currency: 'BRL',
+
+    }).format( pendingOrders?.reduce( ( acc, order ) => acc + order.order.payment.totalAmount, 0 )|| 0 )
+
+    const invoicedOrders = await findOrdersByShopIdAndStatus( shopId.toString(), 'Invoiced' )
+
+    const invoiced = new Intl.NumberFormat( 'pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+
+    }).format( invoicedOrders?.reduce( ( acc, order ) => acc + order.order.payment.totalAmount, 0 )|| 0 )
+
+    const shippedOrders = await findOrdersByShopIdAndStatus( shopId.toString(), 'Shipped' )
+
+    const shipped = new Intl.NumberFormat( 'pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+    }).format( shippedOrders?.reduce( ( acc, order ) => acc + order.order.payment.totalAmount, 0 )|| 0 )
+
+    const deliveredOrders = await findOrdersByShopIdAndStatus( shopId.toString(), 'Delivered' )
+
+    const delivered = new Intl.NumberFormat( 'pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+
+    }).format( deliveredOrders?.reduce( ( acc, order ) => acc + order.order.payment.totalAmount, 0 )|| 0 )
+
+    const canceledOrders = await findOrdersByShopIdAndStatus( shopId.toString(), 'Canceled' )
+
+    const canceled = new Intl.NumberFormat( 'pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+
+    }).format( canceledOrders?.reduce( ( acc, order ) => acc + order.order.payment.totalAmount, 0 )|| 0 )
+
+    return {
+        pending,
+        approved,
+        invoiced,
+        shipped,
+        delivered,
+        canceled,
     }
 }
 
