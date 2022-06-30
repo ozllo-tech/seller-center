@@ -123,18 +123,26 @@ export const findPaginatedOrdersByShopId = async ( shop_id: string, page = 1, li
 
     try {
 
+        const statusConditions = ['delivered', 'completed'].includes( status )
+            ? {'order.status.status': { $in: ['Delivered', 'Completed'] }}
+            : {'order.status.status':  { $regex: status, $options: 'i' }}
+
+        const statusQuery = 'all' !== status ? statusConditions : {}
+
+        const searchQuery = search.length ? {'order.products': { $elemMatch: { name: { $regex: search, $options: 'i' } } } } : {} // Search for product name.
+
         const total = await orderCollection.countDocuments({
-            shop_id: shop_id,
-            ...( 'all' !== status ? { 'order.status.status':  { $regex: status, $options: 'i' }} : {}),
-            ...( search.length ? { 'order.products': { $elemMatch: { name: { $regex: search, $options: 'i' } } } } : {}), // Search for product name.
+            shop_id,
+            ...statusQuery,
+            ...searchQuery
         })
 
         const results: PaginatedResults = {total}
 
         const query = orderCollection.find({
-            shop_id: shop_id,
-            ...( 'all' !== status ? { 'order.status.status':  { $regex: status, $options: 'i' } } : {}),
-            ...( search.length ? { 'order.products': { $elemMatch: { name: { $regex: search, $options: 'i' } } } } : {}) // Search for product name.
+            shop_id,
+            ...statusQuery,
+            ...searchQuery
         }).sort( '_id', -1 ).skip( ( page - 1 ) * limit ).limit( limit )
 
         results.items = await query.toArray()
