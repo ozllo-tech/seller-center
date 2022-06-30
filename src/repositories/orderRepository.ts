@@ -103,7 +103,11 @@ export const findOrdersByShopIdAndStatus = async ( shop_id: string, status: stri
 
     try {
 
-        const result = orderCollection.find({ shop_id: shop_id, 'order.status.status': status }).sort( '_id', -1 )
+        const query = ['Delivered', 'Completed'].includes( status )
+            ? { shop_id: shop_id, 'order.status.status': { $in: ['Delivered', 'Completed'] } }
+            : { shop_id: shop_id, 'order.status.status': status }
+
+        const result = orderCollection.find( query ).sort( '_id', -1 )
 
         const orders = await result.toArray()
 
@@ -233,8 +237,11 @@ export const updateOrderMeta = ( order: Order ): Order => {
 export const getOrdersCountByStatus = async ( shop_id: string, status: string ): Promise<number|null> => {
 
     try {
+        const query = ['Delivered', 'Completed'].includes( status )
+            ? { shop_id: shop_id, 'order.status.status': { $in: ['Delivered', 'Completed'] } }
+            : { shop_id: shop_id, 'order.status.status': status }
 
-        const result = await orderCollection.countDocuments({shop_id, 'order.status.status': status})
+        const result = await orderCollection.countDocuments( query )
 
         return result
 
