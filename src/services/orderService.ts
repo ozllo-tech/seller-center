@@ -443,10 +443,13 @@ export const getOrderAverageShippingTime = async ( shopId: ObjectID ): Promise<u
 
     const lastMonth = await getLastestOrdersShippingAverageTime( shopId, 30 )
 
+    const all = await getLastestOrdersShippingAverageTime( shopId, 0 )
+
     return {
         average_shipping_time: {
             last_week: lastWeek,
             last_month: lastMonth,
+            all
         }
     }
 }
@@ -538,6 +541,8 @@ async function getLastestOrdersShippingAverageTime ( shopId: ObjectID, days: num
     const shippableOrders = validOrders.filter( order => !!order.meta?.approved_at || order.order.status.status === 'Approved' )
 
     const lastestOrders = shippableOrders.filter( order => {
+
+        if ( !days ) return true
 
         const created = new Date( order.order.payment.purchaseDate ) // paymentDate
 
