@@ -21,7 +21,7 @@ orderEventEmitter.on( 'updated', ( order: Order, status ) => {
 
 orderEventEmitter.on( 'approved', ( order: Order ) => {
 
-    sendOrderEmailToSeller( order.shop_id )
+    sendOrderEmailToSeller( order )
 
     log( `Order ${order.order.reference.id} is now approved.`, 'EVENT', 'onOrderApprovedEvent', 'INFO' )
 

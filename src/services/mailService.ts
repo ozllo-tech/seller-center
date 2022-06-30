@@ -17,6 +17,7 @@ import { lateShippingEmailContent } from '../models/emails/lateShippingEmail'
 import { noProductsEmailContent } from '../models/emails/noProductsEmail'
 import { Variation } from '../models/product'
 import { findProductByVariation } from './productService'
+import { Order, OrderEmailContent } from '../models/order'
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -99,18 +100,26 @@ export const sendEmailToResetPassword = async ( user: User ): Promise<any> => {
     return result
 }
 
-export const sendOrderEmailToSeller = async ( shop_id: string ): Promise<any> => {
+export const sendOrderEmailToSeller = async ( order: Order ): Promise<unknown> => {
 
-    const user = await findUserByShopId( shop_id )
+    const user = await findUserByShopId( order.shop_id )
 
     if ( !user ) {
-        log( `Could not send order email for shop_id ${shop_id}. User not found.`, 'EVENT', getFunctionName(), 'ERROR' )
+        log( `Could not send order email for shop_id ${order.shop_id}. User not found.`, 'EVENT', getFunctionName(), 'ERROR' )
         return
     }
 
-    const content = orderEmailContent()
+    const total = new Intl.NumberFormat( 'pt-BR', { style: 'currency', currency: 'BRL' }).format( order.order.payment.totalAmount )
 
-    const result = await sendEmail( user.email, 'OZLLO360 | Boas notícias: você vendeu!', content )
+    const orderDetails: OrderEmailContent = {
+        id: order.order.reference.source,
+        total,
+        products: order.order.products
+    }
+
+    const content = orderEmailContent( orderDetails )
+
+    const result = await sendEmail( user.email, `OZLLO360 | Boas notícias: você vendeu! | Código do pedido: ${order.order.reference.source}`, content )
 
     result
         ? log( `Order email sent to ${ user.email }`, 'EVENT', getFunctionName() )

@@ -1,4 +1,6 @@
-export const orderEmailContent = () => `
+import { OrderEmailContent } from '../order'
+
+export const orderEmailContent = ( order: OrderEmailContent ) =>  /*html*/`
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">
 
@@ -89,8 +91,13 @@ export const orderEmailContent = () => `
                                                                                 <tr>
                                                                                 <tr>
                                                                                     <td align="center" class="esd-block-text es-p10t es-p10b">
-                                                                                        <p>Hora de comemorar porque tivemos uma nova venda!<br />
-                                                                                        Acesse  <a href="http://brandzcenter.ozllo.com.br">aqui o nosso Brandz Center</a> para ver todos os detalhes da sua venda.<br />
+                                                                                        <p>Hora de comemorar porque tivemos uma nova venda!</p>
+                                                                                        <p>
+                                                                                            Código do pedido: <strong>${order.id}</strong><br />
+                                                                                            Produtos: <strong>${order.products.map( item => item.name ).join( ', ' )}</strong><br />
+                                                                                            Valor total: <strong>${order.total}</strong><br />
+                                                                                        </p>
+                                                                                        <p>Acesse  <a href="http://brandzcenter.ozllo.com.br">aqui o nosso Brandz Center</a> para ver todos os detalhes da sua venda.<br />
                                                                                         Não se esqueça de despachar<strong> em até 2 dias!</strong></p>
                                                                                     </td>
                                                                                 </tr>

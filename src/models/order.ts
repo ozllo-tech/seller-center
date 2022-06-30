@@ -2,7 +2,7 @@
 //      Interface Order
 //
 
-import { HUB2B_Order } from './hub2b'
+import { HUB2B_Order, HUB2B_Product_Order } from './hub2b'
 
 export interface Order {
     _id?: any,
@@ -29,4 +29,10 @@ export interface OrderIntegration {
 export interface Tenant_Order {
     id: any,
     order: any,
+}
+
+export interface OrderEmailContent {
+    id: string,
+    total: string,
+    products: HUB2B_Product_Order[]
 }
