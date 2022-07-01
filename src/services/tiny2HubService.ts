@@ -5,8 +5,8 @@ import { getFunctionName, logAxiosError, nowIsoDateHub2b } from '../utils/util'
 import { Product, Variation } from '../models/product'
 import { ObjectID } from 'mongodb'
 import { Tiny_Product, Tiny_Product_Map, Tiny_Variacoes } from '../models/tinyProduct'
-import { createProduct, findProduct, findVariation, updateProductPrice, updateProductVariationStock } from './productService'
-import { createVariation, deleteVariation, findVariationById, findVariationsByProductId, updateProductById, updateVariationById } from '../repositories/productRepository'
+import { createProduct, findProduct, findVariation, updateProduct, updateProductPrice, updateProductVariationStock } from './productService'
+import { createVariation, findVariationById, findVariationsByProductId, updateVariationById } from '../repositories/productRepository'
 import { SUBCATEGORIES } from '../models/category'
 import { COLORS } from '../models/color'
 import { SIZES_DEFAULT } from '../models/size'
@@ -87,7 +87,7 @@ export const importTinyProduct = async ( tinyProduct: Tiny_Product ) => {
 
     if ( existingProduct ) return await updateExistingProduct( tinyProduct, existingProduct, tinyData.shop_id )
 
-    const newProduct = parseTinyProduct( tinyProduct, tinyData.shop_id )
+    const newProduct = await parseTinyProduct( tinyProduct, tinyData.shop_id )
 
     const product =  await createProduct( newProduct )
 
@@ -268,7 +268,7 @@ async function updateExistingProduct ( tinyProduct: Tiny_Product, existingProduc
 
     delete product.variations
 
-    let updatedProduct = await updateProductById( existingProduct._id, product )
+    let updatedProduct = await updateProduct( existingProduct._id, product )
 
     if ( !updatedProduct ) return null
 
