@@ -591,7 +591,7 @@ export const alertLateOrderShippings = async (): Promise<void> => {
 
         if ( duration.months && duration.months > 0 || duration.days && duration.days >= 2 ) {
 
-            const sentEmail = await sendLateShippingEmailToSeller( order.shop_id, String( order.order.reference.id ) )
+            const sentEmail = await sendLateShippingEmailToSeller( order.shop_id, String( order.order.reference.source ) )
 
             if ( sentEmail ) findOneOrderAndModify( 'order.reference.id', order.order.reference.id, {meta:{...order.meta, late_shipping_notifications: 1}})
         }
