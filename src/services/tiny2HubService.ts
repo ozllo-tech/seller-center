@@ -136,7 +136,7 @@ async function parseTinyProduct ( tinyProduct: Tiny_Product, shop_id: ObjectID )
         height: parseFloat( tinyProduct.dados.alturaEmbalagem ),
         width: parseFloat( tinyProduct.dados.larguraEmbalagem ),
         length: parseFloat( tinyProduct.dados.comprimentoEmbalagem ) || parseFloat( tinyProduct.dados.diametroEmbalagem ),
-        weight: parseFloat( tinyProduct.dados.pesoLiquido ) || parseFloat( tinyProduct.dados.pesoBruto ),
+        weight: parseFloat( tinyProduct.dados.pesoLiquido ) * 1000 || parseFloat( tinyProduct.dados.pesoBruto ) * 1000,
         price: parseFloat( tinyProduct.dados.preco ),
         price_discounted: parseFloat( tinyProduct.dados.precoPromocional ) || parseFloat( tinyProduct.dados.preco ),
         ean: tinyProduct.dados.gtin,
