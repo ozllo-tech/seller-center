@@ -288,23 +288,21 @@ export const updateHub2bSkuStatus = async ( id: string, status: number, channel:
 
 }
 
-export const getSKU = async ( sku: string, idTenant: any ) => {
+export const getHubSku = async ( sku: string ) => {
 
     await renewAccessTokenHub2b( false, false )
 
-    const URL_STOCK = `https://eb-api-sandbox.plataformahub.com.br/RestServiceImpl.svc/listskus/${( idTenant || HUB2B_TENANT ) }?filter=sku:${ sku }`
+    const URL = `${HUB2B_URL_V1}/listskus/${HUB2B_TENANT}?filter=parentsku:${sku}`
 
-    const response = await requestHub2B( URL_STOCK )
+    const response = await requestHub2B( URL, 'GET', null, {'auth': HUB2B_ACCESS_KEY_V1})
 
-    if ( !response ) return null
+    if ( !response || !response.data.data.list ) return null
 
-    const product = response.data
+    response.data.data.list && !response.data.error.length
+        ? log( `Get sku ${sku} success`, 'EVENT', getFunctionName() )
+        : log( `Get sku ${response.data.error} error`, 'EVENT', getFunctionName(), 'WARN' )
 
-    product
-        ? log( 'Get List Orders success', 'EVENT', getFunctionName() )
-        : log( 'Get List Orders error', 'EVENT', getFunctionName(), 'WARN' )
-
-    return product
+    return response.data.data.list
 }
 
 export const getStockHub2b = async ( sku: any, idTenant: any ) => {

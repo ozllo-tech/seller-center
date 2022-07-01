@@ -4,6 +4,7 @@
 
 import { Router, Request, Response } from 'express'
 import { findPaginatedProductsByShopId } from '../repositories/productRepository'
+import { getAdsByProduyct } from '../services/adService'
 import { createNewVariation, createProduct, updateProduct, updateProductImages, updateProductPrice, updateProductVariation, updateProductVariationStock, deleteProduct, deleteVariationById } from '../services/productService'
 import { importProduct } from '../services/tenant2HubService'
 import { uploadProductPicture } from '../services/uploadService'
@@ -350,6 +351,22 @@ router.post( '/import/hub2b/:shop_id/:tenant_id', async ( req: Request, res: Res
     return res
         .status( ok.status )
         .send( products )
+})
+
+
+router.get( '/:id/ad', async ( req: Request, res: Response ) => {
+
+    const ad = await getAdsByProduyct( req.params.id )
+
+    if ( !ad )
+        return res
+            .status( internalServerError.status )
+            .send( createHttpStatus( internalServerError ) )
+
+    return res
+        .status( ok.status )
+        .send( ad )
+
 })
 
 export { router as productRouter }
