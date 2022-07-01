@@ -102,6 +102,8 @@ export const updateProductById = async ( _id: any, patch: any ): Promise<Product
 
         const product = await findProductById( result.value._id )
 
+        // TODO: this isSubset function is causing errors. Remove it or move it to Service layer.
+
         if ( !isSubset( result.value, patch ) || patch.images && !equalArray( result.value.images, patch.images ) ) {
 
             const idTenant = patch.idTenant | Number( HUB2B_TENANT ) // TODO: remove idTenant?
