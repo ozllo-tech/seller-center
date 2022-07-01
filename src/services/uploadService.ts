@@ -11,7 +11,7 @@ import multerS3 from 'multer-s3'
 import { AWS_ACCESS_KEY, AWS_ACCESS_SECRET, AWS_REGION, IMPORT_FOLDER } from '../utils/consts'
 import { HttpStatusResponse } from '../utils/httpStatus'
 import { log } from '../utils/loggerUtil'
-import { getFunctionName, getUrlExtension, makeNiceURL, waitforme } from '../utils/util'
+import { getFunctionName, makeNiceURL, waitforme } from '../utils/util'
 import { findProductsByShop, updateProductImages } from './productService'
 
 const s3 = new aws.S3()
@@ -102,7 +102,7 @@ export const deleteFile = ( filePath: string ) => {
     fs.unlinkSync( filePath )
 }
 
-export const sendExternalFileToS3 = async ( url: string, productId: string, index: number ): Promise<string|null> => {
+export const sendExternalFileToS3 = async ( url: string, productId: string, suffix: string ): Promise<string|null> => {
 
     // https://stackoverflow.com/questions/22186979/download-file-from-url-and-upload-it-to-aws-s3-without-saving-node-js
     // https://stackoverflow.com/questions/61605078/axios-get-a-file-from-url-and-upload-to-s3
@@ -122,7 +122,7 @@ export const sendExternalFileToS3 = async ( url: string, productId: string, inde
             'ACL': 'public-read',
             'Body': response.data,
             'Bucket': 'ozllo-seller-center-photos',
-            'Key': `${productId}_${index}`,
+            'Key': `${productId}_${suffix}`,
         }, function ( error: AWSError, data ) {
 
             if ( error ) {
@@ -182,7 +182,7 @@ export const applyImageTransformations = async ( shopId: string ): Promise<any> 
 
             if ( !url ) continue
 
-            const s3Image = await sendExternalFileToS3( url, product._id.toString(), index )
+            const s3Image = await sendExternalFileToS3( url, product._id.toString(), index.toString() )
 
             s3Image
                 ? console.log( `Image ${index + 1} of ${product.images.length} for ${product._id}` )

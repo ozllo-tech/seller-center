@@ -116,7 +116,7 @@ async function parseTinyProduct ( tinyProduct: Tiny_Product, shop_id: ObjectID )
 
     for await ( const [index, image] of tinyProduct.dados.anexos.entries() ) {
 
-        const s3File = await sendExternalFileToS3( image.url, id.toString(), index )
+        const s3File = await sendExternalFileToS3( image.url, id.toString(), index.toString() )
 
         if ( s3File ) images.push( getImageKitUrl( s3File.replace( '/', '' ) ) )
     }
@@ -160,9 +160,12 @@ async function parseTinyProduct ( tinyProduct: Tiny_Product, shop_id: ObjectID )
         })
     }
 
-    tinyProduct.dados.variacoes.forEach( tinyVariation => {
+    for await ( const tinyVariation of tinyProduct.dados.variacoes ) {
+
+        const id = new ObjectID()
 
         product.variations?.push({
+            _id: id,
             stock: tinyVariation.estoqueAtual,
             size: findMatchingSize( tinyVariation ),
             voltage: '',
@@ -174,8 +177,17 @@ async function parseTinyProduct ( tinyProduct: Tiny_Product, shop_id: ObjectID )
             tiny_id: tinyVariation.codigo
         })
 
-        if ( tinyVariation.anexos.length ) product.images.push( ...tinyVariation.anexos.map( anexo => anexo.url ) )
-    })
+        if ( tinyVariation.anexos.length ) {
+
+            for await ( const [index, image] of tinyVariation.anexos.entries() ) {
+
+                const s3File = await sendExternalFileToS3( image.url, id.toString(), 'variation_' + index )
+
+                if ( s3File ) images.push( getImageKitUrl( s3File.replace( '/', '' ) ) )
+            }
+
+        }
+    }
 
     return product
 }

@@ -67,7 +67,7 @@ export const importProduct = async ( idTenant: any, shop_id: any, status = '2', 
 
             for await ( const[index, imageHub2b] of productHub2b.images.entries() ) {
 
-                const s3File = await sendExternalFileToS3( imageHub2b.url, id.toString(), index )
+                const s3File = await sendExternalFileToS3( imageHub2b.url, id.toString(), index.toString() )
 
                 if ( s3File ) images.push( getImageKitUrl( s3File.replace( '/', '' ) ) )
             }
