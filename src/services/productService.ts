@@ -407,7 +407,7 @@ export const validateProductFields = async ( product: Product ): Promise<Product
 
         const updatedVariations = await findVariationsByProductId( product._id )
 
-        console.log({updatedVariations})
+        // console.log({updatedVariations})
 
         if ( !updatedVariations ) return product
 
