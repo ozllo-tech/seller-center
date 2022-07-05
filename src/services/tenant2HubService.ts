@@ -13,7 +13,7 @@ import { log } from '../utils/loggerUtil'
 import { getFunctionName, removeAllTagsExceptBr, waitforme } from '../utils/util'
 import { getCatalogHub2b, getHub2bIntegration, getInvoiceHub2b, getOrderHub2b, getStockHub2b, getTrackingHub2b, mapskuHub2b, postInvoiceHub2b, postTrackingHub2b, setupIntegrationHub2b } from './hub2bService'
 import { findOrdersByShop, updateStatus } from './orderService'
-import { findProductsByShop, updateProductImages, updateProductVariationStock } from './productService'
+import { findProductsByShop, updateProductImages, updateProductVariationStock, validateProduct } from './productService'
 import { getImageKitUrl, sendExternalFileToS3 } from './uploadService'
 
 // TODO: find out a way to reset the offset to 0 when idTenant or shop_id changes.
@@ -116,7 +116,11 @@ export const importProduct = async ( idTenant: any, shop_id: any, status = '2', 
 
         const productInserted = await createNewProduct( product, productVariations )
 
-        if ( productInserted ) {
+        if ( !productInserted ) continue
+
+        const validatedProduct = await validateProduct( productInserted )
+
+        if ( validatedProduct ) {
 
             log( `Product ${product.name} has been created.`, 'EVENT', getFunctionName() )
 
@@ -124,7 +128,7 @@ export const importProduct = async ( idTenant: any, shop_id: any, status = '2', 
 
             productEventEmitter.emit( 'create', product )
 
-            newProducts.push( productInserted )
+            newProducts.push( validatedProduct )
         }
     }
 
