@@ -195,7 +195,12 @@ const createVariationForExistingProduct = async ( product: Product, hubProduct: 
 
     // 3 - Update product images.
 
-    hubProduct.images.forEach( ( imageHub2b ) => product.images.push( imageHub2b.url ) )
+    for await ( const[index, imageHub2b] of hubProduct.images.entries() ) {
+
+        const s3File = await sendExternalFileToS3( imageHub2b.url, newVariation._id.toString(), index.toString() )
+
+        if ( s3File ) product.images.push( getImageKitUrl( s3File.replace( '/', '' ) ) )
+    }
 
     await waitforme( 1000 )
 
