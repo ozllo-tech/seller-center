@@ -215,6 +215,11 @@ export const subcategories_fitness: SubCategory[] = [
         code: 312,
         value: 'Top'
     },
+    {
+        categoryCode: 285,
+        code: 338,
+        value: 'Conjunto'
+    }
 ]
 
 export const subcategories_roupas: SubCategory[] = [
