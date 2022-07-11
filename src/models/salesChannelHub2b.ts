@@ -303,5 +303,10 @@ export const USED_CHANNELS = [
         code: 133,
         ticker: 'rds',
         name: 'RaiaDrogasil'
+    },
+    {
+        code: 51,
+        ticker: 'nsh',
+        name: 'Netshoes'
     }
 ]
