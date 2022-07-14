@@ -93,7 +93,7 @@ export const init = async () => {
 
     await getTenantAuths()
 
-    await updateIntegrationProducts()
+    //await updateIntegrationProducts()
 
     await updateIntegrationStock()
 
@@ -103,15 +103,15 @@ export const init = async () => {
 
     setIntervalAsync(async () => await updateIntegrationStock(), 3000 * 60) // 3min
 
-    setIntervalAsync(async () => {
+    //setIntervalAsync(async () => {
 
-        await updateIntegrationProducts()
+   //     await updateIntegrationProducts()
 
-        await updateIntegrationInvoices()
+   //     await updateIntegrationInvoices()
 
-        await updateIntegrationTrackingCodes()
+   //     await updateIntegrationTrackingCodes()
 
-    }, 500 * 60 * 60) // 30min
+    //}, 500 * 60 * 60) // 30min
 
     await alertUnproductiveUsers()
 
