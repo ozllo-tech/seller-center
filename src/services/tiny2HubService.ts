@@ -351,7 +351,11 @@ export const sendTinyOrder = async ( order: Order, token: string ): Promise<Tiny
 
     const orderResponse = await requestTiny( 'https://api.tiny.com.br/api2/pedido.incluir.php', 'POST', token, {pedido: orderRequest})
 
-    if ( !orderResponse ) return null
+    if ( !orderResponse ) {
+        log( `Tiny: Error sending order ${orderID}`, 'EVENT', getFunctionName() )
+        console.log( orderResponse?.data )
+        return null
+    }
 
     // TODO: handle tiny response errors.
     // https://tiny.com.br/api-docs/api2-tabelas-processamento
