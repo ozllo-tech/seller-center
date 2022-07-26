@@ -2,6 +2,7 @@ import { ObjectID } from 'mongodb'
 import { Order } from '../models/order'
 import { System_Integration } from '../models/system'
 import { updateSystemIntegrationData, findOneSystemIntegrationData } from '../repositories/systemRepository'
+import { log } from '../utils/loggerUtil'
 import { sendIntegrationEmailToOperator } from './mailService'
 import { getTinyInfo } from './tiny2HubService'
 
@@ -52,11 +53,21 @@ export const activateSystemIntegration = async ( systemID: string ) => {
 
 export const findIntegrationOrder = async ( order: Order ) => {
 
-    if ( !ObjectID.isValid( order.shop_id ) ) return null
+    if ( !ObjectID.isValid( order.shop_id ) )  {
+
+        log( `Could not find integration for ${order.shop_id}`, 'EVENT', 'findIntegrationOrder', 'ERROR' )
+
+        return null
+    }
 
     const system = await findOneSystemIntegrationData( 'shop_id', new ObjectID( order.shop_id ) )
 
-    if ( !system ) return null
+    if ( !system ) {
+
+        log( `Could not find integration for ${order.shop_id}`, 'EVENT', 'findIntegrationOrder', 'ERROR' )
+
+        return null
+    }
 
     return system
 }
