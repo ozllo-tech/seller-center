@@ -3,8 +3,8 @@ export interface Tiny_Order_Request {
 }
 
 export interface Pedido {
-    data_pedido:             string;
-    data_prevista:           string;
+    data_pedido?:             string;
+    data_prevista?:           string;
     cliente:                 Cliente;
     endereco_entrega:        Endereco_Entrega;
     itens:                   any;

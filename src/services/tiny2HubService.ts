@@ -1,7 +1,7 @@
 import axios, { Method } from 'axios'
 import { findOneSystemIntegrationData } from '../repositories/systemRepository'
 import { log } from '../utils/loggerUtil'
-import { getFunctionName, logAxiosError, nowIsoDateHub2b } from '../utils/util'
+import { getFunctionName, isDateValid, logAxiosError, nowIsoDateHub2b } from '../utils/util'
 import { Product, Variation } from '../models/product'
 import { ObjectID } from 'mongodb'
 import { Tiny_Product, Tiny_Product_Map, Tiny_Variacoes } from '../models/tinyProduct'
@@ -394,10 +394,16 @@ export const parseTinyOrder = async ( order: Order ): Promise<Tiny_Order_Request
         })
     }
 
+    const shippingDate = isDateValid( hub2bOrder.shipping.shippingDate )
+        ? format( Date.parse( hub2bOrder.shipping.shippingDate ), 'dd/MM/yyyy' ) : ''
+
+    const estimatedDeliveryDate = isDateValid( hub2bOrder.shipping.estimatedDeliveryDate )
+        ? format( Date.parse( hub2bOrder.shipping.estimatedDeliveryDate ), 'dd/MM/yyyy' ) : ''
+
     const tinyOrderRequest: Tiny_Order_Request = {
         pedido: {
-            data_pedido: format( Date.parse( hub2bOrder.shipping.shippingDate ), 'dd/MM/yyyy' ),
-            data_prevista: format( Date.parse( hub2bOrder.shipping.estimatedDeliveryDate ), 'dd/MM/yyyy' ),
+            ...( shippingDate.length ? {data_pedido: shippingDate} : {}),
+            ...( estimatedDeliveryDate.length ? {data_prevista: estimatedDeliveryDate} : {}),
             cliente: {
                 nome: hub2bOrder.customer.name,
                 cpf_cnpj: hub2bOrder.customer.documentNumber,
