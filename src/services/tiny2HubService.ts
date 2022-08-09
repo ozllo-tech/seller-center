@@ -360,7 +360,11 @@ export const sendTinyOrder = async ( order: Order, token: string ): Promise<Tiny
     // TODO: handle tiny response errors.
     // https://tiny.com.br/api-docs/api2-tabelas-processamento
 
-    if ( !orderResponse.data?.retorno?.registros?.registro?.id ) return orderResponse.data
+    if ( !orderResponse.data?.retorno?.registros?.registro?.id ) {
+        log( `Tiny: Could not find tiny order ID for hub order ${orderID}`, 'EVENT', getFunctionName() )
+        console.log( orderResponse?.data )
+        return orderResponse.data
+    }
 
     // Update order with tiny order id.
 
